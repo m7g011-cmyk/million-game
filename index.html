@@ -9,11 +9,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        @keyframes goldGlow {
-            0% { box-shadow: 0 0 5px #F59E0B; }
-            50% { box-shadow: 0 0 20px #F59E0B; }
-            100% { box-shadow: 0 0 5px #F59E0B; }
-        }
         body { background-color: #0F172A; color: white; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 12px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
         .card { background-color: #1E293B; border: 1px solid #F59E0B; border-radius: 16px; padding: 16px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         h1 { color: #F59E0B; margin-bottom: 6px; font-size: 24px; }
@@ -28,21 +23,20 @@
         .btn-bot { background-color: #8B5CF6; color: #fff; }
         
         .players-list { background-color: #0F172A; border: 1px solid #334155; border-radius: 10px; padding: 8px; margin: 10px 0; text-align: right; }
-        .player-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; margin: 4px 0; background: #1E293B; border-radius: 6px; font-size: 13px; }
+        .player-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; margin: 4px 0; background: #1E293B; border-radius: 6px; font-size: 13px; }
         .player-item.active-turn { border: 2px solid #10B981; background: #064E3B; }
         .badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; background-color: #334155; color: #CBD5E1; }
         .badge-money { background-color: #059669; color: #fff; font-weight: bold; }
-        .timer-box { font-size: 16px; color: #10B981; font-weight: bold; }
+        .timer-box { font-size: 16px; color: #EF4444; font-weight: bold; }
         
-        .cards-container { display: flex; justify-content: center; gap: 6px; margin: 8px 0; }
-        .playing-card { background-color: #FFF; color: #000; font-weight: bold; font-size: 14px; padding: 8px 5px; border-radius: 6px; width: 44px; border: 1px solid #CBD5E1; text-align: center; }
+        .cards-container { display: flex; justify-content: center; gap: 6px; margin: 10px 0; }
+        .playing-card { background-color: #FFF; color: #000; font-weight: bold; font-size: 15px; padding: 10px 6px; border-radius: 6px; width: 46px; border: 1px solid #CBD5E1; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .playing-card.red { color: #DC2626; }
         
         .revealed-box { background-color: rgba(30, 41, 59, 0.9); border: 1px solid #334155; border-radius: 8px; padding: 8px; margin: 8px 0; text-align: right; font-size: 12px; }
-        .revealed-box.gold-winner { border: 2px solid #F59E0B; animation: goldGlow 2s infinite; background: rgba(245, 158, 11, 0.15); }
+        .revealed-box.gold-winner { border: 2px solid #F59E0B; background: rgba(245, 158, 11, 0.15); }
         .hidden { display: none; }
         .flex-row { display: flex; gap: 6px; }
-        .negotiate-card { background: #0F172A; border: 1px solid #F59E0B; padding: 10px; border-radius: 8px; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -54,7 +48,7 @@
     <div id="lobby-screen">
         <input type="text" id="player-name" placeholder="اكتب اسمك للبدء" />
         <button class="btn-primary" onclick="createRoom()">إنشاء غرفة جديدة</button>
-        <button class="btn-bot" onclick="startVsBots()">اللعب ضد الكمبيوتر 🤖</button>
+        <button class="btn-bot" onclick="startVsBots()">اللعب بمفردك ضد الكمبيوتر 🤖</button>
         <hr style="border-color: #334155; margin: 12px 0;">
         <input type="number" id="room-code-input" placeholder="رمز الغرفة" />
         <button class="btn-success" onclick="joinRoom()">انضمام لغرفة</button>
@@ -63,14 +57,14 @@
     <!-- 2. شاشة الانتظار -->
     <div id="waiting-screen" class="hidden">
         <h3>غرفة: <span id="current-room-display" style="color:#F59E0B;"></span></h3>
-        <p style="font-size: 13px; color: #94A3B8;">اللاعبون المنضمون (<span id="player-count">1</span>/4)</p>
+        <p style="font-size: 13px; color: #94A3B8;">اللاعبون المنضمون (<span id="player-count">1</span>/4) - يمكنك البدء بـ 2 أو 3 أو 4 لاعبين!</p>
         <div class="players-list" id="players-container"></div>
         <button class="btn-share" onclick="shareInviteLink()">مشاركة رابط الدعوة 🔗</button>
         <div class="flex-row">
             <button class="btn-secondary" onclick="addManualPlayer()">لاعب يدوي 👤</button>
             <button class="btn-bot" onclick="fillWithBots()">إكمال بالكمبيوتر 🤖</button>
         </div>
-        <button id="start-game-btn" class="btn-primary hidden" style="margin-top: 10px;" onclick="startGame()">بدء اللعبة 🚀</button>
+        <button id="start-game-btn" class="btn-primary" style="margin-top: 10px;" onclick="startGame()">بدء اللعب الآن 🚀</button>
     </div>
 
     <!-- 3. طاولة اللعب -->
@@ -88,7 +82,7 @@
             <div id="my-cards" class="cards-container"></div>
         </div>
 
-        <!-- أزرار المزايدة -->
+        <!-- لوحة التحكم باللعب -->
         <div id="bidding-controls" class="hidden">
             <div style="font-size: 13px; color:#10B981; margin-bottom:4px; font-weight:bold;">دورك الآن بالمزايدة!</div>
             <select id="bid-amount-select"></select>
@@ -98,16 +92,19 @@
             </div>
         </div>
 
-        <!-- لوحة التفاوض المباشر -->
-        <div id="negotiation-controls" class="negotiate-card hidden">
-            <h4 style="color:#F59E0B; margin:2px 0;">مرحلة التفاوض والعروض 🤝</h4>
-            <div id="negotiation-status" style="font-size:12px; margin:6px 0; color:#CBD5E1;"></div>
-            <div id="negotiation-action-btns" class="flex-row"></div>
+        <!-- لوحة التفاوض والتحدي -->
+        <div id="negotiation-controls" class="hidden" style="border-top: 1px solid #334155; padding-top: 8px;">
+            <h4 style="color:#F59E0B; margin:4px 0;">مرحلة التفاوض والتحدي 🤝</h4>
+            <div id="negotiation-text" style="font-size:12px; margin-bottom:6px;"></div>
+            <div class="flex-row">
+                <button class="btn-success" onclick="acceptNegotiation()">قبول 🤝</button>
+                <button class="btn-danger" onclick="challengeNegotiation()">رفض وتحدي ⚔️</button>
+            </div>
         </div>
 
         <!-- شاشة النتيجة العامة -->
         <div id="reveal-screen" class="hidden">
-            <h4 style="color:#F59E0B; margin:4px 0;">كشف الأوراق والنتائج 🎴</h4>
+            <h4 style="color:#F59E0B; margin:4px 0;">نتيجة الجولة 🎴</h4>
             <div id="revealed-hands-list"></div>
             <button class="btn-primary" style="margin-top:10px;" onclick="nextRound()">الجولة التالية 🔄</button>
         </div>
@@ -132,7 +129,6 @@
     let myName = "";
     let isHost = false;
     let timerInterval = null;
-    let botProcessing = false;
 
     const SUITS = ['♠️', '♥️', '♦️', '♣️'];
     const RANKS = ['A', 'K', 'Q', 'J', '10', '9', '8', '7'];
@@ -146,7 +142,7 @@
         currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
         let p = { name: name, balance: 50000, bid: 0, folded: false, isHost: true, type: 'حقيقي' };
         db.ref('rooms/' + currentRoomCode).set({
-            status: 'waiting', dealerIndex: 0, turnIndex: 1, currentBid: 0, highestBidder: '', players: [p]
+            status: 'waiting', dealerIndex: 0, turnIndex: 0, currentBid: 0, highestBidder: '', players: [p]
         }).then(() => { listenToRoom(); openWaiting(); });
     }
 
@@ -182,14 +178,14 @@
         players.forEach((p, i) => {
             c.innerHTML += `<div class="player-item"><span>${i+1}. ${p.name}</span><span class="badge badge-money">${p.balance} ر.س</span></div>`;
         });
-        if (players.length === 4 && isHost) document.getElementById('start-game-btn').classList.remove('hidden');
     }
 
     function startGame() {
         db.ref('rooms/' + currentRoomCode + '/players').get().then(snap => {
             let pList = snap.val();
+            if (pList.length < 2) return alert('يجب انضمام لاعبين اثنين على الأقل للبدء!');
             pList.forEach(p => { p.cards = generate4Cards(); p.folded = false; p.bid = 0; });
-            db.ref('rooms/' + currentRoomCode).update({ status: 'playing', players: pList, turnIndex: 1, currentBid: 0 });
+            db.ref('rooms/' + currentRoomCode).update({ status: 'playing', players: pList, turnIndex: 0, currentBid: 0 });
         });
     }
 
@@ -231,17 +227,30 @@
         let pList = data.players || [];
         let activePlayers = pList.filter(p => !p.folded);
 
+        // حسم الفوز إذا تبقى لاعب واحد
         if (activePlayers.length === 1) {
             let winner = activePlayers[0];
             winner.balance += winner.bid || 5000;
-            db.ref('rooms/' + currentRoomCode).update({ status: 'revealed', players: pList, winReason: `🏆 فاز ${winner.name} بانسحاب بقية اللاعبين!` });
+            db.ref('rooms/' + currentRoomCode).update({ status: 'revealed', players: pList, winReason: `🏆 فاز ${winner.name} بانسحاب بقية المنافسين!` });
             return;
         }
 
-        // إذا اكتملت دورة المزايدة، ننتقل لمرحلة التفاوض فوراً
-        let unFoldedNoBid = activePlayers.filter(p => p.bid === 0);
-        if (unFoldedNoBid.length === 0 && data.currentBid > 0) {
-            db.ref('rooms/' + currentRoomCode).update({ status: 'negotiating' });
+        let currPlayer = pList[data.turnIndex];
+
+        // معالجة دور البوت فوراً وبشكل حاسم من متصفح المضيف دون تعليق
+        if (currPlayer && currPlayer.type === 'آلي' && isHost) {
+            setTimeout(() => {
+                let handVal = evaluateHand(currPlayer.cards).rankVal;
+                if (handVal >= 50 || Math.random() > 0.5) {
+                    currPlayer.bid = (data.currentBid || 0) + 5000;
+                    data.currentBid = currPlayer.bid;
+                    data.highestBidder = currPlayer.name;
+                } else {
+                    currPlayer.folded = true;
+                }
+                data.turnIndex = getNextActiveTurn(pList, data.turnIndex);
+                db.ref('rooms/' + currentRoomCode).set(data);
+            }, 800);
             return;
         }
 
@@ -269,14 +278,6 @@
             });
         }
 
-        let currPlayer = pList[data.turnIndex];
-
-        // معالجة البوت التلقائية لمنع التعليق
-        if (currPlayer && currPlayer.type === 'آلي' && isHost && !botProcessing) {
-            botProcessing = true;
-            setTimeout(() => { handleBotTurn(data); }, 1200);
-        }
-
         let myTurn = (currPlayer && currPlayer.name === myName);
         if (myTurn && !myObj.folded) {
             document.getElementById('bidding-controls').classList.remove('hidden');
@@ -287,23 +288,14 @@
         }
     }
 
-    function handleBotTurn(data) {
-        let p = data.players[data.turnIndex];
-        if (p.folded) {
-            nextTurnInDb(data);
-            return;
+    function getNextActiveTurn(players, currentIndex) {
+        let next = (currentIndex + 1) % players.length;
+        let count = 0;
+        while (players[next].folded && count < players.length) {
+            next = (next + 1) % players.length;
+            count++;
         }
-        let handVal = evaluateHand(p.cards).rankVal;
-        if (handVal >= 50 || Math.random() > 0.4) {
-            let newBid = (data.currentBid || 0) + 5000;
-            p.bid = newBid;
-            data.currentBid = newBid;
-            data.highestBidder = p.name;
-        } else {
-            p.folded = true;
-        }
-        data.turnIndex = (data.turnIndex + 1) % data.players.length;
-        db.ref('rooms/' + currentRoomCode).set(data).then(() => { botProcessing = false; });
+        return next;
     }
 
     function setupBidSelect(balance, currentBid) {
@@ -321,7 +313,10 @@
         timerInterval = setInterval(() => {
             left--;
             document.getElementById('timer-display').innerText = left;
-            if (left <= 0) { clearInterval(timerInterval); foldHand(); }
+            if (left <= 0) { 
+                clearInterval(timerInterval); 
+                foldHand(); // انسحاب تلقائي عند انتهاء الـ 15 ثانية
+            }
         }, 1000);
     }
 
@@ -332,8 +327,10 @@
         db.ref('rooms/' + currentRoomCode).get().then(snap => {
             let data = snap.val();
             data.players[data.turnIndex].bid = val;
-            let nextTurn = (data.turnIndex + 1) % data.players.length;
-            db.ref('rooms/' + currentRoomCode).update({ currentBid: val, highestBidder: myName, turnIndex: nextTurn, players: data.players });
+            let nextIndex = getNextActiveTurn(data.players, data.turnIndex);
+            
+            // تحويل للنتائج إذا اكتملت الدورة
+            db.ref('rooms/' + currentRoomCode).update({ currentBid: val, highestBidder: myName, turnIndex: nextIndex, players: data.players });
         });
     }
 
@@ -342,32 +339,23 @@
         db.ref('rooms/' + currentRoomCode).get().then(snap => {
             let data = snap.val();
             data.players[data.turnIndex].folded = true;
-            let nextTurn = (data.turnIndex + 1) % data.players.length;
-            db.ref('rooms/' + currentRoomCode).update({ players: data.players, turnIndex: nextTurn });
+            let nextIndex = getNextActiveTurn(data.players, data.turnIndex);
+            db.ref('rooms/' + currentRoomCode).update({ players: data.players, turnIndex: nextIndex });
         });
     }
 
     function renderNegotiation(data) {
         document.getElementById('bidding-controls').classList.add('hidden');
         document.getElementById('negotiation-controls').classList.remove('hidden');
-
-        let statusBox = document.getElementById('negotiation-status');
-        let btnBox = document.getElementById('negotiation-action-btns');
-
-        statusBox.innerHTML = `صاحب أعلى مزايدة: <strong style="color:#F59E0B;">${data.highestBidder}</strong> بالمبلغ: <strong style="color:#10B981;">${data.currentBid} ر.س</strong>`;
-
-        btnBox.innerHTML = `
-            <button class="btn-success" onclick="acceptOffer()">قبول العرض 🤝</button>
-            <button class="btn-danger" onclick="challengeOffer()">رفض وتحدي ⚔️</button>
-        `;
+        document.getElementById('negotiation-text').innerText = `أعلى مزايد هو ${data.highestBidder} بمبلغ ${data.currentBid} ر.س`;
     }
 
-    function acceptOffer() {
-        db.ref('rooms/' + currentRoomCode).update({ status: 'revealed', winReason: 'تم قبول العروض وتوزيع المبالغ بالتراضي!' });
+    function acceptNegotiation() {
+        db.ref('rooms/' + currentRoomCode).update({ status: 'revealed', winReason: 'تم القبول بالتراضي وتوزيع المبالغ!' });
     }
 
-    function challengeOffer() {
-        db.ref('rooms/' + currentRoomCode).update({ status: 'revealed', winReason: 'رفض وتحدي! تم كشف الأوراق لمعرفة الفائز باليد الأقوى 🔥' });
+    function challengeNegotiation() {
+        db.ref('rooms/' + currentRoomCode).update({ status: 'revealed', winReason: 'تحدي ورفض العرض! تم كشف الأوراق لمعرفة صاحب اليد الأقوى 🔥' });
     }
 
     function renderReveal(data) {
@@ -406,7 +394,7 @@
             let nextDealer = (data.dealerIndex + 1) % data.players.length;
             data.players.forEach(p => { p.cards = generate4Cards(); p.folded = false; p.bid = 0; });
             db.ref('rooms/' + currentRoomCode).update({
-                status: 'playing', dealerIndex: nextDealer, turnIndex: (nextDealer + 1) % data.players.length,
+                status: 'playing', dealerIndex: nextDealer, turnIndex: nextDealer,
                 currentBid: 0, players: data.players
             });
         });
@@ -444,7 +432,7 @@
             { name: 'الكمبيوتر 3 🤖', balance: 50000, bid: 0, folded: false, isHost: false, type: 'آلي' }
         ];
         db.ref('rooms/' + currentRoomCode).set({
-            status: 'waiting', dealerIndex: 0, turnIndex: 1, currentBid: 0, highestBidder: '', players: players
+            status: 'waiting', dealerIndex: 0, turnIndex: 0, currentBid: 0, highestBidder: '', players: players
         }).then(() => { listenToRoom(); openWaiting(); });
     }
 
