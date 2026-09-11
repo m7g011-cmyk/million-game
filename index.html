@@ -10,7 +10,7 @@
             color: white;
             font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 16px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -20,48 +20,81 @@
         .card {
             background-color: #1E293B;
             border: 1px solid #F59E0B;
-            border-radius: 12px;
-            padding: 24px;
+            border-radius: 16px;
+            padding: 20px;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             text-align: center;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
-        h1 { color: #F59E0B; margin-bottom: 8px; }
+        h1 { color: #F59E0B; margin-bottom: 8px; font-size: 26px; }
         input {
             width: 100%;
             padding: 12px;
-            margin: 10px 0;
-            border-radius: 6px;
+            margin: 8px 0;
+            border-radius: 8px;
             border: 1px solid #334155;
             background-color: #0F172A;
             color: white;
             box-sizing: border-box;
-            font-size: 16px;
+            font-size: 15px;
+            text-align: center;
         }
         button {
             width: 100%;
             padding: 12px;
-            margin: 8px 0;
-            border-radius: 6px;
+            margin: 6px 0;
+            border-radius: 8px;
             border: none;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 15px;
             cursor: pointer;
+            transition: 0.2s;
         }
+        button:active { transform: scale(0.98); }
         .btn-primary { background-color: #F59E0B; color: #000; }
         .btn-success { background-color: #10B981; color: #fff; }
         .btn-share { background-color: #3B82F6; color: #fff; }
+        .btn-secondary { background-color: #64748B; color: #fff; }
+        .btn-bot { background-color: #8B5CF6; color: #fff; }
+        
         .invite-box {
-            background-color: rgba(16, 185, 129, 0.2);
+            background-color: rgba(16, 185, 129, 0.15);
             border: 1px solid #10B981;
             padding: 10px;
-            border-radius: 6px;
+            border-radius: 8px;
             margin-bottom: 12px;
             font-size: 14px;
             color: #34D399;
         }
+        .players-list {
+            background-color: #0F172A;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 15px 0;
+            text-align: right;
+        }
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin: 4px 0;
+            background: #1E293B;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .player-item.host { border-right: 3px solid #F59E0B; }
+        .badge {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background-color: #334155;
+            color: #CBD5E1;
+        }
         .hidden { display: none; }
+        .flex-row { display: flex; gap: 8px; }
     </style>
 </head>
 <body>
@@ -69,37 +102,68 @@
 <div class="card">
     <h1>لعبة المليون 🃏</h1>
 
-    <!-- شاشة اللوبي والدخول -->
+    <!-- 1. شاشة اللوبي والدخول -->
     <div id="lobby-screen">
         <div id="invite-alert" class="invite-box hidden">
-            🎯 وصلتك دعوة للانضمام للغرفة: <span id="invite-code-text"></span>
+            🎯 وصلتك دعوة للانضمام للغرفة رقم: <strong id="invite-code-text"></strong>
         </div>
 
         <input type="text" id="player-name" placeholder="اكتب اسمك للبدء" />
         
+        <!-- التحكم العادي -->
         <div id="normal-controls">
-            <button class="btn-primary" onclick="createRoom()">إنشاء غرفة جديدة</button>
+            <button class="btn-primary" onclick="createRoom()">إنشاء غرفة أونلاين جديد</button>
+            <button class="btn-bot" onclick="startVsBots()">اللعب بمفردك ضد الكمبيوتر 🤖</button>
+            
             <hr style="border-color: #334155; margin: 15px 0;">
-            <input type="number" id="room-code-input" placeholder="أدخل رمز الغرفة" />
-            <button class="btn-success" onclick="joinRoom()">انضمام للغرفة</button>
+            <input type="number" id="room-code-input" placeholder="أدخل رمز الغرفة (مثال: 4582)" />
+            <button class="btn-success" onclick="joinRoom()">انضمام لغرفة أونلاين</button>
         </div>
 
+        <!-- التحكم عند الفتح عبر رابط دعوة -->
         <div id="invite-controls" class="hidden">
-            <button class="btn-success" onclick="joinDirectRoom()">دخول مباشر للعبة 🚀</button>
+            <button class="btn-success" onclick="joinDirectRoom()">دخول مباشر للغرفة 🚀</button>
         </div>
     </div>
 
-    <!-- شاشة الانتظار واللعب -->
-    <div id="game-screen" class="hidden">
-        <h3>غرفة رقم: <span id="current-room-display" style="color:#F59E0B;"></span></h3>
-        <p>في انتظار اكتمال اللاعبين (4)...</p>
+    <!-- 2. شاشة الانتظار وإدارة اللاعبين -->
+    <div id="waiting-screen" class="hidden">
+        <h3>رمز الغرفة: <span id="current-room-display" style="color:#F59E0B;"></span></h3>
+        <p style="font-size: 14px; color: #94A3B8;">في انتظار اكتمال اللاعبين (<span id="player-count">1</span>/4)</p>
+
+        <!-- قائمة الأسماء المنضمين -->
+        <div class="players-list">
+            <div style="font-size: 13px; color: #F59E0B; margin-bottom: 6px; font-weight: bold;">اللاعبون المتواجدون:</div>
+            <div id="players-container"></div>
+        </div>
+
+        <!-- أزرار الدعوة والإضافة اليدوية -->
         <button class="btn-share" onclick="shareInviteLink()">مشاركة رابط الدعوة 🔗</button>
+        
+        <div class="flex-row">
+            <button class="btn-secondary" onclick="addManualPlayer()">إضافة لاعب يدوي 👤</button>
+            <button class="btn-bot" onclick="fillWithBots()">إكمال بالكمبيوتر 🤖</button>
+        </div>
+
+        <button id="start-game-btn" class="btn-primary hidden" style="margin-top: 15px;" onclick="startGame()">بدء اللعب الآن 🚀</button>
+    </div>
+
+    <!-- 3. شاشة طاولة اللعب -->
+    <div id="game-screen" class="hidden">
+        <h3 style="color: #10B981;">بدأت المباراة! 🃏</h3>
+        <div id="game-board-players" class="players-list"></div>
+        <p style="color: #F59E0B; font-size: 14px;">جاري توزيع الأوراق وإعداد الجولة الأولى...</p>
+        <button class="btn-secondary" onclick="location.reload()">العودة للرئيسية ↩️</button>
     </div>
 </div>
 
 <script>
+    let currentRoomCode = null;
+    let players = [];
+    let isVsBotsMode = false;
     let autoCode = new URLSearchParams(window.location.search).get('code');
 
+    // كشف رابط الدعوة تلقائياً
     if (autoCode) {
         document.getElementById('invite-alert').classList.remove('hidden');
         document.getElementById('invite-controls').classList.remove('hidden');
@@ -107,37 +171,131 @@
         document.getElementById('invite-code-text').innerText = autoCode;
     }
 
+    // إنشاء غرفة جديدة
     function createRoom() {
         let name = document.getElementById('player-name').value.trim();
         if (!name) return alert('الرجاء كتابة اسمك أولاً!');
-        let code = Math.floor(1000 + Math.random() * 9000);
-        openGameScreen(code);
+        
+        currentRoomCode = Math.floor(1000 + Math.random() * 9000);
+        players = [{ name: name, isHost: true, type: 'حقيقي' }];
+        openWaitingScreen();
     }
 
+    // اللعب ضد الكمبيوتر مباشرة
+    function startVsBots() {
+        let name = document.getElementById('player-name').value.trim() || 'اللاعب';
+        isVsBotsMode = true;
+        currentRoomCode = 'مباراة آليّة';
+        players = [
+            { name: name, isHost: true, type: 'حقيقي' },
+            { name: 'الكمبيوتر 1 🤖', isHost: false, type: 'آلي' },
+            { name: 'الكمبيوتر 2 🤖', isHost: false, type: 'آلي' },
+            { name: 'الكمبيوتر 3 🤖', isHost: false, type: 'آلي' }
+        ];
+        openGameScreen();
+    }
+
+    // انضمام برقم الغرفة
     function joinRoom() {
         let name = document.getElementById('player-name').value.trim();
         let code = document.getElementById('room-code-input').value.trim();
         if (!name || !code) return alert('أدخل الاسم ورمز الغرفة!');
-        openGameScreen(code);
+        
+        currentRoomCode = code;
+        players = [
+            { name: 'مضيف الغرفة', isHost: true, type: 'حقيقي' },
+            { name: name, isHost: false, type: 'حقيقي' }
+        ];
+        openWaitingScreen();
     }
 
+    // انضمام مباشر برابط الدعوة
     function joinDirectRoom() {
         let name = document.getElementById('player-name').value.trim();
         if (!name) return alert('الرجاء كتابة اسمك للدخول!');
-        openGameScreen(autoCode);
+        
+        currentRoomCode = autoCode;
+        players = [
+            { name: 'صاحب الدعوة', isHost: true, type: 'حقيقي' },
+            { name: name, isHost: false, type: 'حقيقي' }
+        ];
+        openWaitingScreen();
     }
 
-    function openGameScreen(code) {
+    // فتح شاشة الانتظار وتحديث قائمة الأسماء
+    function openWaitingScreen() {
         document.getElementById('lobby-screen').classList.add('hidden');
-        document.getElementById('game-screen').classList.remove('hidden');
-        document.getElementById('current-room-display').innerText = code;
+        document.getElementById('waiting-screen').classList.remove('hidden');
+        document.getElementById('current-room-display').innerText = currentRoomCode;
+        updatePlayersUI();
     }
 
+    // إضافة لاعب يدوي عادي (صديق بجانبك)
+    function addManualPlayer() {
+        if (players.length >= 4) return alert('الغرفة مكتملة بالفعل (4 لاعبين)!');
+        let name = prompt('أدخل اسم اللاعب الإضافي:', `لاعب ${players.length + 1}`);
+        if (name && name.trim() !== '') {
+            players.push({ name: name.trim(), isHost: false, type: 'يدوي' });
+            updatePlayersUI();
+        }
+    }
+
+    // إكمال خانات الخصوم بالكمبيوتر
+    function fillWithBots() {
+        let botCount = 1;
+        while (players.length < 4) {
+            players.push({ name: `بوت ${botCount} 🤖`, isHost: false, type: 'آلي' });
+            botCount++;
+        }
+        updatePlayersUI();
+    }
+
+    // تحديث الواجهة والأسماء والعدّاد
+    function updatePlayersUI() {
+        document.getElementById('player-count').innerText = players.length;
+        let container = document.getElementById('players-container');
+        container.innerHTML = '';
+
+        players.forEach((p, index) => {
+            let item = document.createElement('div');
+            item.className = `player-item ${p.isHost ? 'host' : ''}`;
+            item.innerHTML = `
+                <span><strong>${index + 1}.</strong> ${p.name}</span>
+                <span class="badge">${p.isHost ? 'المضيف 👑' : p.type}</span>
+            `;
+            container.appendChild(item);
+        });
+
+        // إظهار زر بدء اللعب فور اكتمال 4 لاعبين
+        if (players.length === 4) {
+            document.getElementById('start-game-btn').classList.remove('hidden');
+        } else {
+            document.getElementById('start-game-btn').classList.add('hidden');
+        }
+    }
+
+    // مشاركة رابط الدعوة
     function shareInviteLink() {
-        let code = document.getElementById('current-room-display').innerText;
-        let url = window.location.origin + window.location.pathname + '?code=' + code;
+        let url = window.location.origin + window.location.pathname + '?code=' + currentRoomCode;
         navigator.clipboard.writeText(url).then(() => {
-            alert('تم نسخ رابط الدعوة المباشر! أرسله بالواتساب لأصدقائك 🔗');
+            alert('تم نسخ رابط الدعوة! أرسله بالواتساب لأصدقائك للانضمام فوراً 🔗');
+        });
+    }
+
+    // البدء والانتقال للطاولة
+    function startGame() {
+        openGameScreen();
+    }
+
+    function openGameScreen() {
+        document.getElementById('lobby-screen').classList.add('hidden');
+        document.getElementById('waiting-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+
+        let container = document.getElementById('game-board-players');
+        container.innerHTML = '<div style="font-size:13px; color:#F59E0B; margin-bottom:6px;">اللاعبون المتنافسون:</div>';
+        players.forEach((p, i) => {
+            container.innerHTML += `<div class="player-item"><span>${i + 1}. ${p.name}</span><span class="badge">50,000 $</span></div>`;
         });
     }
 </script>
