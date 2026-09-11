@@ -3,32 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة المليون</title>
+    <title>لعبة المليون أونلاين</title>
     <style>
         body {
             background-color: #0F172A;
             color: white;
             font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            text-align: center;
+            min-height: 100vh;
+            box-sizing: border-box;
         }
-        .container {
-            padding: 20px;
-            background: #1E293B;
-            border-radius: 12px;
+        .card {
+            background-color: #1E293B;
             border: 1px solid #F59E0B;
+            border-radius: 12px;
+            padding: 24px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
-        h1 { color: #F59E0B; }
+        h1 { color: #F59E0B; margin-bottom: 8px; }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background-color: #0F172A;
+            color: white;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn-primary { background-color: #F59E0B; color: #000; }
+        .btn-success { background-color: #10B981; color: #fff; }
+        .btn-share { background-color: #3B82F6; color: #fff; }
+        .invite-box {
+            background-color: rgba(16, 185, 129, 0.2);
+            border: 1px solid #10B981;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #34D399;
+        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>لعبة المليون 🃏</h1>
-        <p>مرحباً بك في واجهة الويب الخاصة باللعبة!</p>
+
+<div class="card">
+    <h1>لعبة المليون 🃏</h1>
+
+    <!-- شاشة اللوبي والدخول -->
+    <div id="lobby-screen">
+        <div id="invite-alert" class="invite-box hidden">
+            🎯 وصلتك دعوة للانضمام للغرفة: <span id="invite-code-text"></span>
+        </div>
+
+        <input type="text" id="player-name" placeholder="اكتب اسمك للبدء" />
+        
+        <div id="normal-controls">
+            <button class="btn-primary" onclick="createRoom()">إنشاء غرفة جديدة</button>
+            <hr style="border-color: #334155; margin: 15px 0;">
+            <input type="number" id="room-code-input" placeholder="أدخل رمز الغرفة" />
+            <button class="btn-success" onclick="joinRoom()">انضمام للغرفة</button>
+        </div>
+
+        <div id="invite-controls" class="hidden">
+            <button class="btn-success" onclick="joinDirectRoom()">دخول مباشر للعبة 🚀</button>
+        </div>
     </div>
+
+    <!-- شاشة الانتظار واللعب -->
+    <div id="game-screen" class="hidden">
+        <h3>غرفة رقم: <span id="current-room-display" style="color:#F59E0B;"></span></h3>
+        <p>في انتظار اكتمال اللاعبين (4)...</p>
+        <button class="btn-share" onclick="shareInviteLink()">مشاركة رابط الدعوة 🔗</button>
+    </div>
+</div>
+
+<script>
+    let autoCode = new URLSearchParams(window.location.search).get('code');
+
+    if (autoCode) {
+        document.getElementById('invite-alert').classList.remove('hidden');
+        document.getElementById('invite-controls').classList.remove('hidden');
+        document.getElementById('normal-controls').classList.add('hidden');
+        document.getElementById('invite-code-text').innerText = autoCode;
+    }
+
+    function createRoom() {
+        let name = document.getElementById('player-name').value.trim();
+        if (!name) return alert('الرجاء كتابة اسمك أولاً!');
+        let code = Math.floor(1000 + Math.random() * 9000);
+        openGameScreen(code);
+    }
+
+    function joinRoom() {
+        let name = document.getElementById('player-name').value.trim();
+        let code = document.getElementById('room-code-input').value.trim();
+        if (!name || !code) return alert('أدخل الاسم ورمز الغرفة!');
+        openGameScreen(code);
+    }
+
+    function joinDirectRoom() {
+        let name = document.getElementById('player-name').value.trim();
+        if (!name) return alert('الرجاء كتابة اسمك للدخول!');
+        openGameScreen(autoCode);
+    }
+
+    function openGameScreen(code) {
+        document.getElementById('lobby-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+        document.getElementById('current-room-display').innerText = code;
+    }
+
+    function shareInviteLink() {
+        let code = document.getElementById('current-room-display').innerText;
+        let url = window.location.origin + window.location.pathname + '?code=' + code;
+        navigator.clipboard.writeText(url).then(() => {
+            alert('تم نسخ رابط الدعوة المباشر! أرسله بالواتساب لأصدقائك 🔗');
+        });
+    }
+</script>
+
 </body>
 </html>
