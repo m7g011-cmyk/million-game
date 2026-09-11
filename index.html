@@ -9,52 +9,22 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        body {
-            background-color: #0F172A;
-            color: white;
-            font-family: system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 16px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
+        @keyframes goldGlow {
+            0% { box-shadow: 0 0 5px #F59E0B; }
+            50% { box-shadow: 0 0 20px #F59E0B, 0 0 30px #EF4444; }
+            100% { box-shadow: 0 0 5px #F59E0B; }
         }
-        .card {
-            background-color: #1E293B;
-            border: 1px solid #F59E0B;
-            border-radius: 16px;
-            padding: 20px;
-            width: 100%;
-            max-width: 420px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        @keyframes winnerPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
         }
-        h1 { color: #F59E0B; margin-bottom: 8px; font-size: 26px; }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            background-color: #0F172A;
-            color: white;
-            box-sizing: border-box;
-            font-size: 15px;
-            text-align: center;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            margin: 6px 0;
-            border-radius: 8px;
-            border: none;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+
+        body { background-color: #0F172A; color: white; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 12px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+        .card { background-color: #1E293B; border: 1px solid #F59E0B; border-radius: 16px; padding: 16px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        h1 { color: #F59E0B; margin-bottom: 6px; font-size: 24px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        input, select { width: 100%; padding: 10px; margin: 6px 0; border-radius: 8px; border: 1px solid #334155; background-color: #0F172A; color: white; box-sizing: border-box; font-size: 14px; text-align: center; }
+        button { width: 100%; padding: 11px; margin: 5px 0; border-radius: 8px; border: none; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; }
         button:active { transform: scale(0.98); }
         .btn-primary { background-color: #F59E0B; color: #000; }
         .btn-success { background-color: #10B981; color: #fff; }
@@ -63,59 +33,22 @@
         .btn-danger { background-color: #EF4444; color: #fff; }
         .btn-bot { background-color: #8B5CF6; color: #fff; }
         
-        .invite-box {
-            background-color: rgba(16, 185, 129, 0.15);
-            border: 1px solid #10B981;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            font-size: 14px;
-            color: #34D399;
-        }
-        .players-list {
-            background-color: #0F172A;
-            border: 1px solid #334155;
-            border-radius: 10px;
-            padding: 10px;
-            margin: 15px 0;
-            text-align: right;
-        }
-        .player-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            margin: 4px 0;
-            background: #1E293B;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-        .player-item.host { border-right: 3px solid #F59E0B; }
-        .badge {
-            font-size: 11px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background-color: #334155;
-            color: #CBD5E1;
-        }
-        .cards-container {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin: 15px 0;
-        }
-        .playing-card {
-            background-color: #F59E0B;
-            color: #000;
-            font-weight: bold;
-            font-size: 18px;
-            padding: 15px 10px;
-            border-radius: 8px;
-            width: 45px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        }
+        .players-list { background-color: #0F172A; border: 1px solid #334155; border-radius: 10px; padding: 8px; margin: 10px 0; text-align: right; }
+        .player-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; margin: 4px 0; background: #1E293B; border-radius: 6px; font-size: 13px; transition: all 0.3s ease; }
+        .player-item.active-turn { border: 2px solid #10B981; background: #064E3B; animation: winnerPulse 1.5s infinite; }
+        .badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; background-color: #334155; color: #CBD5E1; }
+        .badge-money { background-color: #059669; color: #fff; font-weight: bold; }
+        .timer-box { font-size: 16px; color: #10B981; font-weight: bold; margin: 5px 0; transition: color 0.3s; }
+        .timer-warning { color: #EF4444 !important; animation: winnerPulse 0.5s infinite; }
+        
+        .cards-container { display: flex; justify-content: center; gap: 6px; margin: 8px 0; }
+        .playing-card { background-color: #FFF; color: #000; font-weight: bold; font-size: 14px; padding: 8px 5px; border-radius: 6px; width: 44px; border: 1px solid #CBD5E1; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .playing-card.red { color: #DC2626; }
+        
+        .revealed-box { background-color: rgba(30, 41, 59, 0.9); border: 1px solid #334155; border-radius: 8px; padding: 8px; margin: 8px 0; text-align: right; font-size: 12px; }
+        .revealed-box.gold-winner { border: 2px solid #F59E0B; animation: goldGlow 2s infinite; background: rgba(245, 158, 11, 0.15); }
         .hidden { display: none; }
-        .flex-row { display: flex; gap: 8px; }
+        .flex-row { display: flex; gap: 6px; }
     </style>
 </head>
 <body>
@@ -123,65 +56,87 @@
 <div class="card">
     <h1>لعبة المليون 🃏</h1>
 
-    <!-- 1. شاشة اللوبي والدخول -->
+    <!-- 1. شاشة اللوبي ودخول الغرف -->
     <div id="lobby-screen">
-        <div id="invite-alert" class="invite-box hidden">
-            🎯 وصلتك دعوة للانضمام للغرفة رقم: <strong id="invite-code-text"></strong>
-        </div>
-
         <input type="text" id="player-name" placeholder="اكتب اسمك للبدء" />
-        
-        <div id="normal-controls">
-            <button class="btn-primary" onclick="createRoom()">إنشاء غرفة أونلاين جديدة</button>
-            <button class="btn-bot" onclick="startVsBots()">اللعب بمفردك ضد الكمبيوتر 🤖</button>
-            
-            <hr style="border-color: #334155; margin: 15px 0;">
-            <input type="number" id="room-code-input" placeholder="أدخل رمز الغرفة" />
-            <button class="btn-success" onclick="joinRoom()">انضمام لغرفة أونلاين</button>
-        </div>
-
-        <div id="invite-controls" class="hidden">
-            <button class="btn-success" onclick="joinDirectRoom()">دخول مباشر للغرفة 🚀</button>
-        </div>
+        <button class="btn-primary" onclick="createRoom()">إنشاء غرفة جديدة</button>
+        <button class="btn-bot" onclick="startVsBots()">اللعب ضد الكمبيوتر 🤖</button>
+        <hr style="border-color: #334155; margin: 12px 0;">
+        <input type="number" id="room-code-input" placeholder="رمز الغرفة" />
+        <button class="btn-success" onclick="joinRoom()">انضمام لغرفة</button>
     </div>
 
     <!-- 2. شاشة الانتظار -->
     <div id="waiting-screen" class="hidden">
-        <h3>رمز الغرفة: <span id="current-room-display" style="color:#F59E0B;"></span></h3>
-        <p style="font-size: 14px; color: #94A3B8;">المتواجدون (<span id="player-count">1</span>/4)</p>
-
-        <div class="players-list">
-            <div style="font-size: 13px; color: #F59E0B; margin-bottom: 6px; font-weight: bold;">اللاعبون المتواجدون الآن:</div>
-            <div id="players-container"></div>
-        </div>
-
+        <h3>غرفة: <span id="current-room-display" style="color:#F59E0B;"></span></h3>
+        <p style="font-size: 13px; color: #94A3B8;">اللاعبون المنضمون (<span id="player-count">1</span>/4)</p>
+        <div class="players-list" id="players-container"></div>
         <button class="btn-share" onclick="shareInviteLink()">مشاركة رابط الدعوة 🔗</button>
-        
         <div class="flex-row">
-            <button class="btn-secondary" onclick="addManualPlayer()">إضافة لاعب يدوي 👤</button>
+            <button class="btn-secondary" onclick="addManualPlayer()">لاعب يدوي 👤</button>
             <button class="btn-bot" onclick="fillWithBots()">إكمال بالكمبيوتر 🤖</button>
         </div>
-
-        <button id="start-game-btn" class="btn-primary hidden" style="margin-top: 12px;" onclick="startGame()">بدء اللعب الآن 🚀</button>
-        <button class="btn-danger" style="margin-top: 8px;" onclick="leaveRoom()">مغادرة الغرفة 🚪</button>
+        <button id="start-game-btn" class="btn-primary hidden" style="margin-top: 10px;" onclick="startGame()">بدء اللعبة 🚀</button>
     </div>
 
-    <!-- 3. طاولة اللعب والتوزيع -->
+    <!-- 3. طاولة اللعب والتزايد -->
     <div id="game-screen" class="hidden">
-        <h3 style="color: #10B981; margin-bottom: 4px;">جولة المزايدة 🎴</h3>
-        <div id="game-board-players" class="players-list"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; color:#F59E0B;">الموزع: <strong id="dealer-name">-</strong></span>
+            <span class="timer-box" id="timer-box-wrapper">⏳ <span id="timer-display">15</span>s</span>
+        </div>
 
-        <div style="margin-top: 10px;">
-            <div style="font-size: 14px; color: #CBD5E1;">أوراقك الخاصة:</div>
+        <div class="players-list" id="game-board-players"></div>
+
+        <!-- أوراق اللاعب الخاصة -->
+        <div style="margin: 6px 0;">
+            <div style="font-size: 12px; color: #CBD5E1;">أوراقك الخاصة (قوة اليد: <strong id="hand-rank-text" style="color:#F59E0B;">-</strong>):</div>
             <div id="my-cards" class="cards-container"></div>
         </div>
 
-        <button class="btn-primary" onclick="playTurn()">رمي ورقة / مزايدة ♠️</button>
-        <button class="btn-danger" style="margin-top: 10px;" onclick="leaveRoom()">الخروج للرئيسية ↩️</button>
+        <!-- المزايدة -->
+        <div id="bidding-controls" class="hidden">
+            <div style="font-size: 13px; color:#10B981; margin-bottom:4px; font-weight:bold;">دورك الآن بالمزايدة!</div>
+            <select id="bid-amount-select"></select>
+            <div class="flex-row">
+                <button class="btn-primary" onclick="submitBid()">مزايدة 💰</button>
+                <button class="btn-danger" onclick="foldHand()">انسحاب 🏳️</button>
+            </div>
+        </div>
+
+        <!-- شاشة كشف الأوراق والتحدي النهائي -->
+        <div id="reveal-screen" class="hidden">
+            <h4 style="color:#F59E0B; margin:4px 0;">نتيجة كشف الأوراق أونلاين 🎴</h4>
+            <div id="revealed-hands-list"></div>
+            <button class="btn-primary" style="margin-top:10px;" onclick="nextRound()">الجولة التالية 🔄</button>
+        </div>
     </div>
 </div>
 
 <script>
+    // إنشاء مؤشرات الصوت عبر واجهة الصوت المباشرة بالمتصفح
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep(freq = 440, type = 'sine', duration = 0.15) {
+        try {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        } catch(e){}
+    }
+
+    function playWinSound() {
+        playBeep(523.25, 'triangle', 0.2);
+        setTimeout(() => playBeep(659.25, 'triangle', 0.2), 150);
+        setTimeout(() => playBeep(783.99, 'triangle', 0.4), 300);
+    }
+
     const firebaseConfig = {
         apiKey: "AIzaSyBRtQGiXgrzm7SoFwymT39OBZVtN0Pz-Ys",
         authDomain: "million-game-1ec89.firebaseapp.com",
@@ -198,216 +153,285 @@
     let currentRoomCode = null;
     let myName = "";
     let isHost = false;
-    let autoCode = new URLSearchParams(window.location.search).get('code');
+    let timerInterval = null;
 
-    window.onload = function() {
-        let savedName = localStorage.getItem('million_player_name');
-        if (savedName) document.getElementById('player-name').value = savedName;
+    const SUITS = ['♠️', '♥️', '♦️', '♣️'];
+    const RANKS = ['A', 'K', 'Q', 'J', '10', '9', '8', '7'];
 
-        if (autoCode) {
-            document.getElementById('invite-alert').classList.remove('hidden');
-            document.getElementById('invite-controls').classList.remove('hidden');
-            document.getElementById('normal-controls').classList.add('hidden');
-            document.getElementById('invite-code-text').innerText = autoCode;
-        }
-    };
-
-    function saveName(name) {
-        myName = name;
-        localStorage.setItem('million_player_name', name);
-    }
+    function saveName(name) { myName = name; localStorage.setItem('million_player_name', name); }
 
     function createRoom() {
         let name = document.getElementById('player-name').value.trim();
         if (!name) return alert('أدخل اسمك أولاً!');
-        saveName(name);
-
-        isHost = true;
+        saveName(name); isHost = true;
         currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
         
-        let initialPlayer = { name: name, isHost: true, type: 'حقيقي', cards: [7, 3, 9] };
-        
-        let roomRef = db.ref('rooms/' + currentRoomCode);
-        roomRef.set({
-            status: 'waiting',
-            players: [initialPlayer]
-        }).then(() => {
-            listenToRoomUpdates(currentRoomCode);
-            openWaitingScreen();
-        }).catch((err) => {
-            alert('حدث خطأ بالاتصال بالسيرفر، تأكد من الاتصال.');
-        });
+        let p = { name: name, balance: 50000, bid: 0, folded: false, isHost: true, type: 'حقيقي' };
+        db.ref('rooms/' + currentRoomCode).set({
+            status: 'waiting', dealerIndex: 0, turnIndex: 1, currentBid: 0, highestBidder: '',
+            players: [p]
+        }).then(() => { listenToRoom(); openWaiting(); });
     }
 
     function joinRoom() {
         let name = document.getElementById('player-name').value.trim();
         let code = document.getElementById('room-code-input').value.trim();
-        if (!name || !code) return alert('أدخل الاسم ورقم الغرفة!');
-        saveName(name);
-        performJoin(code, name);
-    }
-
-    function joinDirectRoom() {
-        let name = document.getElementById('player-name').value.trim();
-        if (!name) return alert('أدخل اسمك أولاً!');
-        saveName(name);
-        performJoin(autoCode, name);
-    }
-
-    function performJoin(code, name) {
-        currentRoomCode = code;
-        let roomRef = db.ref('rooms/' + code);
+        if (!name || !code) return alert('أدخل بياناتك كاملة!');
+        saveName(name); currentRoomCode = code;
         
-        roomRef.get().then((snapshot) => {
-            if (snapshot.exists()) {
-                let roomData = snapshot.val();
-                let playersList = roomData.players || [];
-                if (playersList.length >= 4) return alert('الغرفة مكتملة!');
-
-                playersList.push({ name: name, isHost: false, type: 'حقيقي', cards: [5, 8, 2] });
-                roomRef.update({ players: playersList }).then(() => {
-                    listenToRoomUpdates(code);
-                    openWaitingScreen();
-                });
-            } else {
-                alert('الغرفة غير موجودة!');
-            }
+        db.ref('rooms/' + code).get().then(snap => {
+            if (snap.exists()) {
+                let pList = snap.val().players || [];
+                if (pList.length >= 4) return alert('الغرفة مكتملة!');
+                pList.push({ name: name, balance: 50000, bid: 0, folded: false, isHost: false, type: 'حقيقي' });
+                db.ref('rooms/' + code + '/players').set(pList).then(() => { listenToRoom(); openWaiting(); });
+            } else alert('الغرفة غير موجودة!');
         });
     }
 
-    function listenToRoomUpdates(code) {
-        db.ref('rooms/' + code).on('value', (snapshot) => {
-            if (!snapshot.exists()) return;
-            let data = snapshot.val();
-            
-            if (data.status === 'playing') {
-                renderGameBoard(data.players);
-            } else {
-                updatePlayersUI(data.players || []);
-            }
+    function listenToRoom() {
+        db.ref('rooms/' + currentRoomCode).on('value', snap => {
+            if (!snap.exists()) return;
+            let data = snap.val();
+            if (data.status === 'playing') renderGame(data);
+            else if (data.status === 'revealed') renderReveal(data);
+            else updateWaitingUI(data.players || []);
         });
     }
 
-    function updatePlayersUI(players) {
+    function updateWaitingUI(players) {
         document.getElementById('player-count').innerText = players.length;
-        let container = document.getElementById('players-container');
-        container.innerHTML = '';
-
-        players.forEach((p, index) => {
-            let item = document.createElement('div');
-            item.className = `player-item ${p.isHost ? 'host' : ''}`;
-            item.innerHTML = `
-                <span><strong>${index + 1}.</strong> ${p.name}</span>
-                <span class="badge">${p.isHost ? 'المضيف 👑' : p.type}</span>
-            `;
-            container.appendChild(item);
+        let c = document.getElementById('players-container'); c.innerHTML = '';
+        players.forEach((p, i) => {
+            c.innerHTML += `<div class="player-item"><span>${i+1}. ${p.name}</span><span class="badge badge-money">${p.balance} ر.س</span></div>`;
         });
-
-        if (players.length === 4 && isHost) {
-            document.getElementById('start-game-btn').classList.remove('hidden');
-        } else {
-            document.getElementById('start-game-btn').classList.add('hidden');
-        }
+        if (players.length === 4 && isHost) document.getElementById('start-game-btn').classList.remove('hidden');
     }
 
     function startGame() {
-        db.ref('rooms/' + currentRoomCode + '/players').get().then((snapshot) => {
-            let playersList = snapshot.val() || [];
-            playersList.forEach(p => {
-                p.cards = [
-                    Math.floor(Math.random() * 10) + 1,
-                    Math.floor(Math.random() * 10) + 1,
-                    Math.floor(Math.random() * 10) + 1
-                ];
-            });
-
-            db.ref('rooms/' + currentRoomCode).update({
-                status: 'playing',
-                players: playersList
-            });
+        db.ref('rooms/' + currentRoomCode + '/players').get().then(snap => {
+            let pList = snap.val();
+            pList.forEach(p => { p.cards = generate4Cards(); p.folded = false; p.bid = 0; });
+            db.ref('rooms/' + currentRoomCode).update({ status: 'playing', players: pList, turnIndex: 1, currentBid: 0 });
         });
     }
 
-    function renderGameBoard(playersList) {
+    function generate4Cards() {
+        let cards = [];
+        for(let i=0; i<4; i++) {
+            cards.push({ rank: RANKS[Math.floor(Math.random()*RANKS.length)], suit: SUITS[Math.floor(Math.random()*SUITS.length)] });
+        }
+        return cards;
+    }
+
+    function evaluateHand(cards) {
+        if (!cards || cards.length < 4) return { rankVal: 0, text: 'ضعيف' };
+        let suits = cards.map(c => c.suit);
+        let ranks = cards.map(c => c.rank);
+        let isSameSuit = suits.every(s => s === suits[0]);
+        let hasA = ranks.includes('A'), hasK = ranks.includes('K'), hasQ = ranks.includes('Q'), hasJ = ranks.includes('J');
+
+        if (isSameSuit && hasA && hasK && hasQ && hasJ) return { rankVal: 100, text: 'كبو متطابق (أقوى يد 👑)' };
+
+        let countMap = {}; ranks.forEach(r => countMap[r] = (countMap[r] || 0) + 1);
+        let counts = Object.values(countMap);
+        
+        if (counts.includes(4)) return { rankVal: 90, text: `4 أوراق متشابهة 🔥` };
+        if (counts.includes(3)) return { rankVal: 70, text: `3 أوراق متشابهة` };
+        let pairs = Object.keys(countMap).filter(k => countMap[k] === 2);
+        if (pairs.length === 2) return { rankVal: 50, text: `زوجين` };
+
+        return { rankVal: 10, text: 'يد عشوائية' };
+    }
+
+    function renderGame(data) {
         document.getElementById('lobby-screen').classList.add('hidden');
         document.getElementById('waiting-screen').classList.add('hidden');
         document.getElementById('game-screen').classList.remove('hidden');
+        document.getElementById('reveal-screen').classList.add('hidden');
 
-        let container = document.getElementById('game-board-players');
-        container.innerHTML = '';
+        let pList = data.players || [];
+        let activePlayers = pList.filter(p => !p.folded);
 
-        let myPlayerObj = null;
+        if (activePlayers.length === 1) {
+            let winner = activePlayers[0];
+            winner.balance += winner.bid || 5000;
+            db.ref('rooms/' + currentRoomCode).update({ status: 'revealed', players: pList, winReason: `🏆 فاز ${winner.name} بانسحاب بقية المنافسين!` });
+            return;
+        }
 
-        playersList.forEach((p, i) => {
-            if (p.name === myName) myPlayerObj = p;
-            container.innerHTML += `
-                <div class="player-item">
-                    <span>${i + 1}. ${p.name}</span>
-                    <span class="badge">$50,000</span>
+        document.getElementById('dealer-name').innerText = pList[data.dealerIndex] ? pList[data.dealerIndex].name : '-';
+        let board = document.getElementById('game-board-players'); board.innerHTML = '';
+        let myObj = null;
+
+        pList.forEach((p, i) => {
+            if (p.name === myName) myObj = p;
+            let isTurn = (i === data.turnIndex);
+            board.innerHTML += `
+                <div class="player-item ${isTurn ? 'active-turn' : ''}">
+                    <span>${p.name} ${p.folded ? '(منسحب 🏳️)' : ''}</span>
+                    <span class="badge badge-money">${p.balance} ر.س</span>
                 </div>`;
         });
 
-        let cardsContainer = document.getElementById('my-cards');
-        cardsContainer.innerHTML = '';
-        let myCards = (myPlayerObj && myPlayerObj.cards) ? myPlayerObj.cards : [7, 3, 9];
+        if (myObj && myObj.cards) {
+            let evalRes = evaluateHand(myObj.cards);
+            document.getElementById('hand-rank-text').innerText = evalRes.text;
+            let mc = document.getElementById('my-cards'); mc.innerHTML = '';
+            myObj.cards.forEach(c => {
+                let isRed = (c.suit === '♥️' || c.suit === '♦️');
+                mc.innerHTML += `<div class="playing-card ${isRed?'red':''}">${c.rank}<br>${c.suit}</div>`;
+            });
+        }
 
-        myCards.forEach(c => {
-            cardsContainer.innerHTML += `<div class="playing-card">${c}</div>`;
+        let myTurn = (pList[data.turnIndex] && pList[data.turnIndex].name === myName);
+        if (myTurn && !myObj.folded) {
+            document.getElementById('bidding-controls').classList.remove('hidden');
+            setupBidSelect(myObj.balance, data.currentBid || 0);
+            startTimer(15);
+        } else {
+            document.getElementById('bidding-controls').classList.add('hidden');
+        }
+    }
+
+    function setupBidSelect(balance, currentBid) {
+        let select = document.getElementById('bid-amount-select'); select.innerHTML = '';
+        let min = currentBid + 5000;
+        for (let amt = min; amt <= balance; amt += 5000) {
+            select.innerHTML += `<option value="${amt}">${amt} ريال</option>`;
+        }
+    }
+
+    function startTimer(sec) {
+        clearInterval(timerInterval);
+        let left = sec;
+        let timerWrapper = document.getElementById('timer-box-wrapper');
+        timerWrapper.classList.remove('timer-warning');
+        document.getElementById('timer-display').innerText = left;
+
+        timerInterval = setInterval(() => {
+            left--;
+            document.getElementById('timer-display').innerText = left;
+            if (left <= 5) {
+                timerWrapper.classList.add('timer-warning');
+                playBeep(880, 'sine', 0.05);
+            }
+            if (left <= 0) { clearInterval(timerInterval); foldHand(); }
+        }, 1000);
+    }
+
+    function submitBid() {
+        playBeep(600, 'square', 0.1);
+        let val = parseInt(document.getElementById('bid-amount-select').value);
+        if (!val) return;
+        clearInterval(timerInterval);
+        db.ref('rooms/' + currentRoomCode).get().then(snap => {
+            let data = snap.val();
+            data.players[data.turnIndex].bid = val;
+            let nextTurn = (data.turnIndex + 1) % data.players.length;
+            db.ref('rooms/' + currentRoomCode).update({ currentBid: val, highestBidder: myName, turnIndex: nextTurn, players: data.players });
+        });
+    }
+
+    function foldHand() {
+        playBeep(250, 'sawtooth', 0.15);
+        clearInterval(timerInterval);
+        db.ref('rooms/' + currentRoomCode).get().then(snap => {
+            let data = snap.val();
+            data.players[data.turnIndex].folded = true;
+            let nextTurn = (data.turnIndex + 1) % data.players.length;
+            db.ref('rooms/' + currentRoomCode).update({ players: data.players, turnIndex: nextTurn });
+        });
+    }
+
+    function renderReveal(data) {
+        playWinSound();
+        document.getElementById('bidding-controls').classList.add('hidden');
+        document.getElementById('reveal-screen').classList.remove('hidden');
+
+        let container = document.getElementById('revealed-hands-list');
+        container.innerHTML = `<p style="color:#10B981; font-size:13px; font-weight:bold;">${data.winReason || 'تم كشف الأوراق وحساب النتيجة!'}</p>`;
+
+        let bestVal = -1;
+        data.players.forEach(p => {
+            if(!p.folded) {
+                let ev = evaluateHand(p.cards);
+                if(ev.rankVal > bestVal) bestVal = ev.rankVal;
+            }
+        });
+
+        data.players.forEach((p, i) => {
+            let evalRes = evaluateHand(p.cards);
+            let isBest = (!p.folded && evalRes.rankVal === bestVal);
+            let cardsStr = p.cards ? p.cards.map(c => `${c.rank}${c.suit}`).join(' ') : 'لا يوجد';
+            
+            container.innerHTML += `
+                <div class="revealed-box ${isBest ? 'gold-winner' : ''}">
+                    <strong>${i+1}. ${p.name}</strong> ${isBest ? '👑 (الفائز باليد الأقوى)' : (p.folded ? '(منسحب)' : '')}<br>
+                    <span>قوة أوراقه: ${evalRes.text}</span> [ ${cardsStr} ]<br>
+                    <span style="color:#10B981; font-weight:bold;">الرصيد الحالي: ${p.balance} ر.س</span>
+                </div>`;
+        });
+    }
+
+    function nextRound() {
+        db.ref('rooms/' + currentRoomCode).get().then(snap => {
+            let data = snap.val();
+            let nextDealer = (data.dealerIndex + 1) % data.players.length;
+            data.players.forEach(p => { p.cards = generate4Cards(); p.folded = false; p.bid = 0; });
+            db.ref('rooms/' + currentRoomCode).update({
+                status: 'playing', dealerIndex: nextDealer, turnIndex: (nextDealer + 1) % data.players.length,
+                currentBid: 0, players: data.players
+            });
         });
     }
 
     function addManualPlayer() {
-        let roomRef = db.ref('rooms/' + currentRoomCode + '/players');
-        roomRef.get().then((snapshot) => {
-            let playersList = snapshot.val() || [];
-            if (playersList.length >= 4) return alert('الغرفة مكتملة!');
-            
-            let name = prompt('أدخل اسم اللاعب الإضافي:', `لاعب ${playersList.length + 1}`);
-            if (name && name.trim() !== '') {
-                playersList.push({ name: name.trim(), isHost: false, type: 'يدوي', cards: [4, 6, 1] });
-                roomRef.set(playersList);
-            }
+        db.ref('rooms/' + currentRoomCode + '/players').get().then(snap => {
+            let list = snap.val() || [];
+            if (list.length >= 4) return alert('مكتملة!');
+            let n = prompt('اسم اللاعب:', `لاعب ${list.length+1}`);
+            if (n) { list.push({ name: n, balance: 50000, bid: 0, folded: false, isHost: false, type: 'يدوي' }); db.ref('rooms/' + currentRoomCode + '/players').set(list); }
         });
     }
 
     function fillWithBots() {
-        let roomRef = db.ref('rooms/' + currentRoomCode + '/players');
-        roomRef.get().then((snapshot) => {
-            let playersList = snapshot.val() || [];
-            let botCount = 1;
-            while (playersList.length < 4) {
-                playersList.push({ name: `بوت ${botCount} 🤖`, isHost: false, type: 'آلي', cards: [1, 2, 3] });
-                botCount++;
+        db.ref('rooms/' + currentRoomCode + '/players').get().then(snap => {
+            let list = snap.val() || [];
+            let c = 1;
+            while(list.length < 4) {
+                list.push({ name: `بوت ${c} 🤖`, balance: 50000, bid: 0, folded: false, isHost: false, type: 'آلي' });
+                c++;
             }
-            roomRef.set(playersList);
+            db.ref('rooms/' + currentRoomCode + '/players').set(list);
         });
     }
 
     function startVsBots() {
         let name = document.getElementById('player-name').value.trim() || 'اللاعب';
         saveName(name);
+        currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
         let players = [
-            { name: name, isHost: true, type: 'حقيقي', cards: [8, 5, 2] },
-            { name: 'الكمبيوتر 1 🤖', isHost: false, type: 'آلي', cards: [] },
-            { name: 'الكمبيوتر 2 🤖', isHost: false, type: 'آلي', cards: [] },
-            { name: 'الكمبيوتر 3 🤖', isHost: false, type: 'آلي', cards: [] }
+            { name: name, balance: 50000, bid: 0, folded: false, isHost: true, type: 'حقيقي' },
+            { name: 'الكمبيوتر 1 🤖', balance: 50000, bid: 0, folded: false, isHost: false, type: 'آلي' },
+            { name: 'الكمبيوتر 2 🤖', balance: 50000, bid: 0, folded: false, isHost: false, type: 'آلي' },
+            { name: 'الكمبيوتر 3 🤖', balance: 50000, bid: 0, folded: false, isHost: false, type: 'آلي' }
         ];
-        renderGameBoard(players);
+        db.ref('rooms/' + currentRoomCode).set({
+            status: 'waiting', dealerIndex: 0, turnIndex: 1, currentBid: 0, highestBidder: '',
+            players: players
+        }).then(() => { listenToRoom(); openWaiting(); });
     }
 
-    function playTurn() {
-        alert('تم إرسال دورك بنجاح للطاولة!');
+    function openWaiting() {
+        document.getElementById('lobby-screen').classList.add('hidden');
+        document.getElementById('waiting-screen').classList.remove('hidden');
+        document.getElementById('current-room-display').innerText = currentRoomCode;
     }
 
     function shareInviteLink() {
         let url = window.location.origin + window.location.pathname + '?code=' + currentRoomCode;
-        navigator.clipboard.writeText(url).then(() => {
-            alert('تم نسخ رابط الدعوة! أرسله بالواتساب لأصدقائك 🔗');
-        });
-    }
-
-    function leaveRoom() {
-        location.href = window.location.origin + window.location.pathname;
+        navigator.clipboard.writeText(url).then(() => alert('تم نسخ رابط الدعوة! 🔗'));
     }
 </script>
 
