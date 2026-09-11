@@ -225,13 +225,17 @@
         isHost = true;
         currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
         
+        let initialPlayer = { name: name, isHost: true, type: 'حقيقي', cards: [7, 3, 9] };
+        
         let roomRef = db.ref('rooms/' + currentRoomCode);
         roomRef.set({
             status: 'waiting',
-            players: [{ name: name, isHost: true, type: 'حقيقي', cards: [] }]
+            players: [initialPlayer]
         }).then(() => {
             listenToRoomUpdates(currentRoomCode);
             openWaitingScreen();
+        }).catch((err) => {
+            alert('حدث خطأ بالاتصال بالسيرفر، تأكد من الاتصال.');
         });
     }
 
@@ -260,7 +264,7 @@
                 let playersList = roomData.players || [];
                 if (playersList.length >= 4) return alert('الغرفة مكتملة!');
 
-                playersList.push({ name: name, isHost: false, type: 'حقيقي', cards: [] });
+                playersList.push({ name: name, isHost: false, type: 'حقيقي', cards: [5, 8, 2] });
                 roomRef.update({ players: playersList }).then(() => {
                     listenToRoomUpdates(code);
                     openWaitingScreen();
@@ -307,7 +311,6 @@
     }
 
     function startGame() {
-        // توزيع كروت عشوائية للاعبين فور البدء
         db.ref('rooms/' + currentRoomCode + '/players').get().then((snapshot) => {
             let playersList = snapshot.val() || [];
             playersList.forEach(p => {
@@ -344,7 +347,6 @@
                 </div>`;
         });
 
-        // عرض أوراق المستخدم الحالية
         let cardsContainer = document.getElementById('my-cards');
         cardsContainer.innerHTML = '';
         let myCards = (myPlayerObj && myPlayerObj.cards) ? myPlayerObj.cards : [7, 3, 9];
@@ -362,7 +364,7 @@
             
             let name = prompt('أدخل اسم اللاعب الإضافي:', `لاعب ${playersList.length + 1}`);
             if (name && name.trim() !== '') {
-                playersList.push({ name: name.trim(), isHost: false, type: 'يدوي', cards: [] });
+                playersList.push({ name: name.trim(), isHost: false, type: 'يدوي', cards: [4, 6, 1] });
                 roomRef.set(playersList);
             }
         });
@@ -374,7 +376,7 @@
             let playersList = snapshot.val() || [];
             let botCount = 1;
             while (playersList.length < 4) {
-                playersList.push({ name: `بوت ${botCount} 🤖`, isHost: false, type: 'آلي', cards: [] });
+                playersList.push({ name: `بوت ${botCount} 🤖`, isHost: false, type: 'آلي', cards: [1, 2, 3] });
                 botCount++;
             }
             roomRef.set(playersList);
