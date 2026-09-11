@@ -91,7 +91,7 @@
 
         <!-- أزرار المزايدة -->
         <div id="bidding-controls" class="hidden">
-            <div style="font-size: 13px; color:#10B981; margin-bottom:4px; font-weight:bold;">دورك بالمزايدة (مرة واحدة فقط)!</div>
+            <div style="font-size: 13px; color:#10B981; margin-bottom:4px; font-weight:bold;">دورك بالمزايدة (فرصة واحدة فقط)!</div>
             <select id="bid-amount-select"></select>
             <div class="flex-row">
                 <button class="btn-primary" onclick="submitBid()">مزايدة 💰</button>
@@ -99,15 +99,15 @@
             </div>
         </div>
 
-        <!-- مرحلة خيارات صاحب أعلى مزايدة -->
+        <!-- مرحلة تحديد العروض (صاحب أقصى مزايدة) -->
         <div id="host-negotiation-box" class="negotiate-box hidden">
             <h4 style="color:#F59E0B; margin:2px 0;">خيارات المزايد الأكبر 🎯 (إجمالي المزايدة: <span id="my-total-bid-display">0</span>)</h4>
             <div id="offers-inputs-list"></div>
-            <button class="btn-primary" onclick="sendOffersToPlayers()">توزيع المبالغ وإرسال العروض 📩</button>
+            <button class="btn-primary" onclick="sendOffersToPlayers()">إرسال العروض فوراً لجميع المزايدين 📩</button>
             <button class="btn-danger" style="margin-top:6px;" onclick="lockAndChallengeAll()">إقفال وتحدي الجميع ⚔️</button>
         </div>
 
-        <!-- مرحلة اتخاذ القرار للخصوم -->
+        <!-- مرحلة رد الخصوم -->
         <div id="player-response-box" class="negotiate-box hidden">
             <div class="offer-alert">
                 📩 وصلك عرض بمبلغ: <span id="offered-amount-display">0</span> ر.س
@@ -123,7 +123,7 @@
             </div>
         </div>
 
-        <!-- شاشة كشف الأوراق وإعلان النتائج النشرة -->
+        <!-- شاشة كشف الأوراق والنتائج -->
         <div id="reveal-screen" class="hidden">
             <h4 style="color:#F59E0B; margin:4px 0;">النشرة المحدثة والنتائج الرسمية 🎴</h4>
             <div id="revealed-hands-list"></div>
@@ -227,8 +227,8 @@
             let pList = snap.val();
             if (pList.length < 2) return alert('يجب انضمام لاعبين اثنين على الأقل!');
             let deck = buildCustomDeck(pList.length);
-            pList.forEach(p => { p.cards = deal4FromDeck(deck); p.folded = false; p.bid = 0; p.response = ''; });
-            db.ref('rooms/' + currentRoomCode).update({ status: 'playing', players: pList, turnIndex: 0, bidsCount: 0, currentBid: 0 });
+            pList.forEach(p => { p.cards = deal4FromDeck(deck); p.folded = false; p.bid = 0; p.response = ''; p.offeredAmount = 0; });
+            db.ref('rooms/' + currentRoomCode).update({ status: 'playing', players: pList, turnIndex: 0, bidsCount: 0, currentBid: 0, offersSent: false });
         });
     }
 
@@ -283,8 +283,8 @@
 
         if (activePlayers.length === 1) {
             let winner = activePlayers[0];
-            winner.balance += winner.bid || 5000;
-            db.ref('rooms/' + currentRoomCode).update({ status: 'revealed', players: pList, winReason: `🏆 فاز ${winner.name} بانسحاب الجميع!` });
+            winner.balance += (data.currentBid > 0 ? data.currentBid : 5000);
+            db.ref('rooms/' + currentRoomCode).update({ status: 'revealed', players: pList, winReason: `🏆 انسحب جميع الخصوم! فاز ${winner.name} وأُضيف المبلغ تلقائياً لرصيده!` });
             return;
         }
 
@@ -342,7 +342,6 @@
     function advanceTurn(data) {
         data.bidsCount = (data.bidsCount || 0) + 1;
         
-        // جولة مزايدة واحدة فقط لكل لاعب
         if (data.bidsCount >= data.players.length) {
             data.status = 'negotiating';
         } else {
@@ -402,18 +401,30 @@
     function renderNegotiationStage(data) {
         document.getElementById('bidding-controls').classList.add('hidden');
 
+        let unFoldedBidders = data.players.filter(p => !p.folded && p.name !== data.highestBidder);
+
+        if (unFoldedBidders.length === 0 && data.highestBidder) {
+            let winner = data.players.find(p => p.name === data.highestBidder);
+            if (winner) winner.balance += (data.currentBid || 5000);
+            db.ref('rooms/' + currentRoomCode).update({
+                status: 'revealed', players: data.players, winReason: `🏆 انسحب جميع الخصوم! أُضيف مبلغ المزايدة (${data.currentBid} ر.س) تلقائياً لرصيد ${data.highestBidder}!`
+            });
+            return;
+        }
+
+        let myObj = data.players.find(p => p.name === myName);
+
         if (data.highestBidder === myName) {
             document.getElementById('host-negotiation-box').classList.remove('hidden');
             document.getElementById('player-response-box').classList.add('hidden');
             document.getElementById('my-total-bid-display').innerText = data.currentBid + ' ر.س';
             setupOfferInputs(data);
-        } else {
-            let myObj = data.players.find(p => p.name === myName);
-            if (myObj && !myObj.folded && data.offersSent) {
+        } else if (myObj && !myObj.folded) {
+            if (data.offersSent || myObj.offeredAmount > 0) {
                 playBeep(750, 'sine', 0.2);
                 document.getElementById('player-response-box').classList.remove('hidden');
                 document.getElementById('host-negotiation-box').classList.add('hidden');
-                document.getElementById('offered-amount-display').innerText = myObj.offeredAmount || 0;
+                document.getElementById('offered-amount-display').innerText = myObj.offeredAmount || 5000;
             }
         }
     }
@@ -439,7 +450,8 @@
                 let el = document.getElementById(`offer-for-${i}`);
                 if (el) p.offeredAmount = parseInt(el.value) || 5000;
             });
-            db.ref('rooms/' + currentRoomCode).update({ players: data.players, offersSent: true });
+            data.offersSent = true;
+            db.ref('rooms/' + currentRoomCode).set(data);
         });
     }
 
@@ -470,7 +482,6 @@
         });
     }
 
-    // الحساب المالي والحسم الأكيد للنشرة
     function processFinancialSettlement(data) {
         let highestBidderObj = data.players.find(p => p.name === data.highestBidder);
         let bestHandVal = -1;
@@ -489,7 +500,6 @@
         let isChallenged = data.players.some(p => p.response === 'challenge');
 
         if (isChallenged && winnerObj.name !== data.highestBidder) {
-            // الخسارة المباشرة وخصم كامل المزايدة في النشرة
             highestBidderObj.balance -= highestBidderObj.bid;
             winnerObj.balance += winnerObj.bid || 5000;
         } else {
@@ -504,7 +514,7 @@
         }
 
         db.ref('rooms/' + currentRoomCode).update({
-            status: 'revealed', players: data.players, winReason: `حسمت الجولة! الفائز بـ اليد الأقوى هو ${winnerObj.name}`
+            status: 'revealed', players: data.players, winReason: `حسمت الجولة! الفائز باليد الأقوى هو ${winnerObj.name}`
         });
     }
 
@@ -550,7 +560,7 @@
             let data = snap.val();
             let nextDealer = (data.dealerIndex + 1) % data.players.length;
             let deck = buildCustomDeck(data.players.length);
-            data.players.forEach(p => { p.cards = deal4FromDeck(deck); p.folded = false; p.bid = 0; p.response = ''; });
+            data.players.forEach(p => { p.cards = deal4FromDeck(deck); p.folded = false; p.bid = 0; p.response = ''; p.offeredAmount = 0; });
             db.ref('rooms/' + currentRoomCode).update({
                 status: 'playing', dealerIndex: nextDealer, turnIndex: nextDealer,
                 bidsCount: 0, currentBid: 0, offersSent: false, players: data.players
