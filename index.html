@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لعبة المليون أونلاين</title>
     
-    <!-- مكتبات Firebase السحابية للويب المباشر -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -99,13 +98,21 @@
             background-color: #334155;
             color: #CBD5E1;
         }
-        .status-dot {
-            height: 8px;
-            width: 8px;
-            background-color: #10B981;
-            border-radius: 50%;
-            display: inline-block;
-            margin-left: 6px;
+        .cards-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 15px 0;
+        }
+        .playing-card {
+            background-color: #F59E0B;
+            color: #000;
+            font-weight: bold;
+            font-size: 18px;
+            padding: 15px 10px;
+            border-radius: 8px;
+            width: 45px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
         .hidden { display: none; }
         .flex-row { display: flex; gap: 8px; }
@@ -138,14 +145,11 @@
         </div>
     </div>
 
-    <!-- 2. شاشة الانتظار وإدارة اللاعبين -->
+    <!-- 2. شاشة الانتظار -->
     <div id="waiting-screen" class="hidden">
         <h3>رمز الغرفة: <span id="current-room-display" style="color:#F59E0B;"></span></h3>
-        <p style="font-size: 14px; color: #94A3B8;">
-            <span class="status-dot"></span> متصل بالسيرفر | المتواجدون (<span id="player-count">1</span>/4)
-        </p>
+        <p style="font-size: 14px; color: #94A3B8;">المتواجدون (<span id="player-count">1</span>/4)</p>
 
-        <!-- قائمة الأسماء المحدثة لحظياً عبر Firebase -->
         <div class="players-list">
             <div style="font-size: 13px; color: #F59E0B; margin-bottom: 6px; font-weight: bold;">اللاعبون المتواجدون الآن:</div>
             <div id="players-container"></div>
@@ -162,17 +166,22 @@
         <button class="btn-danger" style="margin-top: 8px;" onclick="leaveRoom()">مغادرة الغرفة 🚪</button>
     </div>
 
-    <!-- 3. شاشة طاولة اللعب -->
+    <!-- 3. طاولة اللعب والتوزيع -->
     <div id="game-screen" class="hidden">
-        <h3 style="color: #10B981;">بدأت المباراة أونلاين! 🃏</h3>
+        <h3 style="color: #10B981; margin-bottom: 4px;">جولة المزايدة 🎴</h3>
         <div id="game-board-players" class="players-list"></div>
-        <p style="color: #F59E0B; font-size: 14px;">جاري مزامنة توزيع الأوراق أونلاين...</p>
-        <button class="btn-danger" onclick="leaveRoom()">الخروج للرئيسية ↩️</button>
+
+        <div style="margin-top: 10px;">
+            <div style="font-size: 14px; color: #CBD5E1;">أوراقك الخاصة:</div>
+            <div id="my-cards" class="cards-container"></div>
+        </div>
+
+        <button class="btn-primary" onclick="playTurn()">رمي ورقة / مزايدة ♠️</button>
+        <button class="btn-danger" style="margin-top: 10px;" onclick="leaveRoom()">الخروج للرئيسية ↩️</button>
     </div>
 </div>
 
 <script>
-    // تهيئة Firebase ببياناتك السحابية المباشرة
     const firebaseConfig = {
         apiKey: "AIzaSyBRtQGiXgrzm7SoFwymT39OBZVtN0Pz-Ys",
         authDomain: "million-game-1ec89.firebaseapp.com",
@@ -208,7 +217,6 @@
         localStorage.setItem('million_player_name', name);
     }
 
-    // إنشاء غرفة وتخزينها في قاعدة البيانات السحابية
     function createRoom() {
         let name = document.getElementById('player-name').value.trim();
         if (!name) return alert('أدخل اسمك أولاً!');
@@ -220,20 +228,18 @@
         let roomRef = db.ref('rooms/' + currentRoomCode);
         roomRef.set({
             status: 'waiting',
-            players: [{ name: name, isHost: true, type: 'حقيقي' }]
+            players: [{ name: name, isHost: true, type: 'حقيقي', cards: [] }]
         }).then(() => {
             listenToRoomUpdates(currentRoomCode);
             openWaitingScreen();
         });
     }
 
-    // الانضمام لغرفة أونلاين ومزامنة اسمك مع المضيف
     function joinRoom() {
         let name = document.getElementById('player-name').value.trim();
         let code = document.getElementById('room-code-input').value.trim();
         if (!name || !code) return alert('أدخل الاسم ورقم الغرفة!');
         saveName(name);
-        
         performJoin(code, name);
     }
 
@@ -241,7 +247,6 @@
         let name = document.getElementById('player-name').value.trim();
         if (!name) return alert('أدخل اسمك أولاً!');
         saveName(name);
-
         performJoin(autoCode, name);
     }
 
@@ -253,28 +258,26 @@
             if (snapshot.exists()) {
                 let roomData = snapshot.val();
                 let playersList = roomData.players || [];
+                if (playersList.length >= 4) return alert('الغرفة مكتملة!');
 
-                if (playersList.length >= 4) return alert('الغرفة مكتملة بـ 4 لاعبين!');
-
-                playersList.push({ name: name, isHost: false, type: 'حقيقي' });
+                playersList.push({ name: name, isHost: false, type: 'حقيقي', cards: [] });
                 roomRef.update({ players: playersList }).then(() => {
                     listenToRoomUpdates(code);
                     openWaitingScreen();
                 });
             } else {
-                alert('الغرفة غير موجودة! التأكد من رمز الغرفة.');
+                alert('الغرفة غير موجودة!');
             }
         });
     }
 
-    // الاستماع المباشر للتغييرات أونلاين (عند انضمام أي صديق تظهر شاشته عندك فوراً)
     function listenToRoomUpdates(code) {
         db.ref('rooms/' + code).on('value', (snapshot) => {
             if (!snapshot.exists()) return;
             let data = snapshot.val();
             
             if (data.status === 'playing') {
-                openGameScreen(data.players);
+                renderGameBoard(data.players);
             } else {
                 updatePlayersUI(data.players || []);
             }
@@ -303,6 +306,54 @@
         }
     }
 
+    function startGame() {
+        // توزيع كروت عشوائية للاعبين فور البدء
+        db.ref('rooms/' + currentRoomCode + '/players').get().then((snapshot) => {
+            let playersList = snapshot.val() || [];
+            playersList.forEach(p => {
+                p.cards = [
+                    Math.floor(Math.random() * 10) + 1,
+                    Math.floor(Math.random() * 10) + 1,
+                    Math.floor(Math.random() * 10) + 1
+                ];
+            });
+
+            db.ref('rooms/' + currentRoomCode).update({
+                status: 'playing',
+                players: playersList
+            });
+        });
+    }
+
+    function renderGameBoard(playersList) {
+        document.getElementById('lobby-screen').classList.add('hidden');
+        document.getElementById('waiting-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+
+        let container = document.getElementById('game-board-players');
+        container.innerHTML = '';
+
+        let myPlayerObj = null;
+
+        playersList.forEach((p, i) => {
+            if (p.name === myName) myPlayerObj = p;
+            container.innerHTML += `
+                <div class="player-item">
+                    <span>${i + 1}. ${p.name}</span>
+                    <span class="badge">$50,000</span>
+                </div>`;
+        });
+
+        // عرض أوراق المستخدم الحالية
+        let cardsContainer = document.getElementById('my-cards');
+        cardsContainer.innerHTML = '';
+        let myCards = (myPlayerObj && myPlayerObj.cards) ? myPlayerObj.cards : [7, 3, 9];
+
+        myCards.forEach(c => {
+            cardsContainer.innerHTML += `<div class="playing-card">${c}</div>`;
+        });
+    }
+
     function addManualPlayer() {
         let roomRef = db.ref('rooms/' + currentRoomCode + '/players');
         roomRef.get().then((snapshot) => {
@@ -311,7 +362,7 @@
             
             let name = prompt('أدخل اسم اللاعب الإضافي:', `لاعب ${playersList.length + 1}`);
             if (name && name.trim() !== '') {
-                playersList.push({ name: name.trim(), isHost: false, type: 'يدوي' });
+                playersList.push({ name: name.trim(), isHost: false, type: 'يدوي', cards: [] });
                 roomRef.set(playersList);
             }
         });
@@ -323,7 +374,7 @@
             let playersList = snapshot.val() || [];
             let botCount = 1;
             while (playersList.length < 4) {
-                playersList.push({ name: `بوت ${botCount} 🤖`, isHost: false, type: 'آلي' });
+                playersList.push({ name: `بوت ${botCount} 🤖`, isHost: false, type: 'آلي', cards: [] });
                 botCount++;
             }
             roomRef.set(playersList);
@@ -334,40 +385,22 @@
         let name = document.getElementById('player-name').value.trim() || 'اللاعب';
         saveName(name);
         let players = [
-            { name: name, isHost: true, type: 'حقيقي' },
-            { name: 'الكمبيوتر 1 🤖', isHost: false, type: 'آلي' },
-            { name: 'الكمبيوتر 2 🤖', isHost: false, type: 'آلي' },
-            { name: 'الكمبيوتر 3 🤖', isHost: false, type: 'آلي' }
+            { name: name, isHost: true, type: 'حقيقي', cards: [8, 5, 2] },
+            { name: 'الكمبيوتر 1 🤖', isHost: false, type: 'آلي', cards: [] },
+            { name: 'الكمبيوتر 2 🤖', isHost: false, type: 'آلي', cards: [] },
+            { name: 'الكمبيوتر 3 🤖', isHost: false, type: 'آلي', cards: [] }
         ];
-        openGameScreen(players);
+        renderGameBoard(players);
     }
 
-    function startGame() {
-        db.ref('rooms/' + currentRoomCode).update({ status: 'playing' });
-    }
-
-    function openWaitingScreen() {
-        document.getElementById('lobby-screen').classList.add('hidden');
-        document.getElementById('waiting-screen').classList.remove('hidden');
-        document.getElementById('current-room-display').innerText = currentRoomCode;
-    }
-
-    function openGameScreen(playersList) {
-        document.getElementById('lobby-screen').classList.add('hidden');
-        document.getElementById('waiting-screen').classList.add('hidden');
-        document.getElementById('game-screen').classList.remove('hidden');
-
-        let container = document.getElementById('game-board-players');
-        container.innerHTML = '<div style="font-size:13px; color:#F59E0B; margin-bottom:6px;">اللاعبون المباشرون أونلاين:</div>';
-        playersList.forEach((p, i) => {
-            container.innerHTML += `<div class="player-item"><span>${i + 1}. ${p.name}</span><span class="badge">50,000 $</span></div>`;
-        });
+    function playTurn() {
+        alert('تم إرسال دورك بنجاح للطاولة!');
     }
 
     function shareInviteLink() {
         let url = window.location.origin + window.location.pathname + '?code=' + currentRoomCode;
         navigator.clipboard.writeText(url).then(() => {
-            alert('تم نسخ رابط الدعوة الأونلاين! أرسله بالواتساب لأصدقائك للانضمام فوراً 🔗');
+            alert('تم نسخ رابط الدعوة! أرسله بالواتساب لأصدقائك 🔗');
         });
     }
 
