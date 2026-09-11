@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة المليون أونلاين</title>
+    <title>لعبة المليون - النسخة الاحترافية</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -11,11 +11,17 @@
     <style>
         @keyframes goldGlow {
             0% { box-shadow: 0 0 5px #F59E0B; }
-            50% { box-shadow: 0 0 20px #F59E0B; }
+            50% { box-shadow: 0 0 25px #F59E0B, 0 0 10px #10B981; }
             100% { box-shadow: 0 0 5px #F59E0B; }
         }
-        body { background-color: #0F172A; color: white; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 12px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
-        .card { background-color: #1E293B; border: 1px solid #F59E0B; border-radius: 16px; padding: 16px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        @keyframes floatEmoji {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            50% { transform: translateY(-40px) scale(1.4); opacity: 1; }
+            100% { transform: translateY(-80px) scale(1); opacity: 0; }
+        }
+
+        body { background-color: #0F172A; color: white; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 12px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; overflow-x: hidden; }
+        .card { background-color: #1E293B; border: 1px solid #F59E0B; border-radius: 16px; padding: 16px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; }
         h1 { color: #F59E0B; margin-bottom: 6px; font-size: 24px; }
         input, select { width: 100%; padding: 10px; margin: 6px 0; border-radius: 8px; border: 1px solid #334155; background-color: #0F172A; color: white; box-sizing: border-box; font-size: 14px; text-align: center; }
         button { width: 100%; padding: 11px; margin: 5px 0; border-radius: 8px; border: none; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; }
@@ -26,18 +32,25 @@
         .btn-secondary { background-color: #64748B; color: #fff; }
         .btn-danger { background-color: #EF4444; color: #fff; }
         .btn-bot { background-color: #8B5CF6; color: #fff; }
+        .btn-double { background-color: #D97706; color: #fff; border: 1px solid #F59E0B; }
         
         .players-list { background-color: #0F172A; border: 1px solid #334155; border-radius: 10px; padding: 8px; margin: 10px 0; text-align: right; }
-        .player-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; margin: 4px 0; background: #1E293B; border-radius: 6px; font-size: 13px; }
+        .player-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; margin: 4px 0; background: #1E293B; border-radius: 6px; font-size: 13px; position: relative; }
         .player-item.active-turn { border: 2px solid #10B981; background: #064E3B; }
         .badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; background-color: #334155; color: #CBD5E1; }
         .badge-money { background-color: #059669; color: #fff; font-weight: bold; }
+        .badge-rank { background-color: #8B5CF6; color: #fff; font-size: 10px; margin-right: 4px; }
         .timer-box { font-size: 16px; color: #EF4444; font-weight: bold; }
         
-        .cards-container { display: flex; justify-content: center; gap: 6px; margin: 10px 0; }
-        .playing-card { background-color: #FFF; color: #000; font-weight: bold; font-size: 15px; padding: 10px 6px; border-radius: 6px; width: 46px; border: 1px solid #CBD5E1; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .cards-container { display: flex; justify-content: center; gap: 8px; margin: 10px 0; perspective: 1000px; }
+        .playing-card { background-color: #2D3748; color: #FFF; font-weight: bold; font-size: 15px; padding: 10px 6px; border-radius: 6px; width: 48px; height: 65px; border: 1px solid #CBD5E1; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.4s; transform-style: preserve-3d; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .playing-card.flipped { background-color: #FFF; color: #000; transform: rotateY(180deg); }
         .playing-card.red { color: #DC2626; }
         
+        .reaction-bar { display: flex; justify-content: center; gap: 8px; background: #0F172A; padding: 6px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 8px; }
+        .reaction-btn { width: flex; padding: 4px 8px; margin: 0; font-size: 16px; background: #1E293B; border: 1px solid #475569; border-radius: 6px; }
+        .floating-emoji { position: absolute; font-size: 32px; animation: floatEmoji 2s forwards; pointer-events: none; z-index: 100; }
+
         .revealed-box { background-color: rgba(30, 41, 59, 0.9); border: 1px solid #334155; border-radius: 8px; padding: 8px; margin: 8px 0; text-align: right; font-size: 12px; }
         .revealed-box.gold-winner { border: 2px solid #F59E0B; background: rgba(245, 158, 11, 0.15); animation: goldGlow 2s infinite; }
         .hidden { display: none; }
@@ -48,7 +61,8 @@
 </head>
 <body>
 
-<div class="card">
+<div class="card" id="main-card">
+    <div id="emoji-layer"></div>
     <h1>لعبة المليون 🃏</h1>
 
     <!-- 1. شاشة اللوبي -->
@@ -81,17 +95,26 @@
             <span class="timer-box">⏳ <span id="timer-display">15</span>s</span>
         </div>
 
+        <!-- شريط التفاعلات والإيموجيات الحية -->
+        <div class="reaction-bar">
+            <button class="reaction-btn" onclick="sendEmoji('😂')">😂</button>
+            <button class="reaction-btn" onclick="sendEmoji('🔥')">🔥</button>
+            <button class="reaction-btn" onclick="sendEmoji('👏')">👏</button>
+            <button class="reaction-btn" onclick="sendEmoji('🤫')">🤫</button>
+            <button class="reaction-btn" onclick="sendEmoji('💸')">💸</button>
+        </div>
+
         <div class="players-list" id="game-board-players"></div>
 
-        <!-- أوراق اللاعب الخاصة -->
+        <!-- أوراق اللاعب مع إمكانية التقليب -->
         <div style="margin: 6px 0;">
-            <div style="font-size: 12px; color: #CBD5E1;">أوراقك الخاصة (قوة اليد: <strong id="hand-rank-text" style="color:#F59E0B;">-</strong>):</div>
+            <div style="font-size: 12px; color: #CBD5E1;">أوراقك (اضغط على الكرت لقلبه 🎴) [اليد: <strong id="hand-rank-text" style="color:#F59E0B;">-</strong>]:</div>
             <div id="my-cards" class="cards-container"></div>
         </div>
 
         <!-- أزرار المزايدة -->
         <div id="bidding-controls" class="hidden">
-            <div style="font-size: 13px; color:#10B981; margin-bottom:4px; font-weight:bold;">دورك بالمزايدة (فرصة واحدة فقط)!</div>
+            <div style="font-size: 13px; color:#10B981; margin-bottom:4px; font-weight:bold;">دورك بالمزايدة!</div>
             <select id="bid-amount-select"></select>
             <div class="flex-row">
                 <button class="btn-primary" onclick="submitBid()">مزايدة 💰</button>
@@ -99,11 +122,12 @@
             </div>
         </div>
 
-        <!-- مرحلة تحديد العروض (صاحب أقصى مزايدة) -->
+        <!-- مرحلة خيارات المزايد الأكبر + زر المضاعفة -->
         <div id="host-negotiation-box" class="negotiate-box hidden">
-            <h4 style="color:#F59E0B; margin:2px 0;">خيارات المزايد الأكبر 🎯 (إجمالي المزايدة: <span id="my-total-bid-display">0</span>)</h4>
+            <h4 style="color:#F59E0B; margin:2px 0;">خيارات المزايد الأكبر 🎯 (المزايدة: <span id="my-total-bid-display">0</span>)</h4>
+            <button class="btn-double" onclick="doubleRiskBid()">⚡ مضاعفة الرهان (Double Risk)</button>
             <div id="offers-inputs-list"></div>
-            <button class="btn-primary" onclick="sendOffersToPlayers()">إرسال العروض فوراً لجميع المزايدين 📩</button>
+            <button class="btn-primary" onclick="sendOffersToPlayers()">إرسال العروض للجميع 📩</button>
             <button class="btn-danger" style="margin-top:6px;" onclick="lockAndChallengeAll()">إقفال وتحدي الجميع ⚔️</button>
         </div>
 
@@ -207,6 +231,9 @@
         db.ref('rooms/' + currentRoomCode).on('value', snap => {
             if (!snap.exists()) return;
             let data = snap.val();
+            
+            if (data.lastEmoji) triggerEmojiAnimation(data.lastEmoji);
+
             if (data.status === 'playing') renderGame(data);
             else if (data.status === 'negotiating') renderNegotiationStage(data);
             else if (data.status === 'revealed') renderReveal(data);
@@ -270,6 +297,14 @@
         return { rankVal: 10, text: 'يد عشوائية ضعيفة' };
     }
 
+    // حساب الرتب الألقاب التنافسية
+    function getPlayerTitle(p, maxBalance) {
+        if (p.balance >= maxBalance && maxBalance > 50000) return '👑 الهامور';
+        if (p.bid >= 20000) return '🔥 المجازف';
+        if (p.folded) return '🛡️ المحافظ';
+        return '🃏 لاعب';
+    }
+
     function renderGame(data) {
         document.getElementById('lobby-screen').classList.add('hidden');
         document.getElementById('waiting-screen').classList.add('hidden');
@@ -280,6 +315,7 @@
 
         let pList = data.players || [];
         let activePlayers = pList.filter(p => !p.folded);
+        let maxBal = Math.max(...pList.map(p => p.balance));
 
         if (activePlayers.length === 1) {
             let winner = activePlayers[0];
@@ -312,9 +348,10 @@
         pList.forEach((p, i) => {
             if (p.name === myName) myObj = p;
             let isTurn = (i === data.turnIndex);
+            let title = getPlayerTitle(p, maxBal);
             board.innerHTML += `
                 <div class="player-item ${isTurn ? 'active-turn' : ''}">
-                    <span>${p.name} ${p.type === 'آلي' ? '🤖' : ''} ${p.folded ? '(منسحب 🏳️)' : ''}</span>
+                    <span><span class="badge badge-rank">${title}</span> ${p.name} ${p.type === 'آلي' ? '🤖' : ''} ${p.folded ? '(منسحب 🏳️)' : ''}</span>
                     <span class="badge badge-money">${p.balance} ر.س</span>
                 </div>`;
         });
@@ -323,9 +360,12 @@
             let evalRes = evaluateHand(myObj.cards);
             document.getElementById('hand-rank-text').innerText = evalRes.text;
             let mc = document.getElementById('my-cards'); mc.innerHTML = '';
-            myObj.cards.forEach(c => {
+            myObj.cards.forEach((c, idx) => {
                 let isRed = (c.suit === '♥️' || c.suit === '♦️');
-                mc.innerHTML += `<div class="playing-card ${isRed?'red':''}">${c.rank}<br>${c.suit}</div>`;
+                mc.innerHTML += `
+                    <div class="playing-card ${isRed?'red':''}" id="card-${idx}" onclick="flipCard(this, '${c.rank}', '${c.suit}')">
+                        🎴
+                    </div>`;
             });
         }
 
@@ -339,9 +379,36 @@
         }
     }
 
+    function flipCard(el, rank, suit) {
+        playBeep(400, 'sine', 0.08);
+        if (!el.classList.contains('flipped')) {
+            el.classList.add('flipped');
+            el.innerHTML = `${rank}<br>${suit}`;
+        } else {
+            el.classList.remove('flipped');
+            el.innerHTML = `🎴`;
+        }
+    }
+
+    function sendEmoji(emoji) {
+        db.ref('rooms/' + currentRoomCode).update({ lastEmoji: { emoji: emoji, sender: myName, time: Date.now() } });
+    }
+
+    function triggerEmojiAnimation(emojiData) {
+        if (!emojiData || Date.now() - emojiData.time > 3000) return;
+        playBeep(900, 'sine', 0.1);
+        let layer = document.getElementById('emoji-layer');
+        let el = document.createElement('div');
+        el.className = 'floating-emoji';
+        el.innerText = emojiData.emoji;
+        el.style.left = (Math.random() * 80 + 10) + '%';
+        el.style.top = '50%';
+        layer.appendChild(el);
+        setTimeout(() => el.remove(), 2000);
+    }
+
     function advanceTurn(data) {
         data.bidsCount = (data.bidsCount || 0) + 1;
-        
         if (data.bidsCount >= data.players.length) {
             data.status = 'negotiating';
         } else {
@@ -398,9 +465,18 @@
         });
     }
 
+    function doubleRiskBid() {
+        playBeep(1000, 'triangle', 0.25);
+        db.ref('rooms/' + currentRoomCode).get().then(snap => {
+            let data = snap.val();
+            data.currentBid = data.currentBid * 2;
+            db.ref('rooms/' + currentRoomCode).update({ currentBid: data.currentBid });
+            alert('⚡ تم مضاعفة الرهان والجولة أصبحت عالية المخاطرة!');
+        });
+    }
+
     function renderNegotiationStage(data) {
         document.getElementById('bidding-controls').classList.add('hidden');
-
         let unFoldedBidders = data.players.filter(p => !p.folded && p.name !== data.highestBidder);
 
         if (unFoldedBidders.length === 0 && data.highestBidder) {
