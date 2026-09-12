@@ -123,7 +123,6 @@
             position: relative;
         }
         
-        /* مؤشر العداد المرئي فوق اللاعب النشط */
         .player-timer-badge {
             position: absolute;
             top: -10px;
@@ -284,6 +283,8 @@
             cursor: pointer;
             transition: transform 0.2s;
         }
+        /* كرت ملغى ومجبر عند وجود نوع محدد بالفرشة */
+        .fan-card.restricted { opacity: 0.35; filter: grayscale(80%); cursor: not-allowed; }
         .fan-card.disabled { opacity: 0.8; cursor: not-allowed; }
         .fan-card.red { color: #DC2626; }
 
@@ -545,16 +546,25 @@
         }
 
         let myTurn = (data.turnIndex === myIndex);
-
-        // إظهار كروتي مع تعطيل الضغط عليها إذا لم يكن دوري
         let myObj = pList[myIndex];
+
+        // تطبيق قانون القيد والقطع والمجبر
+        let leadSuit = (data.floorCards && data.floorCards.length > 0) ? data.floorCards[0].suit : null;
+        let hasLeadSuit = false;
+        
+        if (leadSuit && myObj && myObj.cards) {
+            hasLeadSuit = myObj.cards.some(c => c.suit === leadSuit);
+        }
+
         let fanBox = document.getElementById('my-cards-fan');
         fanBox.innerHTML = '';
         if (myObj && myObj.cards) {
             myObj.cards.forEach((c, idx) => {
                 let isRed = (c.suit === '♥️' || c.suit === '♦️');
+                let isRestricted = (leadSuit && hasLeadSuit && c.suit !== leadSuit);
+
                 fanBox.innerHTML += `
-                    <div class="fan-card ${isRed ? 'red' : ''} ${!myTurn || data.mode === 'bidding' ? 'disabled' : ''}" onclick="playCard(${idx})">
+                    <div class="fan-card ${isRed ? 'red' : ''} ${!myTurn || data.mode === 'bidding' ? 'disabled' : ''} ${isRestricted ? 'restricted' : ''}" onclick="playCard(${idx})">
                         <div>${c.rank}</div>
                         <div style="align-self:center; font-size:16px;">${c.suit}</div>
                         <div style="align-self:flex-end;">${c.rank}</div>
@@ -569,7 +579,6 @@
             biddingBox.classList.add('hidden');
         }
 
-        // إشهار العداد فوق اللاعب المعني للجميع
         updateActivePlayerTimer(data.turnIndex);
 
         let currPlayer = pList[data.turnIndex];
@@ -628,7 +637,16 @@
         if (data.mode === 'bidding') {
             makeBid('pass');
         } else {
-            playCard(0);
+            // اختيار أول ورقة مسموحة تلقائياً عند انتهاء الوقت
+            let myObj = data.players[myIndex];
+            let leadSuit = (data.floorCards && data.floorCards.length > 0) ? data.floorCards[0].suit : null;
+            let validIdx = 0;
+
+            if (leadSuit && myObj && myObj.cards) {
+                let matchIdx = myObj.cards.findIndex(c => c.suit === leadSuit);
+                if (matchIdx !== -1) validIdx = matchIdx;
+            }
+            playCard(validIdx);
         }
     }
 
@@ -669,6 +687,7 @@
                 });
 
                 data.mode = 'playing_cards';
+                data.contractType = choice; // حفظ نوع المشتريات (صن أو حكم)
                 data.turnIndex = (data.dealerIndex + 1) % 4;
             }
 
@@ -676,11 +695,23 @@
         });
     }
 
+    // لعب البوت مع التزامه بالقيد وعدم القطع العشوائي
     function handleBotTurn(data, botIndex) {
         if (data.mode === 'bidding') {
             makeBid('pass');
         } else {
-            playCard(0);
+            let botObj = data.players[botIndex];
+            if (!botObj || !botObj.cards || botObj.cards.length === 0) return;
+
+            let leadSuit = (data.floorCards && data.floorCards.length > 0) ? data.floorCards[0].suit : null;
+            let validIdx = 0;
+
+            if (leadSuit) {
+                let matchIdx = botObj.cards.findIndex(c => c.suit === leadSuit);
+                if (matchIdx !== -1) validIdx = matchIdx;
+            }
+
+            executeCardPlay(data, botIndex, validIdx);
         }
     }
 
@@ -688,25 +719,42 @@
         db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
             let data = snap.val();
             
-            // حماية صارمة: منع لعب أوراق إذا لم يكن دور اللاعب الحقيقي الحالي
             if (data.turnIndex !== myIndex || data.mode === 'bidding') return;
 
-            clearInterval(timerInterval);
-            let playerObj = data.players[data.turnIndex];
+            let myObj = data.players[myIndex];
+            let leadSuit = (data.floorCards && data.floorCards.length > 0) ? data.floorCards[0].suit : null;
             
-            if (playerObj && playerObj.cards && playerObj.cards[index]) {
-                let played = playerObj.cards.splice(index, 1)[0];
-                if (!data.floorCards) data.floorCards = [];
-                data.floorCards.push(played);
-
-                if (data.floorCards.length === 4) {
-                    data.floorCards = [];
+            // تحقق قانوني: إذا امتلك اللاعب نفس النوع النازل وحاول لعب نوع آخر، يُمنع فوراً
+            if (leadSuit && myObj && myObj.cards) {
+                let hasSuit = myObj.cards.some(c => c.suit === leadSuit);
+                let chosenCard = myObj.cards[index];
+                
+                if (hasSuit && chosenCard.suit !== leadSuit) {
+                    alert('مجبور تلعب من نفس النوع النازل بالفرشة!');
+                    return;
                 }
-
-                data.turnIndex = (data.turnIndex + 1) % 4;
             }
-            db.ref('baloot_rooms/' + currentRoomCode).set(data);
+
+            clearInterval(timerInterval);
+            executeCardPlay(data, myIndex, index);
         });
+    }
+
+    function executeCardPlay(data, playerIndex, cardIndex) {
+        let playerObj = data.players[playerIndex];
+        
+        if (playerObj && playerObj.cards && playerObj.cards[cardIndex]) {
+            let played = playerObj.cards.splice(cardIndex, 1)[0];
+            if (!data.floorCards) data.floorCards = [];
+            data.floorCards.push(played);
+
+            if (data.floorCards.length === 4) {
+                data.floorCards = [];
+            }
+
+            data.turnIndex = (data.turnIndex + 1) % 4;
+        }
+        db.ref('baloot_rooms/' + currentRoomCode).set(data);
     }
 </script>
 
