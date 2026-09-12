@@ -108,6 +108,27 @@
             cursor: pointer;
         }
 
+        /* لوحة أفضل 10 متصدرين */
+        .leaderboard-box {
+            background: #0F172A;
+            border: 1px solid #F59E0B;
+            border-radius: 12px;
+            padding: 10px;
+            margin-top: 14px;
+            text-align: right;
+        }
+        .rank-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1E293B;
+            border-radius: 6px;
+            padding: 6px 10px;
+            margin: 4px 0;
+            font-size: 12px;
+        }
+        .rank-item.top-1 { border: 1px solid #F59E0B; color: #FCD34D; font-weight: bold; }
+
         .hidden { display: none !important; }
     </style>
 </head>
@@ -116,18 +137,25 @@
 <div class="quiz-card">
     <h1>من سيربح المليون 🏆</h1>
 
-    <!-- 1. شاشة البداية وتسجيل الاسم -->
+    <!-- 1. شاشة البداية وتسجيل الاسم ولوحة الأوائل -->
     <div id="start-screen">
-        <p style="color:#94A3B8; font-size:13px; margin-bottom:14px;">أدخل اسمك وابدأ التحدي عبر 15 سؤالاً للوصول للمليون!</p>
+        <p style="color:#94A3B8; font-size:13px; margin-bottom:12px;">أدخل اسمك وابدأ التحدي عبر 15 سؤالاً للوصول للمليون!</p>
         <input type="text" id="player-name-input" placeholder="اكتب اسم المتسابق هنا" style="width:100%; padding:12px; border-radius:10px; border:1px solid #F59E0B; background:#0F172A; color:white; text-align:center; font-size:14px; margin-bottom:12px;" />
         <button class="btn-option" style="width:100%; background:#F59E0B; color:#000; font-size:15px;" onclick="initQuiz()">دخول وتحدي الأسئلة 🚀</button>
+
+        <div class="leaderboard-box">
+            <h4 style="margin:2px 0 8px 0; color:#F59E0B; text-align:center;">🏆 قائمة أفضل 10 متصدرين</h4>
+            <div id="leaderboard-list">جاري تحميل قائمة الصدارة...</div>
+        </div>
     </div>
 
     <!-- 2. شاشة المسابقة والأسئلة -->
     <div id="game-screen" class="hidden">
-        <div style="font-size:12px; color:#94A3B8; margin-bottom:6px;">المتسابق: <strong id="player-name-display" style="color:#F59E0B;">-</strong></div>
+        <div style="display:flex; justify-content:space-between; font-size:12px; color:#94A3B8; margin-bottom:6px;">
+            <span>المتسابق: <strong id="player-name-display" style="color:#F59E0B;">-</strong></span>
+            <span>⏱️ الوقت: <strong id="timer-display" style="color:#10B981;">00:00</strong></span>
+        </div>
 
-        <!-- الوسائل المساعدة الاربع -->
         <div class="lifelines">
             <button class="btn-lifeline" id="life-50" onclick="use5050()">حذف إجابتين (50:50)</button>
             <button class="btn-lifeline" id="life-phone" onclick="usePhone()">اتصال بصديق 📞</button>
@@ -135,7 +163,6 @@
             <button class="btn-lifeline locked" id="life-change" onclick="useChangeQuestion()">تغيير السؤال 🔄</button>
         </div>
 
-        <!-- شريط الجائزة الحالية ومحطات الأمان -->
         <div class="prize-bar">
             <span>السؤال (<span id="q-num">1</span>/15)</span>
             <span>القيمة: <span id="prize-val">500</span> ر.س</span>
@@ -155,39 +182,60 @@
 </div>
 
 <script>
-    // سلم الجوائز لـ 15 سؤالاً (السؤال 5 والسؤال 10 هما محطتا الأمان)
+    const firebaseConfig = {
+        apiKey: "AIzaSyBRtQGiXgrzm7SoFwymT39OBZVtN0Pz-Ys",
+        authDomain: "million-game-1ec89.firebaseapp.com",
+        databaseURL: "https://million-game-1ec89-default-rtdb.firebaseio.com",
+        projectId: "million-game-1ec89",
+        storageBucket: "million-game-1ec89.firebasestorage.app",
+        messagingSenderId: "6658146268",
+        appId: "1:6658146268:web:0467d3f63e11b818fb9919"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     const PRIZES = [
-        "500", "1,000", "2,000", "5,000", "10,000", // محطة الأمان الأولى (السؤال 5 = 10,000)
-        "20,000", "40,000", "60,000", "80,000", "100,000", // محطة الأمان الثانية (السؤال 10 = 100,000)
-        "200,000", "350,000", "500,000", "750,000", "1,000,000" // السؤال 15 الحاسم
+        "500", "1,000", "2,000", "5,000", "10,000",
+        "20,000", "40,000", "60,000", "80,000", "100,000",
+        "200,000", "350,000", "500,000", "750,000", "1,000,000"
     ];
 
-    // بنك الأسئلة المقسم ديناميكياً حسب تدرج الصعوبة
+    const PRIZE_NUMS = [500, 1000, 2000, 5000, 10000, 20000, 40000, 60000, 80000, 100000, 200000, 350000, 500000, 750000, 1000000];
+
+    // بنك أسئلة موسع جداً بتكرار معدوم
     const QUESTION_BANK = {
-        easy: [ // الأسئلة 1 إلى 5
+        easy: [
             { q: "ما هي عاصمة المملكة العربية السعودية؟", opts: ["جدة", "الرياض", "الدمام", "مكة المكرمة"], correct: 1 },
             { q: "كم عدد سور القرآن الكريم؟", opts: ["114", "110", "120", "108"], correct: 0 },
             { q: "ما هو أسرع حيوان بري في العالم؟", opts: ["الأسد", "الفهد", "النعامة", "الغزال"], correct: 1 },
             { q: "أين تقع أهرامات الجيزة الشهيرة؟", opts: ["السودان", "المغرب", "مصر", "الأردن"], correct: 2 },
             { q: "ما هو أكبر كوكب في المجموعة الشمسية؟", opts: ["الأرض", "المريخ", "المشتري", "زحل"], correct: 2 },
             { q: "كم عدد أضلاع المثلث؟", opts: ["3", "4", "5", "6"], correct: 0 },
-            { q: "ما هي عاصمة دولة الإمارات العربية المتحدة؟", opts: ["دبي", "أبوظبي", "الشارقة", "العين"], correct: 1 }
+            { q: "ما هي عاصمة دولة الإمارات العربية المتحدة؟", opts: ["دبي", "أبوظبي", "الشارقة", "العين"], correct: 1 },
+            { q: "ما هي أكبر القارات مساحة في العالم؟", opts: ["أفريقيا", "آسيا", "أوروبا", "أمريكا الشمالية"], correct: 1 },
+            { q: "في أي شهر هجري يصوم المسلمون؟", opts: ["رجب", "شعبان", "رمضان", "شوال"], correct: 2 },
+            { q: "ما هي عاصمة دولة الكويت؟", opts: ["الجهراء", "الكويت", "حولي", "الأحمدي"], correct: 1 }
         ],
-        medium: [ // الأسئلة 6 إلى 10
+        medium: [
             { q: "ما هو العنصر الكيميائي الذي رمزه (O)؟", opts: ["الهيدروجين", "الأكسجين", "الحديد", "الذهب"], correct: 1 },
             { q: "في أي قارة تقع دولة تونس والجزائر؟", opts: ["آسيا", "أفريقيا", "أوروبا", "أستراليا"], correct: 1 },
             { q: "ما هي العملة الرسمية لدولة اليابان؟", opts: ["الدولار", "الين", "الون", "البيزو"], correct: 1 },
             { q: "من هو القائد المسلم الذي فتح الأندلس؟", opts: ["طارق بن زياد", "خالد بن الوليد", "صلاح الدين", "عمرو بن العاص"], correct: 0 },
             { q: "ما هو أطول نهر في العالم؟", opts: ["الأمازون", "النيل", "المسيسيبي", "الفرات"], correct: 1 },
-            { q: "ما هو الكوكب الملقب بالكوكب الأحمر؟", opts: ["الزهرة", "المريخ", "عطارد", "نبتون"], correct: 1 }
+            { q: "ما هو الكوكب الملقب بالكوكب الأحمر؟", opts: ["الزهرة", "المريخ", "عطارد", "نبتون"], correct: 1 },
+            { q: "في أي عام تم توحيد المملكة العربية السعودية؟", opts: ["1932م", "1925م", "1940م", "1930م"], correct: 0 },
+            { q: "ما هو أطول عظم في جسم الإنسان؟", opts: ["عظم الفخذ", "الجمجمة", "الساعد", "العمود الفقري"], correct: 0 },
+            { q: "ما هو المحيط الأكبر مساحة على كوكب الأرض؟", opts: ["الأطلسي", "الهادي", "الهندي", "المتجمد الشمالي"], correct: 1 }
         ],
-        hard: [ // الأسئلة 11 إلى 15
+        hard: [
             { q: "ما هي أصغر دولة في العالم من حيث المساحة؟", opts: ["موناكو", "الفاتيكان", "سان مارينو", "مالطا"], correct: 1 },
             { q: "من هو مخترع المصباح الكهربائي؟", opts: ["غراهام بيل", "توماس إديسون", "أينشتاين", "تيسلا"], correct: 1 },
             { q: "ما هي أعمق نقطة على سطح الأرض؟", opts: ["خندق ماريانا", "البحر الميت", "بحيرة بايكال", "وادي الموت"], correct: 0 },
             { q: "في أي سنة اندلعت الحرب العالمية الأولى؟", opts: ["1914", "1918", "1939", "1945"], correct: 0 },
-            { q: "ما هي الغازات الأكثر وفرة في الغلاف الجوي للأرض؟", opts: ["الأكسجين", "النيتروجين", "ثاني أكسيد الكربون", "الآرجون"], correct: 1 },
-            { q: "ما هي الدولة التي تمتلك أكبر عدد من الجزر في العالم؟", opts: ["إندونيسيا", "الفلبين", "السويد", "اليابان"], correct: 2 }
+            { q: "ما هو الغاز الأكثر وفرة في الغلاف الجوي للأرض؟", opts: ["الأكسجين", "النيتروجين", "ثاني أكسيد الكربون", "الآرجون"], correct: 1 },
+            { q: "ما هي الدولة التي تمتلك أكبر عدد من الجزر في العالم؟", opts: ["إندونيسيا", "الفلبين", "السويد", "اليابان"], correct: 2 },
+            { q: "كم عدد العظام في جسم الإنسان البالغ؟", opts: ["206", "300", "210", "195"], correct: 0 }
         ]
     };
 
@@ -195,6 +243,43 @@
     let currentQIndex = 0;
     let selectedQuestions = [];
     let currentQuestionData = null;
+    let timerInterval = null;
+    let totalSecondsElapsed = 0;
+
+    window.onload = function() {
+        fetchLeaderboard();
+    };
+
+    function fetchLeaderboard() {
+        db.ref('quiz_leaderboard').on('value', snap => {
+            let container = document.getElementById('leaderboard-list');
+            if (!snap.exists()) {
+                container.innerHTML = '<div style="font-size:11px; text-align:center;">لا يوجد متصدرين حالياً. كن أول فائز!</div>';
+                return;
+            }
+            let data = snap.val();
+            let list = Object.values(data);
+
+            // ترتيب المتصدرين: 1. الفائز بالمليون أولاً بأقل وقت. 2. أعلى رصيد مالي ثم أقل وقت.
+            list.sort((a, b) => {
+                if (b.amount !== a.amount) return b.amount - a.amount;
+                return a.seconds - b.seconds;
+            });
+
+            container.innerHTML = '';
+            list.slice(0, 10).forEach((item, index) => {
+                let mins = Math.floor(item.seconds / 60);
+                let secs = item.seconds % 60;
+                let timeStr = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                
+                container.innerHTML += `
+                    <div class="rank-item ${index === 0 ? 'top-1' : ''}">
+                        <span>#${index + 1} <strong>${item.name}</strong></span>
+                        <span>💰 ${item.amount.toLocaleString()} ر.س (⏱️ ${timeStr})</span>
+                    </div>`;
+            });
+        });
+    }
 
     function initQuiz() {
         playerName = document.getElementById('player-name-input').value.trim();
@@ -204,7 +289,6 @@
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('game-screen').classList.remove('hidden');
 
-        // سحب 15 سؤالاً عشوائياً وغير مكرر متدرجة الصعوبة لخصيص المتسابق
         selectedQuestions = [
             ...shuffleArray(QUESTION_BANK.easy).slice(0, 5),
             ...shuffleArray(QUESTION_BANK.medium).slice(0, 5),
@@ -212,7 +296,19 @@
         ];
 
         currentQIndex = 0;
+        totalSecondsElapsed = 0;
+        startTimer();
         loadQuestion();
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            totalSecondsElapsed++;
+            let mins = Math.floor(totalSecondsElapsed / 60);
+            let secs = totalSecondsElapsed % 60;
+            document.getElementById('timer-display').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }, 1000);
     }
 
     function shuffleArray(arr) {
@@ -225,7 +321,6 @@
         document.getElementById('prize-val').innerText = PRIZES[currentQIndex];
         document.getElementById('question-text').innerText = currentQuestionData.q;
 
-        // تفعيل وسيلة "تغيير السؤال" تلقائياً بعد تجاوز السؤال الخامس (السؤال 6 فما فوق)
         let changeBtn = document.getElementById('life-change');
         if (currentQIndex >= 5 && !changeBtn.classList.contains('used')) {
             changeBtn.classList.remove('locked');
@@ -247,37 +342,54 @@
             setTimeout(() => {
                 currentQIndex++;
                 if (currentQIndex >= 15) {
-                    alert(`🎉 مبروك يا ${playerName}! فزت بـ 1,000,000 ريال وأصبحت مليونير المسابقة!`);
+                    clearInterval(timerInterval);
+                    saveScoreToLeaderboard(1000000);
+                    alert(`🎉 مبروك يا ${playerName}! فزت بـ 1,000,000 ريال وسُجل إنجازك بـ وقت قياسي!`);
                     location.reload();
                 } else {
                     loadQuestion();
                 }
             }, 1200);
         } else {
+            clearInterval(timerInterval);
             btn.classList.add('wrong');
             document.getElementById(`opt-${currentQuestionData.correct}`).classList.add('correct');
             
-            // حساب الجائزة المحفوظة حسب محطات الأمان (السؤال 5 والسؤال 10)
-            let safePrize = "0";
-            if (currentQIndex >= 10) {
-                safePrize = "100,000"; // محطة الأمان الثانية
-            } else if (currentQIndex >= 5) {
-                safePrize = "10,000";  // محطة الأمان الأولى
+            let safePrizeNum = 0;
+            if (currentQIndex >= 10) safePrizeNum = 100000;
+            else if (currentQIndex >= 5) safePrizeNum = 10000;
+
+            if (safePrizeNum > 0) {
+                saveScoreToLeaderboard(safePrizeNum);
             }
 
             setTimeout(() => {
-                alert(`💔 للأسف يا ${playerName} إجابة خاطئة!\nالرصيد المحفوظ لك عند الخسارة هو: ${safePrize} ريال.`);
+                alert(`💔 للأسف يا ${playerName} إجابة خاطئة!\nالرصيد المحفوظ لك عند الخسارة هو: ${safePrizeNum.toLocaleString()} ريال.`);
                 location.reload();
             }, 1500);
         }
     }
 
     function withdrawGame() {
-        let achievedPrize = currentQIndex > 0 ? PRIZES[currentQIndex - 1] : "0";
-        if (confirm(`هل أنت متأكد من الانسحاب بـ ${achievedPrize} ريال؟`)) {
-            alert(`🏆 تهانينا يا ${playerName}! انسحبت بنجاح وأخذت مبلغ: ${achievedPrize} ريال.`);
+        let prizeNum = currentQIndex > 0 ? PRIZE_NUMS[currentQIndex - 1] : 0;
+        if (confirm(`هل أنت متأكد من الانسحاب بـ ${prizeNum.toLocaleString()} ريال؟`)) {
+            clearInterval(timerInterval);
+            if (prizeNum > 0) {
+                saveScoreToLeaderboard(prizeNum);
+            }
+            alert(`🏆 تهانينا يا ${playerName}! انسحبت بنجاح وأخذت مبلغ: ${prizeNum.toLocaleString()} ريال.`);
             location.reload();
         }
+    }
+
+    function saveScoreToLeaderboard(amount) {
+        if (amount <= 0) return; // استبعاد الصفر من اللوحة
+        db.ref('quiz_leaderboard').push({
+            name: playerName,
+            amount: amount,
+            seconds: totalSecondsElapsed,
+            timestamp: Date.now()
+        });
     }
 
     // الوسائل المساعدة
@@ -311,7 +423,6 @@
         }
 
         alert('🔄 تم تغيير السؤال بسؤال جديد بنفس درجة الصعوبة!');
-        // سحب سؤال جديد من نفس الصعوبة
         let cat = currentQIndex < 5 ? 'easy' : (currentQIndex < 10 ? 'medium' : 'hard');
         let newQ = shuffleArray(QUESTION_BANK[cat])[0];
         currentQuestionData = newQ;
