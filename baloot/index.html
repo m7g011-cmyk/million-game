@@ -153,8 +153,8 @@
 
         .cards-back-fan { display: flex; gap: -10px; margin-top: 2px; }
         .card-back-blue {
-            width: 24px;
-            height: 34px;
+            width: 22px;
+            height: 32px;
             background: #1E3A8A;
             border: 1px solid #93C5FD;
             border-radius: 4px;
@@ -252,8 +252,8 @@
             width: 100%;
         }
         .fan-card {
-            width: 46px;
-            height: 72px;
+            width: 44px;
+            height: 68px;
             background: #FFFFFF;
             border-radius: 6px;
             border: 1px solid #94A3B8;
@@ -302,7 +302,7 @@
         </div>
     </div>
 
-    <!-- أزرار الإعدادات والمؤقت (أعلى اليسار) -->
+    <!-- المؤقت والأدوات (أعلى اليسار) -->
     <div class="top-left-bar">
         <div class="icon-btn-round">☰</div>
         <div class="icon-btn-round" style="color:#EF4444; font-size:12px; font-weight:bold;">⏳<span id="timer-display">10</span></div>
@@ -381,7 +381,7 @@
         </div>
     </div>
 
-    <!-- كروتك المروحية بالأسفل (8 أوراق عند اكتمال اللعب) -->
+    <!-- كروتك المروحية بالأسفل -->
     <div class="my-hand-fan" id="my-cards-fan"></div>
 
     <!-- شريط الأدوات بالأسفل -->
@@ -471,11 +471,9 @@
 
     function startNewRound(playersList, dealerIdx) {
         let deck = buildBalootDeck();
-        // توزيع 5 كروت فقط لكل لاعب في المرحلة الأولى
         playersList.forEach(p => { p.cards = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()]; });
-        // كشف ورقة عشوائية واحدة في الوسط
         let revealed = deck.pop();
-        let rightOfDealer = (dealerIdx + 1) % 4;
+        let rightOfDealer = (dealerIdx + 1) % 4; // اليمين يظهر له خيار الشراء فوراً
 
         db.ref('baloot_rooms/' + currentRoomCode).set({
             status: 'playing', scoreUsTotal: 0, scoreThemTotal: 0, dealerIndex: dealerIdx, turnIndex: rightOfDealer, bidRound: 1,
@@ -508,7 +506,6 @@
         document.getElementById('dealer-left').classList.toggle('hidden', data.dealerIndex !== (myIndex + 3) % 4);
         document.getElementById('dealer-bottom').classList.toggle('hidden', data.dealerIndex !== myIndex);
 
-        // إظهار أو إخفاء الورقة المكشوفة بالوسط (تختفي إذا الشتراها أحد)
         let centerDeckArea = document.getElementById('center-deck-area');
         if (data.revealedCard && data.mode === 'bidding') {
             centerDeckArea.classList.remove('hidden');
@@ -520,7 +517,6 @@
             centerDeckArea.classList.add('hidden');
         }
 
-        // إظهار كروت اللعب في الفرشة
         let floorArea = document.getElementById('floor-played-area');
         floorArea.innerHTML = '';
         if (data.floorCards) {
@@ -530,7 +526,6 @@
             });
         }
 
-        // إظهار أوراقي بالأسفل
         let myObj = pList[myIndex];
         let fanBox = document.getElementById('my-cards-fan');
         fanBox.innerHTML = '';
@@ -556,7 +551,6 @@
             biddingBox.classList.add('hidden');
         }
 
-        // البوت يقرر خلال 3 ثوانٍ
         let currPlayer = pList[data.turnIndex];
         if (currPlayer && currPlayer.type === 'آلي' && isHost) {
             startTimer(3, () => handleBotTurn(data, data.turnIndex));
@@ -587,7 +581,7 @@
         }, 1000);
     }
 
-    // الشراء: إضافة الورقة المكشوفة للمشتري وتكملة الـ 8 كروت لكل لاعب
+    // شراء مباشر وتوزيع فوري للـ 8 أوراق
     function makeBid(choice) {
         clearInterval(timerInterval);
         db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
@@ -602,7 +596,6 @@
                     data.passesCount = 0;
                     data.turnIndex = (data.dealerIndex + 1) % 4;
                 } else if (pCount === 4 && data.bidRound === 2) {
-                    // تكويش وتوزيع جديد عند تمرير الجميع بالدورة الثانية
                     let nextDealer = (data.dealerIndex + 1) % 4;
                     startNewRound(data.players, nextDealer);
                     return;
@@ -611,27 +604,23 @@
                     data.turnIndex = nextTurn;
                 }
             } else {
-                // شراء الورقة المكشوفة وتوزيع بقية الكروت ليصل كل لاعب إلى 8 كروت
+                // عند الشراء المباشر: إضافة المكشوفة للمشتري وتوزيع باقي الـ 8 كروت فوراً للجميع
                 let buyerIndex = data.turnIndex;
                 let buyer = data.players[buyerIndex];
                 
-                // إضافة الورقة المكشوفة للمشتري
                 buyer.cards.push(data.revealedCard);
-                data.revealedCard = null; // إخفاء الورقة من الوسط
+                data.revealedCard = null;
 
-                // استكمال التوزيع (3 كروت إضافية للشاري، و3 كروت لبقية اللاعبين)
                 data.players.forEach((p, idx) => {
                     if (idx === buyerIndex) {
-                        // المشتري يكتمل لـ 8 كروت (معه 5 + المكشوفة + كرتين إضافية)
                         p.cards.push(data.deck.pop(), data.deck.pop());
                     } else {
-                        // بقية اللاعبين يكتملون لـ 8 كروت (معهم 5 + 3 كروت إضافية)
                         p.cards.push(data.deck.pop(), data.deck.pop(), data.deck.pop());
                     }
                 });
 
                 data.mode = 'playing_cards';
-                data.turnIndex = (data.dealerIndex + 1) % 4; // تبدأ اللعبة من يمين الموزع
+                data.turnIndex = (data.dealerIndex + 1) % 4; // يبدأ اللعب فوراً من يمين الموزع
             }
 
             db.ref('baloot_rooms/' + currentRoomCode).set(data);
@@ -642,7 +631,6 @@
         if (data.mode === 'bidding') {
             makeBid('pass');
         } else {
-            // البوت ينزل الكرت الأول التلقائي
             playCard(0);
         }
     }
@@ -658,7 +646,6 @@
                 if (!data.floorCards) data.floorCards = [];
                 data.floorCards.push(played);
 
-                // إزاحة الأكلة عند نزول 4 كروت
                 if (data.floorCards.length === 4) {
                     data.floorCards = [];
                 }
