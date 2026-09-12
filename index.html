@@ -27,16 +27,8 @@
             text-align: center; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
         }
-        h1 { 
-            color: #F59E0B; 
-            margin-bottom: 8px; 
-            font-size: 24px; 
-        }
-        p {
-            color: #94A3B8;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
+        h1 { color: #F59E0B; margin-bottom: 8px; font-size: 24px; }
+        p { color: #94A3B8; font-size: 14px; margin-bottom: 20px; }
         .game-btn { 
             display: flex;
             align-items: center;
@@ -44,7 +36,7 @@
             gap: 10px;
             width: 100%; 
             padding: 14px; 
-            margin: 12px 0; 
+            margin: 10px 0; 
             border-radius: 12px; 
             border: none; 
             font-weight: bold; 
@@ -54,24 +46,17 @@
             transition: all 0.2s ease; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
-        .game-btn:active { 
-            transform: scale(0.97); 
-        }
-        .btn-million { 
-            background: linear-gradient(135deg, #F59E0B, #D97706); 
-            color: #000; 
-        }
-        .btn-baloot { 
-            background: linear-gradient(135deg, #10B981, #047857); 
-            color: #fff; 
-        }
+        .game-btn:active { transform: scale(0.97); }
+        .btn-million { background: linear-gradient(135deg, #F59E0B, #D97706); color: #000; }
+        .btn-baloot { background: linear-gradient(135deg, #10B981, #047857); color: #fff; }
+        .btn-quiz { background: linear-gradient(135deg, #3B82F6, #1D4ED8); color: #fff; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <h1>بوابة الألعاب الأونلاين 🎮</h1>
-    <p>اختر اللعبة وابدأ التحدي أونلاين مع أصدقائك</p>
+    <p>اختر اللعبة وابدأ التحدي الآن</p>
     
     <a href="./million/index.html" class="game-btn btn-million">
         🃏 لعبة المليون أونلاين
@@ -79,6 +64,10 @@
     
     <a href="./baloot/index.html" class="game-btn btn-baloot">
         ♠️ لعبة البلوت أونلاين
+    </a>
+
+    <a href="./quiz/index.html" class="game-btn btn-quiz">
+        🏆 لعبة من سيربح المليون
     </a>
 </div>
 
