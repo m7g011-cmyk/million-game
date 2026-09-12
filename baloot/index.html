@@ -2,137 +2,384 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>طاولة البلوت الواقعية ♠️</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>لعبة البلوت الاحترافية ♠️</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        body { background-color: #052E16; color: white; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 6px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; overflow: hidden; }
+        * { box-sizing: border-box; user-select: none; }
+        body { 
+            background: #1E1B4B; 
+            color: white; 
+            font-family: system-ui, -apple-system, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            overflow: hidden; 
+        }
         
-        .felt-table { background: radial-gradient(circle, #065F46 0%, #022C22 100%); border: 4px solid #F59E0B; border-radius: 20px; padding: 10px; width: 100%; max-width: 450px; height: 94vh; max-height: 750px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); position: relative; box-sizing: border-box; }
-        
-        h1 { color: #F59E0B; margin: 0 0 4px 0; font-size: 18px; text-align: center; }
-        
-        .score-top-right { position: absolute; top: 10px; right: 10px; background: rgba(15, 23, 42, 0.9); border: 1px solid #F59E0B; border-radius: 8px; padding: 4px 8px; font-size: 11px; text-align: right; z-index: 10; }
-        .score-top-left { position: absolute; top: 10px; left: 10px; background: rgba(15, 23, 42, 0.9); border: 1px solid #10B981; border-radius: 8px; padding: 4px 8px; font-size: 11px; text-align: left; z-index: 10; }
-        .score-num { font-weight: bold; color: #F59E0B; }
-        
-        .timer-center { font-size: 14px; color: #EF4444; font-weight: bold; background: #0F172A; padding: 2px 8px; border-radius: 6px; border: 1px solid #EF4444; margin-top: 30px; }
+        /* الطاولة والمجلس العربي */
+        .majlis-container {
+            width: 100vw;
+            max-width: 440px;
+            height: 100vh;
+            max-height: 850px;
+            background: linear-gradient(to bottom, #2E1065, #3B0764 20%, #D97706 50%, #78350F 80%, #1E1B4B 100%);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.9);
+        }
 
-        .player-slot { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; z-index: 5; }
-        .player-slot.top { grid-area: top; }
-        .player-slot.bottom { grid-area: bottom; }
-        .player-slot.left { grid-area: left; }
-        .player-slot.right { grid-area: right; }
-        
-        .table-grid { display: grid; grid-template-areas: ". top ." "left center right" ". bottom ."; grid-template-columns: 85px 1fr 85px; grid-template-rows: auto 1fr auto; width: 100%; height: 100%; align-items: center; margin-top: 20px; }
+        /* السجادة بمنتصف الطاولة */
+        .carpet-floor {
+            position: absolute;
+            top: 15%;
+            left: 8%;
+            right: 8%;
+            bottom: 22%;
+            background: #EFE3C3;
+            border: 6px solid #B45309;
+            border-radius: 12px;
+            box-shadow: inset 0 0 20px rgba(180, 83, 9, 0.4), 0 8px 20px rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+        .carpet-pattern {
+            width: 80%;
+            height: 80%;
+            border: 2px dashed #D97706;
+            border-radius: 8px;
+            opacity: 0.3;
+        }
 
-        .player-name-badge { background: #0F172A; border: 1px solid #334155; padding: 2px 6px; border-radius: 4px; color: #FFF; font-size: 10px; margin: 2px 0; white-space: nowrap; }
-        .player-name-badge.active { border: 2px solid #F59E0B; background: #15803D; }
+        /* لوحة النشرة النمطية (أعلى اليمين) */
+        .score-card-top {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 14px;
+            padding: 6px 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            z-index: 20;
+            color: #1E293B;
+            font-size: 13px;
+            text-align: center;
+            min-width: 120px;
+        }
+        .score-title-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 11px; margin-bottom: 2px; }
+        .score-vals-row { display: flex; justify-content: space-between; font-weight: 900; font-size: 18px; }
+        .score-us { color: #16A34A; }
+        .score-them { color: #DC2626; }
 
-        .cards-row { display: flex; justify-content: center; gap: 2px; }
-        .playing-card { background-color: #FFF; color: #000; font-weight: bold; font-size: 12px; padding: 4px 2px; border-radius: 4px; width: 36px; height: 50px; border: 1px solid #CBD5E1; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: center; cursor: pointer; }
-        .playing-card.red { color: #DC2626; }
-        .card-back { background-color: #1E293B; border: 1px solid #F59E0B; width: 22px; height: 32px; border-radius: 3px; }
+        /* تفاصيل أعلى اليسار والرمز */
+        .top-left-bar {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 20;
+        }
+        .icon-btn-round {
+            width: 36px;
+            height: 36px;
+            background: rgba(30, 27, 75, 0.8);
+            border: 1px solid #A855F7;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            color: #FFF;
+        }
 
-        .center-floor { grid-area: center; background: rgba(0, 0, 0, 0.3); border: 1px dashed #10B981; border-radius: 12px; height: 140px; width: 100%; display: flex; justify-content: center; align-items: center; position: relative; gap: 6px; flex-wrap: wrap; }
-        .played-card-floor { width: 42px; height: 58px; background: #FFF; color: #000; font-weight: bold; font-size: 13px; border-radius: 5px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid #333; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
-        .played-card-floor.red { color: #DC2626; }
+        /* أماكن اللاعبين الأربعة */
+        .player-avatar-box {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+        .avatar-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid #F59E0B;
+            background: #334155;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        .dealer-badge-green {
+            position: absolute;
+            bottom: -6px;
+            background: #16A34A;
+            color: #FFF;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 1px 6px;
+            border-radius: 10px;
+            border: 1px solid #FFF;
+        }
+        .player-name-lbl {
+            background: rgba(15, 23, 42, 0.8);
+            color: #FFF;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 2px;
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
 
-        .bidding-box { position: absolute; bottom: 80px; background: rgba(15, 23, 42, 0.95); border: 2px solid #F59E0B; border-radius: 12px; padding: 8px; width: 90%; max-width: 360px; text-align: center; z-index: 20; }
-        .btn-primary { background-color: #F59E0B; color: #000; padding: 8px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; }
-        .btn-success { background-color: #10B981; color: #fff; padding: 8px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; }
-        .btn-danger { background-color: #EF4444; color: #fff; padding: 8px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; }
-        .btn-secondary { background-color: #475569; color: #fff; padding: 8px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; }
-        
+        /* توزيع الأماكن */
+        .player-top { top: 60px; left: 50%; transform: translateX(-50%); }
+        .player-left { top: 38%; left: 10px; }
+        .player-right { top: 38%; right: 10px; }
+        .player-bottom { bottom: 120px; right: 14px; }
+
+        /* كروت الخصوم المقلوبة */
+        .cards-back-fan { display: flex; gap: -10px; margin-top: 2px; }
+        .card-back-blue {
+            width: 24px;
+            height: 34px;
+            background: #1E3A8A;
+            border: 1px solid #93C5FD;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            margin-left: -10px;
+        }
+
+        /* وسط الفرشة (الورقة المكشوفة) */
+        .center-deck-area {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 15;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .revealed-big-card-img {
+            width: 68px;
+            height: 96px;
+            background: #FFFFFF;
+            border-radius: 8px;
+            border: 1px solid #CBD5E1;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 6px;
+            font-weight: 900;
+            font-size: 18px;
+            color: #000;
+        }
+        .revealed-big-card-img.red { color: #DC2626; }
+
+        /* أزرار الحراج الملونة بالأسفل */
+        .bidding-bar-yellow {
+            position: absolute;
+            bottom: 125px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 30;
+            width: 90%;
+            justify-content: center;
+        }
+        .btn-bid-pill {
+            flex: 1;
+            padding: 10px 4px;
+            border-radius: 20px;
+            border: none;
+            font-weight: 900;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            transition: 0.1s;
+        }
+        .btn-bid-pill:active { transform: scale(0.95); }
+        .btn-yellow { background: linear-gradient(180deg, #FCD34D, #F59E0B); color: #451A03; }
+        .btn-white { background: linear-gradient(180deg, #FFFFFF, #E2E8F0); color: #1E293B; }
+
+        /* أوراق اللاعب بالأسفل (طريقة مروحية احترافية) */
+        .my-hand-fan {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            z-index: 25;
+            width: 100%;
+        }
+        .fan-card {
+            width: 58px;
+            height: 86px;
+            background: #FFFFFF;
+            border-radius: 8px;
+            border: 1px solid #94A3B8;
+            box-shadow: -2px 4px 8px rgba(0,0,0,0.4);
+            margin-left: -18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 4px;
+            font-weight: bold;
+            font-size: 14px;
+            color: #000;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .fan-card:hover, .fan-card:active { transform: translateY(-12px); }
+        .fan-card.red { color: #DC2626; }
+
+        /* شريط سفلي للمايك والدردشة */
+        .bottom-mic-bar {
+            position: absolute;
+            bottom: 6px;
+            left: 12px;
+            display: flex;
+            gap: 6px;
+            z-index: 30;
+        }
+
         .hidden { display: none !important; }
-        .flex-row { display: flex; gap: 4px; justify-content: center; }
     </style>
 </head>
 <body>
 
-<div class="felt-table">
-    <h1>طاولة البلوت ♠️</h1>
+<div class="majlis-container">
 
-    <!-- النشرة العامة أونلاين -->
-    <div class="score-top-right">
-        <div><strong>النشرة العامة</strong></div>
-        <div>لنا: <span class="score-num" id="score-us-total">0</span></div>
-        <div>لهم: <span class="score-num" id="score-them-total">0</span></div>
-    </div>
-
-    <!-- نشرة الجولة الحالية -->
-    <div class="score-top-left">
-        <div><strong>أبناط الجولة</strong></div>
-        <div>لنا: <span class="score-num" id="score-us-round">0</span></div>
-        <div>لهم: <span class="score-num" id="score-them-round">0</span></div>
-    </div>
-
-    <div class="timer-center">⏳ <span id="timer-display">10</span>s</div>
-
-    <!-- شاشات التمهيد والانتظار -->
-    <div id="lobby-screen" style="position:absolute; top:20%; width:85%; background:#022C22; border:2px solid #F59E0B; padding:16px; border-radius:12px; z-index:30; text-align:center;">
-        <h3>دخول الطاولة</h3>
-        <input type="text" id="player-name" placeholder="اسمك" style="width:90%; padding:8px; margin-bottom:8px;" />
-        <button class="btn-primary" style="width:95%; margin:4px 0;" onclick="createRoom()">إنشاء طاولة</button>
-        <button class="btn-secondary" style="width:95%; margin:4px 0;" onclick="startVsBots()">اللعب ضد الكمبيوتر 🤖</button>
-        <input type="number" id="room-code-input" placeholder="رمز الطاولة" style="width:90%; padding:8px; margin-top:8px;" />
-        <button class="btn-success" style="width:95%; margin:4px 0;" onclick="joinRoom()">انضمام</button>
-    </div>
-
-    <div id="waiting-screen" class="hidden" style="position:absolute; top:30%; width:85%; background:#022C22; border:2px solid #F59E0B; padding:16px; border-radius:12px; z-index:30; text-align:center;">
-        <h3>رمز الطاولة: <span id="current-room-display" style="color:#F59E0B;"></span></h3>
-        <p style="font-size:12px;">في انتظار 4 لاعبين...</p>
-        <button class="btn-primary" style="width:95%;" onclick="startGame()">بدء اللعب 🚀</button>
-    </div>
-
-    <!-- شبكة مواقع اللاعبين والفرشة -->
-    <div class="table-grid" id="game-board">
-        <div class="player-slot top">
-            <span class="player-name-badge" id="name-top">الخوي 🤝</span>
-            <div class="cards-row" id="cards-top"></div>
+    <!-- النشرة الكلية (أعلى اليمين) -->
+    <div class="score-card-top">
+        <div class="score-title-row">
+            <span class="score-us">لنا</span>
+            <span>:</span>
+            <span class="score-them">لهم</span>
         </div>
-
-        <div class="player-slot left">
-            <span class="player-name-badge" id="name-left">خصم يسار 🟥</span>
-            <div class="cards-row" id="cards-left" style="flex-direction:column;"></div>
-        </div>
-
-        <div class="center-floor">
-            <div id="floor-played-cards" style="display:flex; gap:6px;"></div>
-            <div id="revealed-center-card" style="position:absolute; opacity:0.3; font-size:10px;">المكشوفة</div>
-        </div>
-
-        <div class="player-slot right">
-            <span class="player-name-badge" id="name-right">خصم يمين 🟥</span>
-            <div class="cards-row" id="cards-right" style="flex-direction:column;"></div>
-        </div>
-
-        <div class="player-slot bottom">
-            <span class="player-name-badge active" id="name-bottom">أنت (لاعب) 🟩</span>
-            <div class="cards-row" id="cards-bottom"></div>
+        <div class="score-vals-row">
+            <span class="score-us" id="score-us-val">0</span>
+            <span style="font-size:14px; color:#64748B;">:</span>
+            <span class="score-them" id="score-them-val">0</span>
         </div>
     </div>
 
-    <!-- لوحة الحراج والشراء -->
-    <div id="bidding-screen" class="bidding-box hidden">
-        <h4 style="margin:2px 0; color:#F59E0B;" id="bidding-title">مرحلة الشراء 📢</h4>
-        <div id="bidding-buttons-container" style="margin-top:6px;"></div>
+    <!-- أزرار الإعدادات (أعلى اليسار) -->
+    <div class="top-left-bar">
+        <div class="icon-btn-round">☰</div>
+        <div class="icon-btn-round" style="color:#EF4444; font-size:12px; font-weight:bold;">⏳<span id="timer-display">10</span></div>
     </div>
 
-    <!-- لوحة المشاريع -->
-    <div id="project-declaration-box" class="bidding-box hidden">
-        <h4 style="margin:2px 0; color:#F59E0B;">إشهار مشروع قبل أول كرت 🎴</h4>
-        <div class="flex-row" style="margin-top:4px;">
-            <button class="btn-primary" onclick="declareProject('sira')">سرا</button>
-            <button class="btn-primary" onclick="declareProject('50')">50</button>
-            <button class="btn-primary" onclick="declareProject('100')">100</button>
-            <button class="btn-primary" onclick="declareProject('400')">400</button>
-            <button class="btn-secondary" onclick="declareProject('none')">بدون</button>
+    <!-- السجادة بمنتصف الطاولة -->
+    <div class="carpet-floor">
+        <div class="carpet-pattern"></div>
+    </div>
+
+    <!-- شاشة اللوبي والانتظار -->
+    <div id="lobby-screen" style="position:absolute; top:25%; width:85%; background:rgba(15, 23, 42, 0.95); border:2px solid #F59E0B; padding:16px; border-radius:16px; z-index:50; text-align:center;">
+        <h3 style="color:#F59E0B; margin-top:0;">دخول لعبة البلوت ♠️</h3>
+        <input type="text" id="player-name" placeholder="أدخل اسمك" style="width:90%; padding:10px; border-radius:8px; border:1px solid #334155; background:#0F172A; color:#FFF; text-align:center; margin-bottom:8px;" />
+        <button style="width:95%; padding:10px; background:#F59E0B; color:#000; font-weight:bold; border-radius:8px; border:none; margin:4px 0;" onclick="createRoom()">إنشاء طاولة</button>
+        <button style="width:95%; padding:10px; background:#475569; color:#FFF; font-weight:bold; border-radius:8px; border:none; margin:4px 0;" onclick="startVsBots()">اللعب ضد الكمبيوتر 🤖</button>
+        <input type="number" id="room-code-input" placeholder="رمز الطاولة" style="width:90%; padding:10px; border-radius:8px; border:1px solid #334155; background:#0F172A; color:#FFF; text-align:center; margin-top:8px;" />
+        <button style="width:95%; padding:10px; background:#10B981; color:#FFF; font-weight:bold; border-radius:8px; border:none; margin:4px 0;" onclick="joinRoom()">انضمام</button>
+    </div>
+
+    <!-- الخوي (أعلى الطاولة مقابل لك) -->
+    <div class="player-avatar-box player-top">
+        <div class="avatar-circle">
+            🧔🏻‍♂️
+            <span class="dealer-badge-green hidden" id="dealer-top">الموزع</span>
+        </div>
+        <span class="player-name-lbl" id="name-top">الخوي</span>
+        <div class="cards-back-fan">
+            <div class="card-back-blue"></div><div class="card-back-blue"></div><div class="card-back-blue"></div>
         </div>
     </div>
+
+    <!-- الخصم الأيسر (يسار الطاولة) -->
+    <div class="player-avatar-box player-left">
+        <div class="avatar-circle">
+            👨🏽‍
+            <span class="dealer-badge-green hidden" id="dealer-left">الموزع</span>
+        </div>
+        <span class="player-name-lbl" id="name-left">خصم يسار</span>
+        <div class="cards-back-fan" style="flex-direction:column; margin-top:4px;">
+            <div class="card-back-blue" style="margin-left:0; margin-top:-20px;"></div>
+            <div class="card-back-blue" style="margin-left:0; margin-top:-20px;"></div>
+        </div>
+    </div>
+
+    <!-- الورقة المكشوفة بالوسط -->
+    <div class="center-deck-area">
+        <div id="revealed-card-center" class="revealed-big-card-img">
+            <div>-</div>
+            <div style="align-self: center; font-size: 24px;">♠️</div>
+            <div style="align-self: flex-end;">-</div>
+        </div>
+    </div>
+
+    <!-- الخصم الأيمن (يمين الطاولة) -->
+    <div class="player-avatar-box player-right">
+        <div class="avatar-circle">
+            🧔🏽
+            <span class="dealer-badge-green hidden" id="dealer-right">الموزع</span>
+        </div>
+        <span class="player-name-lbl" id="name-right">خصم يمين</span>
+        <div class="cards-back-fan" style="flex-direction:column; margin-top:4px;">
+            <div class="card-back-blue" style="margin-left:0; margin-top:-20px;"></div>
+            <div class="card-back-blue" style="margin-left:0; margin-top:-20px;"></div>
+        </div>
+    </div>
+
+    <!-- أزرار الحراج والشراء (الكبسات البيضاء والصفراء) -->
+    <div id="bidding-screen" class="bidding-bar-yellow hidden">
+        <button class="btn-bid-pill btn-yellow" onclick="makeBid('hokm')">حكم</button>
+        <button class="btn-bid-pill btn-yellow" onclick="makeBid('sun')">صن</button>
+        <button class="btn-bid-pill btn-white" onclick="makeBid('ashkal')">أشكل</button>
+        <button class="btn-bid-pill btn-yellow" onclick="makeBid('pass')">بس</button>
+    </div>
+
+    <!-- أنت (أسفل الطاولة - كروتك المكشوفة لك) -->
+    <div class="player-avatar-box player-bottom">
+        <div class="avatar-circle">
+            🇸🇦
+            <span class="dealer-badge-green hidden" id="dealer-bottom">الموزع</span>
+        </div>
+    </div>
+
+    <!-- كروتك المروحية بالأسفل -->
+    <div class="my-hand-fan" id="my-cards-fan"></div>
+
+    <!-- شريط الصوت والأدوات بالأسفل -->
+    <div class="bottom-mic-bar">
+        <div class="icon-btn-round" style="font-size:14px;">🎙️</div>
+        <div class="icon-btn-round" style="font-size:14px;">💬</div>
+    </div>
+
 </div>
 
 <script>
@@ -165,11 +412,10 @@
         if (!name) return alert('أدخل اسمك أولاً!');
         saveName(name); isHost = true; myIndex = 0;
         currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
-        let p = { name: name, team: 'us', isHost: true, type: 'حقيقي', project: '' };
+        let p = { name: name, team: 'us', isHost: true, type: 'حقيقي' };
         db.ref('baloot_rooms/' + currentRoomCode).set({
-            status: 'waiting', scoreUsTotal: 0, scoreThemTotal: 0, scoreUsRound: 0, scoreThemRound: 0,
-            dealerIndex: 0, turnIndex: 1, bidRound: 1, trickCount: 0, players: [p]
-        }).then(() => { listenToRoom(); openWaiting(); });
+            status: 'waiting', scoreUsTotal: 0, scoreThemTotal: 0, dealerIndex: 0, turnIndex: 1, bidRound: 1, players: [p]
+        }).then(() => { listenToRoom(); });
     }
 
     function joinRoom() {
@@ -183,8 +429,8 @@
                 if (pList.length >= 4) return alert('الطاولة مكتملة!');
                 myIndex = pList.length;
                 let team = (myIndex % 2 === 0) ? 'us' : 'them';
-                pList.push({ name: name, team: team, isHost: false, type: 'حقيقي', project: '' });
-                db.ref('baloot_rooms/' + code + '/players').set(pList).then(() => { listenToRoom(); openWaiting(); });
+                pList.push({ name: name, team: team, isHost: false, type: 'حقيقي' });
+                db.ref('baloot_rooms/' + code + '/players').set(pList).then(() => { listenToRoom(); });
             } else alert('الطاولة غير موجودة!');
         });
     }
@@ -193,34 +439,32 @@
         db.ref('baloot_rooms/' + currentRoomCode).on('value', snap => {
             if (!snap.exists()) return;
             let data = snap.val();
-            document.getElementById('score-us-total').innerText = data.scoreUsTotal || 0;
-            document.getElementById('score-them-total').innerText = data.scoreThemTotal || 0;
-            document.getElementById('score-us-round').innerText = data.scoreUsRound || 0;
-            document.getElementById('score-them-round').innerText = data.scoreThemRound || 0;
+            document.getElementById('score-us-val').innerText = data.scoreUsTotal || 0;
+            document.getElementById('score-them-val').innerText = data.scoreThemTotal || 0;
             
             if (data.status === 'playing') renderGame(data);
         });
     }
 
-    function startGame() {
-        db.ref('baloot_rooms/' + currentRoomCode + '/players').get().then(snap => {
-            let pList = snap.val();
-            if (pList.length < 4) return alert('يجب اكتمال 4 لاعبين لبدء البلوت!');
-            startNewRound(pList, 0);
-        });
-    }
-
-    function startNewRound(pList, dealerIdx) {
+    function startVsBots() {
+        let name = document.getElementById('player-name').value.trim() || 'اللاعب';
+        saveName(name); myIndex = 0;
+        currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
+        let players = [
+            { name: name, team: 'us', isHost: true, type: 'حقيقي' },
+            { name: 'خصم يمين 🤖', team: 'them', isHost: false, type: 'آلي' },
+            { name: 'الخوي 🤖', team: 'us', isHost: false, type: 'آلي' },
+            { name: 'خصم يسار 🤖', team: 'them', isHost: false, type: 'آلي' }
+        ];
+        
         let deck = buildBalootDeck();
-        pList.forEach(p => { p.cards = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()]; p.project = ''; });
+        players.forEach(p => { p.cards = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()]; });
         let revealed = deck.pop();
-        let rightOfDealer = (dealerIdx + 1) % 4;
 
-        db.ref('baloot_rooms/' + currentRoomCode).update({
-            status: 'playing', players: pList, revealedCard: revealed, deck: deck,
-            dealerIndex: dealerIdx, turnIndex: rightOfDealer, bidRound: 1, passesCount: 0, trickCount: 0, mode: 'bidding',
-            floorCards: []
-        });
+        db.ref('baloot_rooms/' + currentRoomCode).set({
+            status: 'playing', scoreUsTotal: 0, scoreThemTotal: 0, dealerIndex: 0, turnIndex: 1, bidRound: 1,
+            players: players, revealedCard: revealed, deck: deck, mode: 'bidding'
+        }).then(() => { listenToRoom(); });
     }
 
     function buildBalootDeck() {
@@ -232,78 +476,58 @@
 
     function renderGame(data) {
         document.getElementById('lobby-screen').classList.add('hidden');
-        document.getElementById('waiting-screen').classList.add('hidden');
 
         let pList = data.players || [];
         
-        let bottomIdx = myIndex;
-        let rightIdx = (myIndex + 1) % 4;
-        let topIdx = (myIndex + 2) % 4;
-        let leftIdx = (myIndex + 3) % 4;
+        document.getElementById('name-top').innerText = pList[(myIndex + 2) % 4] ? pList[(myIndex + 2) % 4].name : 'الخوي';
+        document.getElementById('name-right').innerText = pList[(myIndex + 1) % 4] ? pList[(myIndex + 1) % 4].name : 'خصم يمين';
+        document.getElementById('name-left').innerText = pList[(myIndex + 3) % 4] ? pList[(myIndex + 3) % 4].name : 'خصم يسار';
 
-        renderPlayerSlot('bottom', pList[bottomIdx], true, data.turnIndex === bottomIdx);
-        renderPlayerSlot('top', pList[topIdx], false, data.turnIndex === topIdx);
-        renderPlayerSlot('right', pList[rightIdx], false, data.turnIndex === rightIdx);
-        renderPlayerSlot('left', pList[leftIdx], false, data.turnIndex === leftIdx);
+        // إظهار الشارة الخضراء للموزع
+        document.getElementById('dealer-top').classList.toggle('hidden', data.dealerIndex !== (myIndex + 2) % 4);
+        document.getElementById('dealer-right').classList.toggle('hidden', data.dealerIndex !== (myIndex + 1) % 4);
+        document.getElementById('dealer-left').classList.toggle('hidden', data.dealerIndex !== (myIndex + 3) % 4);
+        document.getElementById('dealer-bottom').classList.toggle('hidden', data.dealerIndex !== myIndex);
 
-        let floorBox = document.getElementById('floor-played-cards');
-        floorBox.innerHTML = '';
-        if (data.floorCards) {
-            data.floorCards.forEach(c => {
+        // إظهار الورقة المكشوفة بالمنتصف
+        let centerCard = document.getElementById('revealed-card-center');
+        if (data.revealedCard) {
+            let isRed = (data.revealedCard.suit === '♥️' || data.revealedCard.suit === '♦️');
+            centerCard.className = `revealed-big-card-img ${isRed ? 'red' : ''}`;
+            centerCard.innerHTML = `<div>${data.revealedCard.rank}</div><div style="align-self:center; font-size:24px;">${data.revealedCard.suit}</div><div style="align-self:flex-end;">${data.revealedCard.rank}</div>`;
+        }
+
+        // إظهار أوراقي بالأسفل مروحية
+        let myObj = pList[myIndex];
+        let fanBox = document.getElementById('my-cards-fan');
+        fanBox.innerHTML = '';
+        if (myObj && myObj.cards) {
+            myObj.cards.forEach((c, idx) => {
                 let isRed = (c.suit === '♥️' || c.suit === '♦️');
-                floorBox.innerHTML += `<div class="played-card-floor ${isRed ? 'red' : ''}">${c.rank}<br>${c.suit}</div>`;
+                fanBox.innerHTML += `
+                    <div class="fan-card ${isRed ? 'red' : ''}" onclick="playCard(${idx})">
+                        <div>${c.rank}</div>
+                        <div style="align-self:center; font-size:18px;">${c.suit}</div>
+                        <div style="align-self:flex-end;">${c.rank}</div>
+                    </div>`;
             });
         }
 
-        let currPlayer = pList[data.turnIndex];
-
-        // البوت يلعب خلال 3 ثوانٍ دائماً وبدون أي تعليق
-        if (currPlayer && currPlayer.type === 'آلي' && isHost) {
-            startTimer(3, () => handleBotTurn(data, data.turnIndex));
-            return;
-        }
-
+        // أزرار الحراج الملونة بالأسفل
         let myTurn = (data.turnIndex === myIndex);
         let biddingBox = document.getElementById('bidding-screen');
-        let projectBox = document.getElementById('project-declaration-box');
 
-        if (myTurn) {
-            if (data.mode === 'bidding') {
-                biddingBox.classList.remove('hidden');
-                projectBox.classList.add('hidden');
-                setupBiddingControls(data);
-            } else if (data.mode === 'declare_projects') {
-                projectBox.classList.remove('hidden');
-                biddingBox.classList.add('hidden');
-            } else {
-                biddingBox.classList.add('hidden');
-                projectBox.classList.add('hidden');
-            }
-            startTimer(10, () => autoTimeOutAction(data));
+        if (myTurn && data.mode === 'bidding') {
+            biddingBox.classList.remove('hidden');
+            startTimer(10, () => makeBid('pass'));
         } else {
             biddingBox.classList.add('hidden');
-            projectBox.classList.add('hidden');
         }
-    }
 
-    function renderPlayerSlot(position, playerObj, isMe, isTurn) {
-        if (!playerObj) return;
-        let nameElem = document.getElementById(`name-${position}`);
-        nameElem.innerText = `${playerObj.name} ${playerObj.project ? `[${playerObj.project}]` : ''}`;
-        if (isTurn) nameElem.classList.add('active'); else nameElem.classList.remove('active');
-
-        let cardsElem = document.getElementById(`cards-${position}`);
-        cardsElem.innerHTML = '';
-        
-        let cardCount = playerObj.cards ? playerObj.cards.length : 0;
-        for (let i = 0; i < cardCount; i++) {
-            if (isMe) {
-                let c = playerObj.cards[i];
-                let isRed = (c.suit === '♥️' || c.suit === '♦️');
-                cardsElem.innerHTML += `<div class="playing-card ${isRed ? 'red' : ''}" onclick="playCard(${i})">${c.rank}<br>${c.suit}</div>`;
-            } else {
-                cardsElem.innerHTML += `<div class="card-back"></div>`;
-            }
+        // البوت يلعب خلال 3 ثوانٍ
+        let currPlayer = pList[data.turnIndex];
+        if (currPlayer && currPlayer.type === 'آلي' && isHost) {
+            startTimer(3, () => handleBotTurn(data, data.turnIndex));
         }
     }
 
@@ -321,213 +545,33 @@
         }, 1000);
     }
 
-    function autoTimeOutAction(data) {
-        if (data.mode === 'bidding') {
-            makeBid(data.bidRound === 1 ? 'pass' : 'pass2');
-        } else if (data.mode === 'declare_projects') {
-            declareProject('none');
-        } else {
-            playCard(0);
-        }
-    }
-
-    // منطق وذكاء البوت باللعب والاختيار خلال 3 ثوانٍ
-    function handleBotTurn(data, botIndex) {
-        let botPlayer = data.players[botIndex];
-        let isDealer = (botIndex === data.dealerIndex);
-
-        if (data.mode === 'bidding') {
-            if (data.bidRound === 1) {
-                makeBid('pass');
-            } else {
-                if (isDealer) {
-                    makeBid('kawash'); // إذا كان الموزع بالدورة الثانية يختار ورق ويكوش
-                } else {
-                    makeBid('pass2'); // الدورة الثانية للخصوم يختار ولا
-                }
-            }
-        } else if (data.mode === 'declare_projects') {
-            declareProject('none');
-        } else {
-            // منطق لعب الأوراق للذكاء الاصطناعي
-            if (!botPlayer.cards || botPlayer.cards.length === 0) return;
-
-            let chosenIndex = 0;
-            let floorCards = data.floorCards || [];
-
-            if (floorCards.length === 0) {
-                // إذا البوت هو من يبدأ اللعب: ينزل أقوى ورقة عنده
-                let maxPower = -1;
-                botPlayer.cards.forEach((c, idx) => {
-                    let pwr = RANK_POWER[c.rank] || 0;
-                    if (pwr > maxPower) {
-                        maxPower = pwr;
-                        chosenIndex = idx;
-                    }
-                });
-            } else {
-                // إذا كان فيه ورقة نازلة: ينزل أكبر ورقة من نفس النوع
-                let leadSuit = floorCards[0].suit;
-                let sameSuitCards = botPlayer.cards.map((c, idx) => ({ card: c, idx: idx })).filter(item => item.card.suit === leadSuit);
-
-                if (sameSuitCards.length > 0) {
-                    sameSuitCards.sort((a, b) => (RANK_POWER[b.card.rank] || 0) - (RANK_POWER[a.card.rank] || 0));
-                    chosenIndex = sameSuitCards[0].idx;
-                } else {
-                    chosenIndex = 0; // ينزل أي ورقة عنده إذا ما امتلك من نفس النوع
-                }
-            }
-
-            executeCardPlay(data, botIndex, chosenIndex);
-        }
-    }
-
-    function setupBiddingControls(data) {
-        let container = document.getElementById('bidding-buttons-container');
-        let title = document.getElementById('bidding-title');
-        let isDealer = (data.turnIndex === data.dealerIndex);
-
-        if (data.bidRound === 1) {
-            title.innerText = 'مرحلة الشراء (الدورة الأولى) 📢';
-            container.innerHTML = `
-                <div class="flex-row">
-                    <button class="btn-primary" onclick="makeBid('sun')">صن ☀️</button>
-                    <button class="btn-success" onclick="makeBid('hokm')">حكم 🌙</button>
-                    <button class="btn-danger" onclick="makeBid('pass')">بس ✋</button>
-                </div>`;
-        } else {
-            title.innerText = 'مرحلة الشراء (الدورة الثانية) 🔄';
-            if (isDealer) {
-                container.innerHTML = `
-                    <div class="flex-row">
-                        <button class="btn-primary" onclick="makeBid('sun2')">صن ثاني ☀️</button>
-                        <button class="btn-success" onclick="makeBid('hokm2')">حكم ثاني 🌙</button>
-                    </div>
-                    <button class="btn-danger" style="margin-top:4px;" onclick="makeBid('kawash')">ورق (تكويش 🔄)</button>`;
-            } else {
-                container.innerHTML = `
-                    <div class="flex-row">
-                        <button class="btn-primary" onclick="makeBid('sun2')">صن ثاني ☀️</button>
-                        <button class="btn-success" onclick="makeBid('hokm2')">حكم ثاني 🌙</button>
-                        <button class="btn-danger" onclick="makeBid('pass2')">ولا ⚪</button>
-                    </div>`;
-            }
-        }
-    }
-
     function makeBid(choice) {
         clearInterval(timerInterval);
         db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
             let data = snap.val();
-
-            if (choice === 'kawash') {
-                alert('تكويش! انتقال التوزيع للاعب التالي 🔄');
-                let nextDealer = (data.dealerIndex + 1) % 4;
-                startNewRound(data.players, nextDealer);
-                return;
-            }
-
-            if (choice === 'pass' || choice === 'pass2') {
-                let pCount = (data.passesCount || 0) + 1;
-                let nextTurn = (data.turnIndex + 1) % 4;
-
-                if (pCount === 4 && data.bidRound === 1) {
-                    data.bidRound = 2;
-                    data.passesCount = 0;
-                    data.turnIndex = (data.dealerIndex + 1) % 4;
-                } else if (pCount === 4 && data.bidRound === 2) {
-                    let nextDealer = (data.dealerIndex + 1) % 4;
-                    startNewRound(data.players, nextDealer);
-                    return;
-                } else {
-                    data.passesCount = pCount;
-                    data.turnIndex = nextTurn;
-                }
-            } else {
-                data.mode = 'declare_projects';
-                data.contract = choice;
-            }
-
+            let nextTurn = (data.turnIndex + 1) % 4;
+            data.turnIndex = nextTurn;
             db.ref('baloot_rooms/' + currentRoomCode).set(data);
         });
     }
 
-    function declareProject(type) {
-        clearInterval(timerInterval);
-        db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
-            let data = snap.val();
-            let myPlayer = data.players[data.turnIndex];
-            if (myPlayer) myPlayer.project = (type !== 'none' ? type : '');
-
-            let nextTurn = (data.turnIndex + 1) % 4;
-            if (nextTurn === (data.dealerIndex + 1) % 4) {
-                data.mode = 'playing_cards';
-            }
-            data.turnIndex = nextTurn;
-            db.ref('baloot_rooms/' + currentRoomCode).set(data);
-        });
+    function handleBotTurn(data, botIndex) {
+        let nextTurn = (data.turnIndex + 1) % 4;
+        data.turnIndex = nextTurn;
+        db.ref('baloot_rooms/' + currentRoomCode).set(data);
     }
 
     function playCard(index) {
         clearInterval(timerInterval);
         db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
             let data = snap.val();
-            executeCardPlay(data, data.turnIndex, index);
-        });
-    }
-
-    function executeCardPlay(data, playerIndex, cardIndex) {
-        let playerObj = data.players[playerIndex];
-        if (playerObj && playerObj.cards && playerObj.cards[cardIndex]) {
-            let played = playerObj.cards.splice(cardIndex, 1)[0];
-            if (!data.floorCards) data.floorCards = [];
-            data.floorCards.push(played);
-
-            if (data.floorCards.length === 4) {
-                data.trickCount = (data.trickCount || 0) + 1;
-                
-                if (data.trickCount === 8) {
-                    if (playerObj.team === 'us') data.scoreUsRound += 10;
-                    else data.scoreThemRound += 10;
-
-                    data.scoreUsTotal += data.scoreUsRound;
-                    data.scoreThemTotal += data.scoreThemRound;
-                    data.scoreUsRound = 0;
-                    data.scoreThemRound = 0;
-
-                    alert('تم انتهاء الجولة وحساب أرض الجولة (10 أبناط) وتحديث النشرة العامة!');
-                    let nextDealer = (data.dealerIndex + 1) % 4;
-                    startNewRound(data.players, nextDealer);
-                    return;
-                }
-                data.floorCards = [];
+            let myPlayer = data.players[myIndex];
+            if (myPlayer && myPlayer.cards && myPlayer.cards[index]) {
+                myPlayer.cards.splice(index, 1);
+                data.turnIndex = (data.turnIndex + 1) % 4;
             }
-
-            data.turnIndex = (data.turnIndex + 1) % 4;
-        }
-        db.ref('baloot_rooms/' + currentRoomCode).set(data);
-    }
-
-    function startVsBots() {
-        let name = document.getElementById('player-name').value.trim() || 'اللاعب';
-        saveName(name); myIndex = 0;
-        currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
-        let players = [
-            { name: name, team: 'us', isHost: true, type: 'حقيقي', project: '' },
-            { name: 'خصم يمين 🤖', team: 'them', isHost: false, type: 'آلي', project: '' },
-            { name: 'الخوي 🤖', team: 'us', isHost: false, type: 'آلي', project: '' },
-            { name: 'خصم يسار 🤖', team: 'them', isHost: false, type: 'آلي', project: '' }
-        ];
-        db.ref('baloot_rooms/' + currentRoomCode).set({
-            status: 'waiting', scoreUsTotal: 0, scoreThemTotal: 0, scoreUsRound: 0, scoreThemRound: 0,
-            dealerIndex: 0, turnIndex: 1, bidRound: 1, trickCount: 0, players: players
-        }).then(() => { listenToRoom(); openWaiting(); });
-    }
-
-    function openWaiting() {
-        document.getElementById('lobby-screen').classList.add('hidden');
-        document.getElementById('waiting-screen').classList.remove('hidden');
-        document.getElementById('current-room-display').innerText = currentRoomCode;
+            db.ref('baloot_rooms/' + currentRoomCode).set(data);
+        });
     }
 </script>
 
