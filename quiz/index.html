@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>من سيربح المليون 🏆</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <style>
+        body { background-color: #020617; color: white; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 12px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+        .quiz-card { background: radial-gradient(circle, #1E1B4B 0%, #0F172A 100%); border: 2px solid #F59E0B; border-radius: 20px; padding: 20px; width: 100%; max-width: 450px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); position: relative; }
+        h1 { color: #F59E0B; font-size: 22px; margin-bottom: 12px; }
+        
+        .lifelines { display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; }
+        .btn-lifeline { background: #1E293B; border: 1px solid #F59E0B; color: #F59E0B; border-radius: 20px; padding: 6px 12px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-lifeline.used { opacity: 0.3; cursor: not-allowed; border-color: #64748B; color: #64748B; }
+
+        .prize-badge { background: #065F46; border: 1px solid #10B981; color: #FCD34D; border-radius: 8px; padding: 6px 12px; font-weight: bold; font-size: 14px; margin-bottom: 16px; display: inline-block; }
+
+        .question-box { background: #0F172A; border: 2px solid #3B82F6; border-radius: 12px; padding: 16px; font-size: 16px; font-weight: bold; margin-bottom: 16px; min-height: 70px; display: flex; align-items: center; justify-content: center; }
+
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-option { background: #1E293B; border: 1px solid #475569; border-radius: 10px; padding: 12px 8px; color: white; font-size: 14px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s; }
+        .btn-option:active { transform: scale(0.97); }
+        .btn-option.correct { background: #16A34A !important; border-color: #4ADE80 !important; }
+        .btn-option.wrong { background: #DC2626 !important; border-color: #FCA5A5 !important; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="quiz-card">
+    <h1>من سيربح المليون 🏆</h1>
+
+    <div id="start-screen">
+        <p style="color:#94A3B8; font-size:14px;">أجب على 10 أسئلة متتالية للوصول لـ 1,000,000 ريال!</p>
+        <button class="btn-option" style="width:100%; background:#F59E0B; color:#000; margin-top:20px;" onclick="startQuiz()">ابدأ التحدي الان 🚀</button>
+    </div>
+
+    <div id="game-screen" class="hidden">
+        <!-- الوسائل المساعدة -->
+        <div class="lifelines">
+            <button class="btn-lifeline" id="life-50" onclick="use5050()">حذف إجابتين (50:50)</button>
+            <button class="btn-lifeline" id="life-audience" onclick="useAudience()">رأي الجمهور 👥</button>
+        </div>
+
+        <div class="prize-badge">السؤال الحالي: <span id="prize-val">1,000</span> ريال</div>
+
+        <div class="question-box" id="question-text">جاري تحميل السؤال...</div>
+
+        <div class="options-grid">
+            <button class="btn-option" id="opt-0" onclick="checkAnswer(0)">أ) -</button>
+            <button class="btn-option" id="opt-1" onclick="checkAnswer(1)">ب) -</button>
+            <button class="btn-option" id="opt-2" onclick="checkAnswer(2)">ج) -</button>
+            <button class="btn-option" id="opt-3" onclick="checkAnswer(3)">د) -</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { q: "ما هي عاصمة المملكة العربية السعودية؟", opts: ["جدة", "الرياض", "الدمام", "مكة المكرمة"], correct: 1 },
+        { q: "ما هو أكبر كوكب في المجموعة الشمسية؟", opts: ["الأرض", "المريخ", "المشتري", "زحل"], correct: 2 },
+        { q: "كم عدد سور القرآن الكريم؟", opts: ["114", "110", "120", "108"], correct: 0 },
+        { q: "ما هي العملة الرسمية لدولة يابان؟", opts: ["الدولار", "الين", "الورن", "البيزو"], correct: 1 },
+        { q: "أين تقع أهرامات الجيزة؟", opts: ["السودان", "المغرب", "مصر", "الأردن"], correct: 2 },
+        { q: "ما هو العنصر الكيميائي الذي رمزه (O)؟", opts: ["الهيدروجين", "الأكسجين", "الحديد", "الذهب"], correct: 1 },
+        { q: "ما هو أسرع حيوان بري في العالم؟", opts: ["الأسد", "الفهد", "النعامة", "الغزال"], correct: 1 },
+        { q: "في أي قارة تقع تونس والجزائر؟", opts: ["آسيا", "أفريقيا", "أوروبا", "أستراليا"], correct: 1 },
+        { q: "كم عدد أضلاع المثلث؟", opts: ["3", "4", "5", "6"], correct: 0 },
+        { q: "ما هو أطول نهر في العالم؟", opts: ["الأمازون", "النيل", "المسيسيبي", "الفرات"], correct: 1 }
+    ];
+
+    const prizes = ["1,000", "5,000", "10,000", "50,000", "100,000", "250,000", "500,000", "750,000", "900,000", "1,000,000"];
+
+    let currentQ = 0;
+
+    function startQuiz() {
+        currentQ = 0;
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('game-screen').classList.remove('hidden');
+        showQuestion();
+    }
+
+    function showQuestion() {
+        let qData = questions[currentQ];
+        document.getElementById('prize-val').innerText = prizes[currentQ];
+        document.getElementById('question-text').innerText = qData.q;
+        
+        for (let i = 0; i < 4; i++) {
+            let btn = document.getElementById(`opt-${i}`);
+            btn.innerText = qData.opts[i];
+            btn.className = "btn-option";
+            btn.style.visibility = "visible";
+        }
+    }
+
+    function checkAnswer(idx) {
+        let qData = questions[currentQ];
+        let btn = document.getElementById(`opt-${idx}`);
+        
+        if (idx === qData.correct) {
+            btn.classList.add('correct');
+            setTimeout(() => {
+                currentQ++;
+                if (currentQ >= questions.length) {
+                    alert("🎉 مبروك! فزت بـ 1,000,000 ريال!");
+                    location.reload();
+                } else {
+                    showQuestion();
+                }
+            }, 1000);
+        } else {
+            btn.classList.add('wrong');
+            document.getElementById(`opt-${qData.correct}`).classList.add('correct');
+            setTimeout(() => {
+                alert(`💔 إجابة خاطئة! رصيدك النهائي: ${currentQ > 0 ? prizes[currentQ-1] : 0} ريال`);
+                location.reload();
+            }, 1500);
+        }
+    }
+
+    function use5050() {
+        let qData = questions[currentQ];
+        let wrongIndices = [0, 1, 2, 3].filter(i => i !== qData.correct);
+        wrongIndices.sort(() => Math.random() - 0.5);
+        
+        document.getElementById(`opt-${wrongIndices[0]}`).style.visibility = "hidden";
+        document.getElementById(`opt-${wrongIndices[1]}`).style.visibility = "hidden";
+        
+        let btn = document.getElementById('life-50');
+        btn.classList.add('used');
+        btn.onclick = null;
+    }
+
+    function useAudience() {
+        let qData = questions[currentQ];
+        alert(`📊 رأي الجمهور: الإجابة (${qData.opts[qData.correct]}) هي الأكثر تصويتاً بنسبة 72%!`);
+        let btn = document.getElementById('life-audience');
+        btn.classList.add('used');
+        btn.onclick = null;
+    }
+</script>
+
+</body>
+</html>
