@@ -2,30 +2,111 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>من سيربح المليون 🏆</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        body { background-color: #020617; color: white; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 12px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
-        .quiz-card { background: radial-gradient(circle, #1E1B4B 0%, #0F172A 100%); border: 2px solid #F59E0B; border-radius: 20px; padding: 20px; width: 100%; max-width: 450px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); position: relative; }
-        h1 { color: #F59E0B; font-size: 22px; margin-bottom: 12px; }
+        * { box-sizing: border-box; user-select: none; }
+        body { 
+            background: #020617; 
+            color: white; 
+            font-family: system-ui, -apple-system, sans-serif; 
+            margin: 0; 
+            padding: 12px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+        }
+        .quiz-card { 
+            background: radial-gradient(circle, #1E1B4B 0%, #0F172A 100%); 
+            border: 2px solid #F59E0B; 
+            border-radius: 20px; 
+            padding: 16px; 
+            width: 100%; 
+            max-width: 440px; 
+            text-align: center; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
+            position: relative; 
+        }
+        h1 { color: #F59E0B; font-size: 22px; margin: 0 0 10px 0; }
         
-        .lifelines { display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; }
-        .btn-lifeline { background: #1E293B; border: 1px solid #F59E0B; color: #F59E0B; border-radius: 20px; padding: 6px 12px; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .lifelines { display: flex; justify-content: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+        .btn-lifeline { 
+            background: #1E293B; 
+            border: 1px solid #F59E0B; 
+            color: #FCD34D; 
+            border-radius: 16px; 
+            padding: 6px 10px; 
+            font-size: 11px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.2s; 
+        }
         .btn-lifeline.used { opacity: 0.3; cursor: not-allowed; border-color: #64748B; color: #64748B; }
+        .btn-lifeline.locked { opacity: 0.4; border-color: #475569; color: #94A3B8; }
 
-        .prize-badge { background: #065F46; border: 1px solid #10B981; color: #FCD34D; border-radius: 8px; padding: 6px 12px; font-weight: bold; font-size: 14px; margin-bottom: 16px; display: inline-block; }
+        .prize-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: #065F46; 
+            border: 1px solid #10B981; 
+            color: #FCD34D; 
+            border-radius: 10px; 
+            padding: 8px 12px; 
+            font-weight: bold; 
+            font-size: 13px; 
+            margin-bottom: 12px; 
+        }
 
-        .question-box { background: #0F172A; border: 2px solid #3B82F6; border-radius: 12px; padding: 16px; font-size: 16px; font-weight: bold; margin-bottom: 16px; min-height: 70px; display: flex; align-items: center; justify-content: center; }
+        .question-box { 
+            background: #0F172A; 
+            border: 2px solid #3B82F6; 
+            border-radius: 12px; 
+            padding: 14px; 
+            font-size: 15px; 
+            font-weight: bold; 
+            margin-bottom: 14px; 
+            min-height: 80px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            line-height: 1.4;
+        }
 
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-option { background: #1E293B; border: 1px solid #475569; border-radius: 10px; padding: 12px 8px; color: white; font-size: 14px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .btn-option { 
+            background: #1E293B; 
+            border: 1px solid #475569; 
+            border-radius: 10px; 
+            padding: 12px 6px; 
+            color: white; 
+            font-size: 13px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            text-align: center; 
+            transition: 0.2s; 
+        }
         .btn-option:active { transform: scale(0.97); }
         .btn-option.correct { background: #16A34A !important; border-color: #4ADE80 !important; }
         .btn-option.wrong { background: #DC2626 !important; border-color: #FCA5A5 !important; }
+
+        .btn-withdraw {
+            background: linear-gradient(180deg, #DC2626, #991B1B);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px;
+            font-weight: bold;
+            font-size: 13px;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+        }
 
         .hidden { display: none !important; }
     </style>
@@ -35,19 +116,30 @@
 <div class="quiz-card">
     <h1>من سيربح المليون 🏆</h1>
 
+    <!-- 1. شاشة البداية وتسجيل الاسم -->
     <div id="start-screen">
-        <p style="color:#94A3B8; font-size:14px;">أجب على 10 أسئلة متتالية للوصول لـ 1,000,000 ريال!</p>
-        <button class="btn-option" style="width:100%; background:#F59E0B; color:#000; margin-top:20px;" onclick="startQuiz()">ابدأ التحدي الان 🚀</button>
+        <p style="color:#94A3B8; font-size:13px; margin-bottom:14px;">أدخل اسمك وابدأ التحدي عبر 15 سؤالاً للوصول للمليون!</p>
+        <input type="text" id="player-name-input" placeholder="اكتب اسم المتسابق هنا" style="width:100%; padding:12px; border-radius:10px; border:1px solid #F59E0B; background:#0F172A; color:white; text-align:center; font-size:14px; margin-bottom:12px;" />
+        <button class="btn-option" style="width:100%; background:#F59E0B; color:#000; font-size:15px;" onclick="initQuiz()">دخول وتحدي الأسئلة 🚀</button>
     </div>
 
+    <!-- 2. شاشة المسابقة والأسئلة -->
     <div id="game-screen" class="hidden">
-        <!-- الوسائل المساعدة -->
+        <div style="font-size:12px; color:#94A3B8; margin-bottom:6px;">المتسابق: <strong id="player-name-display" style="color:#F59E0B;">-</strong></div>
+
+        <!-- الوسائل المساعدة الاربع -->
         <div class="lifelines">
             <button class="btn-lifeline" id="life-50" onclick="use5050()">حذف إجابتين (50:50)</button>
+            <button class="btn-lifeline" id="life-phone" onclick="usePhone()">اتصال بصديق 📞</button>
             <button class="btn-lifeline" id="life-audience" onclick="useAudience()">رأي الجمهور 👥</button>
+            <button class="btn-lifeline locked" id="life-change" onclick="useChangeQuestion()">تغيير السؤال 🔄</button>
         </div>
 
-        <div class="prize-badge">السؤال الحالي: <span id="prize-val">1,000</span> ريال</div>
+        <!-- شريط الجائزة الحالية ومحطات الأمان -->
+        <div class="prize-bar">
+            <span>السؤال (<span id="q-num">1</span>/15)</span>
+            <span>القيمة: <span id="prize-val">500</span> ر.س</span>
+        </div>
 
         <div class="question-box" id="question-text">جاري تحميل السؤال...</div>
 
@@ -57,89 +149,186 @@
             <button class="btn-option" id="opt-2" onclick="checkAnswer(2)">ج) -</button>
             <button class="btn-option" id="opt-3" onclick="checkAnswer(3)">د) -</button>
         </div>
+
+        <button class="btn-withdraw" onclick="withdrawGame()">الانسحاب بالجائزة الحالية 💰</button>
     </div>
 </div>
 
 <script>
-    const questions = [
-        { q: "ما هي عاصمة المملكة العربية السعودية؟", opts: ["جدة", "الرياض", "الدمام", "مكة المكرمة"], correct: 1 },
-        { q: "ما هو أكبر كوكب في المجموعة الشمسية؟", opts: ["الأرض", "المريخ", "المشتري", "زحل"], correct: 2 },
-        { q: "كم عدد سور القرآن الكريم؟", opts: ["114", "110", "120", "108"], correct: 0 },
-        { q: "ما هي العملة الرسمية لدولة يابان؟", opts: ["الدولار", "الين", "الورن", "البيزو"], correct: 1 },
-        { q: "أين تقع أهرامات الجيزة؟", opts: ["السودان", "المغرب", "مصر", "الأردن"], correct: 2 },
-        { q: "ما هو العنصر الكيميائي الذي رمزه (O)؟", opts: ["الهيدروجين", "الأكسجين", "الحديد", "الذهب"], correct: 1 },
-        { q: "ما هو أسرع حيوان بري في العالم؟", opts: ["الأسد", "الفهد", "النعامة", "الغزال"], correct: 1 },
-        { q: "في أي قارة تقع تونس والجزائر؟", opts: ["آسيا", "أفريقيا", "أوروبا", "أستراليا"], correct: 1 },
-        { q: "كم عدد أضلاع المثلث؟", opts: ["3", "4", "5", "6"], correct: 0 },
-        { q: "ما هو أطول نهر في العالم؟", opts: ["الأمازون", "النيل", "المسيسيبي", "الفرات"], correct: 1 }
+    // سلم الجوائز لـ 15 سؤالاً (السؤال 5 والسؤال 10 هما محطتا الأمان)
+    const PRIZES = [
+        "500", "1,000", "2,000", "5,000", "10,000", // محطة الأمان الأولى (السؤال 5 = 10,000)
+        "20,000", "40,000", "60,000", "80,000", "100,000", // محطة الأمان الثانية (السؤال 10 = 100,000)
+        "200,000", "350,000", "500,000", "750,000", "1,000,000" // السؤال 15 الحاسم
     ];
 
-    const prizes = ["1,000", "5,000", "10,000", "50,000", "100,000", "250,000", "500,000", "750,000", "900,000", "1,000,000"];
+    // بنك الأسئلة المقسم ديناميكياً حسب تدرج الصعوبة
+    const QUESTION_BANK = {
+        easy: [ // الأسئلة 1 إلى 5
+            { q: "ما هي عاصمة المملكة العربية السعودية؟", opts: ["جدة", "الرياض", "الدمام", "مكة المكرمة"], correct: 1 },
+            { q: "كم عدد سور القرآن الكريم؟", opts: ["114", "110", "120", "108"], correct: 0 },
+            { q: "ما هو أسرع حيوان بري في العالم؟", opts: ["الأسد", "الفهد", "النعامة", "الغزال"], correct: 1 },
+            { q: "أين تقع أهرامات الجيزة الشهيرة؟", opts: ["السودان", "المغرب", "مصر", "الأردن"], correct: 2 },
+            { q: "ما هو أكبر كوكب في المجموعة الشمسية؟", opts: ["الأرض", "المريخ", "المشتري", "زحل"], correct: 2 },
+            { q: "كم عدد أضلاع المثلث؟", opts: ["3", "4", "5", "6"], correct: 0 },
+            { q: "ما هي عاصمة دولة الإمارات العربية المتحدة؟", opts: ["دبي", "أبوظبي", "الشارقة", "العين"], correct: 1 }
+        ],
+        medium: [ // الأسئلة 6 إلى 10
+            { q: "ما هو العنصر الكيميائي الذي رمزه (O)؟", opts: ["الهيدروجين", "الأكسجين", "الحديد", "الذهب"], correct: 1 },
+            { q: "في أي قارة تقع دولة تونس والجزائر؟", opts: ["آسيا", "أفريقيا", "أوروبا", "أستراليا"], correct: 1 },
+            { q: "ما هي العملة الرسمية لدولة اليابان؟", opts: ["الدولار", "الين", "الون", "البيزو"], correct: 1 },
+            { q: "من هو القائد المسلم الذي فتح الأندلس؟", opts: ["طارق بن زياد", "خالد بن الوليد", "صلاح الدين", "عمرو بن العاص"], correct: 0 },
+            { q: "ما هو أطول نهر في العالم؟", opts: ["الأمازون", "النيل", "المسيسيبي", "الفرات"], correct: 1 },
+            { q: "ما هو الكوكب الملقب بالكوكب الأحمر؟", opts: ["الزهرة", "المريخ", "عطارد", "نبتون"], correct: 1 }
+        ],
+        hard: [ // الأسئلة 11 إلى 15
+            { q: "ما هي أصغر دولة في العالم من حيث المساحة؟", opts: ["موناكو", "الفاتيكان", "سان مارينو", "مالطا"], correct: 1 },
+            { q: "من هو مخترع المصباح الكهربائي؟", opts: ["غراهام بيل", "توماس إديسون", "أينشتاين", "تيسلا"], correct: 1 },
+            { q: "ما هي أعمق نقطة على سطح الأرض؟", opts: ["خندق ماريانا", "البحر الميت", "بحيرة بايكال", "وادي الموت"], correct: 0 },
+            { q: "في أي سنة اندلعت الحرب العالمية الأولى؟", opts: ["1914", "1918", "1939", "1945"], correct: 0 },
+            { q: "ما هي الغازات الأكثر وفرة في الغلاف الجوي للأرض؟", opts: ["الأكسجين", "النيتروجين", "ثاني أكسيد الكربون", "الآرجون"], correct: 1 },
+            { q: "ما هي الدولة التي تمتلك أكبر عدد من الجزر في العالم؟", opts: ["إندونيسيا", "الفلبين", "السويد", "اليابان"], correct: 2 }
+        ]
+    };
 
-    let currentQ = 0;
+    let playerName = "";
+    let currentQIndex = 0;
+    let selectedQuestions = [];
+    let currentQuestionData = null;
 
-    function startQuiz() {
-        currentQ = 0;
+    function initQuiz() {
+        playerName = document.getElementById('player-name-input').value.trim();
+        if (!playerName) return alert('يرجى كتابة اسم المتسابق أولاً!');
+
+        document.getElementById('player-name-display').innerText = playerName;
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('game-screen').classList.remove('hidden');
-        showQuestion();
+
+        // سحب 15 سؤالاً عشوائياً وغير مكرر متدرجة الصعوبة لخصيص المتسابق
+        selectedQuestions = [
+            ...shuffleArray(QUESTION_BANK.easy).slice(0, 5),
+            ...shuffleArray(QUESTION_BANK.medium).slice(0, 5),
+            ...shuffleArray(QUESTION_BANK.hard).slice(0, 5)
+        ];
+
+        currentQIndex = 0;
+        loadQuestion();
     }
 
-    function showQuestion() {
-        let qData = questions[currentQ];
-        document.getElementById('prize-val').innerText = prizes[currentQ];
-        document.getElementById('question-text').innerText = qData.q;
-        
+    function shuffleArray(arr) {
+        return [...arr].sort(() => Math.random() - 0.5);
+    }
+
+    function loadQuestion() {
+        currentQuestionData = selectedQuestions[currentQIndex];
+        document.getElementById('q-num').innerText = currentQIndex + 1;
+        document.getElementById('prize-val').innerText = PRIZES[currentQIndex];
+        document.getElementById('question-text').innerText = currentQuestionData.q;
+
+        // تفعيل وسيلة "تغيير السؤال" تلقائياً بعد تجاوز السؤال الخامس (السؤال 6 فما فوق)
+        let changeBtn = document.getElementById('life-change');
+        if (currentQIndex >= 5 && !changeBtn.classList.contains('used')) {
+            changeBtn.classList.remove('locked');
+        }
+
         for (let i = 0; i < 4; i++) {
             let btn = document.getElementById(`opt-${i}`);
-            btn.innerText = qData.opts[i];
+            btn.innerText = `${['أ', 'ب', 'ج', 'د'][i]}) ${currentQuestionData.opts[i]}`;
             btn.className = "btn-option";
             btn.style.visibility = "visible";
         }
     }
 
-    function checkAnswer(idx) {
-        let qData = questions[currentQ];
-        let btn = document.getElementById(`opt-${idx}`);
+    function checkAnswer(chosenIdx) {
+        let btn = document.getElementById(`opt-${chosenIdx}`);
         
-        if (idx === qData.correct) {
+        if (chosenIdx === currentQuestionData.correct) {
             btn.classList.add('correct');
             setTimeout(() => {
-                currentQ++;
-                if (currentQ >= questions.length) {
-                    alert("🎉 مبروك! فزت بـ 1,000,000 ريال!");
+                currentQIndex++;
+                if (currentQIndex >= 15) {
+                    alert(`🎉 مبروك يا ${playerName}! فزت بـ 1,000,000 ريال وأصبحت مليونير المسابقة!`);
                     location.reload();
                 } else {
-                    showQuestion();
+                    loadQuestion();
                 }
-            }, 1000);
+            }, 1200);
         } else {
             btn.classList.add('wrong');
-            document.getElementById(`opt-${qData.correct}`).classList.add('correct');
+            document.getElementById(`opt-${currentQuestionData.correct}`).classList.add('correct');
+            
+            // حساب الجائزة المحفوظة حسب محطات الأمان (السؤال 5 والسؤال 10)
+            let safePrize = "0";
+            if (currentQIndex >= 10) {
+                safePrize = "100,000"; // محطة الأمان الثانية
+            } else if (currentQIndex >= 5) {
+                safePrize = "10,000";  // محطة الأمان الأولى
+            }
+
             setTimeout(() => {
-                alert(`💔 إجابة خاطئة! رصيدك النهائي: ${currentQ > 0 ? prizes[currentQ-1] : 0} ريال`);
+                alert(`💔 للأسف يا ${playerName} إجابة خاطئة!\nالرصيد المحفوظ لك عند الخسارة هو: ${safePrize} ريال.`);
                 location.reload();
             }, 1500);
         }
     }
 
+    function withdrawGame() {
+        let achievedPrize = currentQIndex > 0 ? PRIZES[currentQIndex - 1] : "0";
+        if (confirm(`هل أنت متأكد من الانسحاب بـ ${achievedPrize} ريال؟`)) {
+            alert(`🏆 تهانينا يا ${playerName}! انسحبت بنجاح وأخذت مبلغ: ${achievedPrize} ريال.`);
+            location.reload();
+        }
+    }
+
+    // الوسائل المساعدة
     function use5050() {
-        let qData = questions[currentQ];
-        let wrongIndices = [0, 1, 2, 3].filter(i => i !== qData.correct);
+        let wrongIndices = [0, 1, 2, 3].filter(i => i !== currentQuestionData.correct);
         wrongIndices.sort(() => Math.random() - 0.5);
         
         document.getElementById(`opt-${wrongIndices[0]}`).style.visibility = "hidden";
         document.getElementById(`opt-${wrongIndices[1]}`).style.visibility = "hidden";
         
-        let btn = document.getElementById('life-50');
-        btn.classList.add('used');
-        btn.onclick = null;
+        markLifelineUsed('life-50');
+    }
+
+    function usePhone() {
+        let correctText = currentQuestionData.opts[currentQuestionData.correct];
+        alert(`📞 الصديق يقول لك: "أنا واثق بنسبة 85% أن الإجابة الصحيحة هي (${correctText})"`);
+        markLifelineUsed('life-phone');
     }
 
     function useAudience() {
-        let qData = questions[currentQ];
-        alert(`📊 رأي الجمهور: الإجابة (${qData.opts[qData.correct]}) هي الأكثر تصويتاً بنسبة 72%!`);
-        let btn = document.getElementById('life-audience');
+        let correctText = currentQuestionData.opts[currentQuestionData.correct];
+        alert(`👥 تصويت الجمهور: الإجابة (${correctText}) حصلت على 74% من أصوات الجمهور!`);
+        markLifelineUsed('life-audience');
+    }
+
+    function useChangeQuestion() {
+        let btn = document.getElementById('life-change');
+        if (btn.classList.contains('locked')) {
+            alert('🔒 وسيلة تغيير السؤال تُفتح فقط بعد تجاوز السؤال الخامس!');
+            return;
+        }
+
+        alert('🔄 تم تغيير السؤال بسؤال جديد بنفس درجة الصعوبة!');
+        // سحب سؤال جديد من نفس الصعوبة
+        let cat = currentQIndex < 5 ? 'easy' : (currentQIndex < 10 ? 'medium' : 'hard');
+        let newQ = shuffleArray(QUESTION_BANK[cat])[0];
+        currentQuestionData = newQ;
+        
+        document.getElementById('question-text').innerText = currentQuestionData.q;
+        for (let i = 0; i < 4; i++) {
+            let b = document.getElementById(`opt-${i}`);
+            b.innerText = `${['أ', 'ب', 'ج', 'د'][i]}) ${currentQuestionData.opts[i]}`;
+            b.className = "btn-option";
+            b.style.visibility = "visible";
+        }
+
+        markLifelineUsed('life-change');
+    }
+
+    function markLifelineUsed(id) {
+        let btn = document.getElementById(id);
         btn.classList.add('used');
         btn.onclick = null;
     }
