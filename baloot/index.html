@@ -32,6 +32,10 @@
         .playing-card { background-color: #FFF; color: #000; font-weight: bold; font-size: 13px; padding: 8px 4px; border-radius: 6px; width: 42px; height: 58px; border: 1px solid #CBD5E1; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: center; cursor: pointer; }
         .playing-card.red { color: #DC2626; }
         
+        /* الورقة المكشوفة الكبيرة بالوسط */
+        .revealed-big-card { background-color: #FFF; color: #000; font-weight: bold; font-size: 22px; width: 70px; height: 95px; border-radius: 10px; border: 3px solid #F59E0B; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 10px auto; box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
+        .revealed-big-card.red { color: #DC2626; }
+
         .bidding-box { background-color: #064E3B; border: 1px solid #F59E0B; border-radius: 8px; padding: 10px; margin-top: 10px; }
         .hidden { display: none; }
         .flex-row { display: flex; gap: 6px; }
@@ -76,34 +80,25 @@
     <!-- 3. طاولة اللعب والحراج -->
     <div id="game-screen" class="hidden">
         <div style="font-size: 12px; color: #F59E0B; margin-bottom: 4px;">
-            الموزع: <strong id="dealer-name">-</strong> | المكشوفة: <strong id="revealed-card">-</strong>
+            الموزع: <strong id="dealer-name">-</strong>
         </div>
+
+        <!-- الورقة المكشوفة الكبيرة بالمنتصف -->
+        <div style="font-size:12px; color:#CBD5E1;">الورقة المكشوفة بالوسط:</div>
+        <div id="revealed-big-box" class="revealed-big-card">-</div>
 
         <div class="players-list" id="game-board-players"></div>
 
-        <!-- مرحلة الشراء والتسويم (أول / ثاني / صن / حكم) -->
+        <!-- لوحة خيارات الحراج والدورات -->
         <div id="bidding-screen" class="bidding-box hidden">
-            <h4 style="margin:2px 0; color:#F59E0B;">مرحلة الحراج والشراء 📢</h4>
-            <div id="bid-round-title" style="font-size:12px; margin-bottom:6px;">الدور الأول (على المكشوف):</div>
-            <div class="flex-row">
-                <button class="btn-primary" onclick="makeBid('sun')">صن ☀️</button>
-                <button class="btn-success" onclick="makeBid('hokm')">حكم 🌙</button>
-                <button class="btn-danger" onclick="makeBid('pass')">بس (بسس) ✋</button>
-            </div>
-            <div class="flex-row" style="margin-top:4px;">
-                <button class="btn-secondary" onclick="makeBid('ashkal')">أشكال 🎴</button>
-            </div>
+            <h4 style="margin:2px 0; color:#F59E0B;" id="bidding-title">مرحلة الشراء (الدورة الأولى) 📢</h4>
+            <div id="bidding-buttons-container" style="margin-top:8px;"></div>
         </div>
 
         <!-- أوراق اللاعب الخاصة -->
         <div style="margin: 6px 0;">
             <div style="font-size: 12px; color: #CBD5E1;">أوراقك الخاصة:</div>
             <div id="my-cards" class="cards-container"></div>
-        </div>
-
-        <!-- ساحة لعب الورق (الفرشة) -->
-        <div id="table-played-cards" class="cards-container" style="background:#064E3B; border:1px solid #10B981; border-radius:8px; min-height:70px; align-items:center;">
-            <span style="font-size:12px; color:#A7F3D0;">الأوراق النازلة في الفرشة</span>
         </div>
     </div>
 </div>
@@ -127,8 +122,6 @@
     let isHost = false;
 
     const SUITS = ['♠️', '♥️', '♦️', '♣️'];
-    const RANKS_SUN = ['A', '10', 'K', 'Q', 'J', '9', '8', '7']; // ترتيب قوة الصن
-    const RANKS_HOKM = ['J', '9', 'A', '10', 'K', 'Q', '8', '7']; // ترتيب قوة الحكم
 
     function saveName(name) { myName = name; localStorage.setItem('baloot_player_name', name); }
 
@@ -183,15 +176,19 @@
         db.ref('baloot_rooms/' + currentRoomCode + '/players').get().then(snap => {
             let pList = snap.val();
             if (pList.length < 4) return alert('يجب اكتمال 4 لاعبين لبدء البلوت!');
-            let deck = buildBalootDeck();
-            
-            // توزيع 3 كروت ثم كرتين (5 كروت لكل لاعب + كرت مكشوف)
-            pList.forEach(p => { p.cards = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()]; });
-            let revealed = deck.pop();
+            startNewRound(pList, 0);
+        });
+    }
 
-            db.ref('baloot_rooms/' + currentRoomCode).update({
-                status: 'playing', players: pList, revealedCard: revealed, deck: deck, turnIndex: 1, bidRound: 1
-            });
+    function startNewRound(pList, dealerIdx) {
+        let deck = buildBalootDeck();
+        pList.forEach(p => { p.cards = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()]; });
+        let revealed = deck.pop();
+        let rightOfDealer = (dealerIdx + 1) % 4; // اليمين يبدأ
+
+        db.ref('baloot_rooms/' + currentRoomCode).update({
+            status: 'playing', players: pList, revealedCard: revealed, deck: deck,
+            dealerIndex: dealerIdx, turnIndex: rightOfDealer, bidRound: 1, passesCount: 0
         });
     }
 
@@ -209,7 +206,16 @@
 
         let pList = data.players || [];
         document.getElementById('dealer-name').innerText = pList[data.dealerIndex] ? pList[data.dealerIndex].name : '-';
-        document.getElementById('revealed-card').innerText = data.revealedCard ? `${data.revealedCard.rank}${data.revealedCard.suit}` : '-';
+
+        // عرض الكرت المكشوف بالوسط بشكل كبير وواضح
+        let bigBox = document.getElementById('revealed-big-box');
+        if (data.revealedCard) {
+            let isRed = (data.revealedCard.suit === '♥️' || data.revealedCard.suit === '♦️');
+            bigBox.className = `revealed-big-card ${isRed ? 'red' : ''}`;
+            bigBox.innerHTML = `${data.revealedCard.rank}<br>${data.revealedCard.suit}`;
+        } else {
+            bigBox.innerHTML = '-';
+        }
 
         let board = document.getElementById('game-board-players'); board.innerHTML = '';
         let myObj = null;
@@ -217,42 +223,102 @@
         pList.forEach((p, i) => {
             if (p.name === myName) myObj = p;
             let isTurn = (i === data.turnIndex);
+            let isDealer = (i === data.dealerIndex);
             board.innerHTML += `
                 <div class="player-item ${isTurn ? 'active-turn' : ''}">
-                    <span>${p.name} (${p.team === 'us' ? 'فريقنا' : 'فريقهم'})</span>
+                    <span>${p.name} ${isDealer ? '🎲 (الموزع)' : ''}</span>
+                    <span class="badge">${p.team === 'us' ? 'فريقنا 🟩' : 'فريقهم 🟥'}</span>
                 </div>`;
         });
 
         if (myObj && myObj.cards) {
             let mc = document.getElementById('my-cards'); mc.innerHTML = '';
-            myObj.cards.forEach((c, idx) => {
+            myObj.cards.forEach((c) => {
                 let isRed = (c.suit === '♥️' || c.suit === '♦️');
-                mc.innerHTML += `<div class="playing-card ${isRed?'red':''}" onclick="playCard(${idx})">${c.rank}<br>${c.suit}</div>`;
+                mc.innerHTML += `<div class="playing-card ${isRed?'red':''}">${c.rank}<br>${c.suit}</div>`;
             });
         }
 
         let myTurn = (pList[data.turnIndex] && pList[data.turnIndex].name === myName);
+        let biddingBox = document.getElementById('bidding-screen');
+        
         if (myTurn) {
-            document.getElementById('bidding-screen').classList.remove('hidden');
+            biddingBox.classList.remove('hidden');
+            setupBiddingControls(data);
         } else {
-            document.getElementById('bidding-screen').classList.add('hidden');
+            biddingBox.classList.add('hidden');
         }
     }
 
-    function makeBid(type) {
-        db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
-            let data = snap.val();
-            if (type === 'pass') {
-                data.turnIndex = (data.turnIndex + 1) % 4;
+    function setupBiddingControls(data) {
+        let container = document.getElementById('bidding-buttons-container');
+        let title = document.getElementById('bidding-title');
+        let isDealer = (data.turnIndex === data.dealerIndex);
+
+        if (data.bidRound === 1) {
+            title.innerText = 'مرحلة الشراء (الدورة الأولى) 📢';
+            container.innerHTML = `
+                <div class="flex-row">
+                    <button class="btn-primary" onclick="makeBid('sun')">صن ☀️</button>
+                    <button class="btn-success" onclick="makeBid('hokm')">حكم 🌙</button>
+                    <button class="btn-danger" onclick="makeBid('pass')">بس ✋</button>
+                </div>
+                <div class="flex-row" style="margin-top:4px;">
+                    <button class="btn-secondary" onclick="makeBid('ashkal')">أشكال 🎴</button>
+                </div>`;
+        } else {
+            title.innerText = 'مرحلة الشراء (الدورة الثانية) 🔄';
+            if (isDealer) {
+                // خيارات الموزع بالدورة الثانية (صن ثاني / حكم ثاني / ورق للتكويش)
+                container.innerHTML = `
+                    <div class="flex-row">
+                        <button class="btn-primary" onclick="makeBid('sun2')">صن ثاني ☀️</button>
+                        <button class="btn-success" onclick="makeBid('hokm2')">حكم ثاني 🌙</button>
+                    </div>
+                    <button class="btn-danger" style="margin-top:4px;" onclick="makeBid('kawash')">ورق (تكويش الجولة 🔄)</button>`;
             } else {
-                alert(`تم اختيار ${type} بنجاح!`);
+                // خيارات بقية اللاعبين بالدورة الثانية (صن ثاني / حكم ثاني / ولا)
+                container.innerHTML = `
+                    <div class="flex-row">
+                        <button class="btn-primary" onclick="makeBid('sun2')">صن ثاني ☀️</button>
+                        <button class="btn-success" onclick="makeBid('hokm2')">حكم ثاني 🌙</button>
+                        <button class="btn-danger" onclick="makeBid('pass2')">ولا ⚪</button>
+                    </div>`;
             }
-            db.ref('baloot_rooms/' + currentRoomCode).set(data);
-        });
+        }
     }
 
-    function playCard(index) {
-        alert('تم لعب الورقة بنجاح على الفرشة!');
+    function makeBid(choice) {
+        db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
+            let data = snap.val();
+
+            if (choice === 'kawash') {
+                // تكويش الجولة ونقل التوزيع ليمين الموزع
+                alert('تم التكويش! انتقال التوزيع للاعب التالي 🔄');
+                let nextDealer = (data.dealerIndex + 1) % 4;
+                startNewRound(data.players, nextDealer);
+                return;
+            }
+
+            if (choice === 'pass' || choice === 'pass2') {
+                let pCount = (data.passesCount || 0) + 1;
+                let nextTurn = (data.turnIndex + 1) % 4;
+
+                if (pCount === 4 && data.bidRound === 1) {
+                    // الانتقال للدورة الثانية
+                    data.bidRound = 2;
+                    data.passesCount = 0;
+                    data.turnIndex = (data.dealerIndex + 1) % 4; // تبدأ الدورة الثانية من يمين الموزع
+                } else {
+                    data.passesCount = pCount;
+                    data.turnIndex = nextTurn;
+                }
+            } else {
+                alert(`تم اختيار: ${choice} بنجاح!`);
+            }
+
+            db.ref('baloot_rooms/' + currentRoomCode).set(data);
+        });
     }
 
     function startVsBots() {
