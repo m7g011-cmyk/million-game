@@ -122,6 +122,21 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.5);
             position: relative;
         }
+        
+        /* مؤشر العداد المرئي فوق اللاعب النشط */
+        .player-timer-badge {
+            position: absolute;
+            top: -10px;
+            background: #EF4444;
+            color: #FFF;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 1px 6px;
+            border-radius: 10px;
+            border: 1px solid #FFF;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
         .dealer-badge-green {
             position: absolute;
             bottom: -6px;
@@ -140,7 +155,7 @@
             padding: 2px 6px;
             border-radius: 4px;
             margin-top: 2px;
-            max-width: 70px;
+            max-width: 75px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -269,7 +284,7 @@
             cursor: pointer;
             transition: transform 0.2s;
         }
-        .fan-card:hover, .fan-card:active { transform: translateY(-12px); }
+        .fan-card.disabled { opacity: 0.8; cursor: not-allowed; }
         .fan-card.red { color: #DC2626; }
 
         .bottom-mic-bar {
@@ -288,7 +303,7 @@
 
 <div class="majlis-container">
 
-    <!-- النشرة الكلية (أعلى اليمين) -->
+    <!-- النشرة الكلية -->
     <div class="score-card-top">
         <div class="score-title-row">
             <span class="score-us">لنا</span>
@@ -302,10 +317,9 @@
         </div>
     </div>
 
-    <!-- المؤقت والأدوات (أعلى اليسار) -->
+    <!-- أزرار الإعدادات -->
     <div class="top-left-bar">
         <div class="icon-btn-round">☰</div>
-        <div class="icon-btn-round" style="color:#EF4444; font-size:12px; font-weight:bold;">⏳<span id="timer-display">10</span></div>
     </div>
 
     <!-- السجادة بمنتصف الطاولة -->
@@ -327,6 +341,7 @@
     <div class="player-avatar-box player-top">
         <div class="avatar-circle">
             🧔🏻‍♂️
+            <span class="player-timer-badge hidden" id="timer-top">⏳ 10s</span>
             <span class="dealer-badge-green hidden" id="dealer-top">الموزع</span>
         </div>
         <span class="player-name-lbl" id="name-top">الخوي</span>
@@ -337,6 +352,7 @@
     <div class="player-avatar-box player-left">
         <div class="avatar-circle">
             👨🏽‍
+            <span class="player-timer-badge hidden" id="timer-left">⏳ 10s</span>
             <span class="dealer-badge-green hidden" id="dealer-left">الموزع</span>
         </div>
         <span class="player-name-lbl" id="name-left">خصم يسار</span>
@@ -359,6 +375,7 @@
     <div class="player-avatar-box player-right">
         <div class="avatar-circle">
             🧔🏽
+            <span class="player-timer-badge hidden" id="timer-right">⏳ 10s</span>
             <span class="dealer-badge-green hidden" id="dealer-right">الموزع</span>
         </div>
         <span class="player-name-lbl" id="name-right">خصم يمين</span>
@@ -377,6 +394,7 @@
     <div class="player-avatar-box player-bottom">
         <div class="avatar-circle">
             🇸🇦
+            <span class="player-timer-badge hidden" id="timer-bottom">⏳ 10s</span>
             <span class="dealer-badge-green hidden" id="dealer-bottom">الموزع</span>
         </div>
     </div>
@@ -473,7 +491,7 @@
         let deck = buildBalootDeck();
         playersList.forEach(p => { p.cards = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()]; });
         let revealed = deck.pop();
-        let rightOfDealer = (dealerIdx + 1) % 4; // اليمين يظهر له خيار الشراء فوراً
+        let rightOfDealer = (dealerIdx + 1) % 4;
 
         db.ref('baloot_rooms/' + currentRoomCode).set({
             status: 'playing', scoreUsTotal: 0, scoreThemTotal: 0, dealerIndex: dealerIdx, turnIndex: rightOfDealer, bidRound: 1,
@@ -526,6 +544,9 @@
             });
         }
 
+        let myTurn = (data.turnIndex === myIndex);
+
+        // إظهار كروتي مع تعطيل الضغط عليها إذا لم يكن دوري
         let myObj = pList[myIndex];
         let fanBox = document.getElementById('my-cards-fan');
         fanBox.innerHTML = '';
@@ -533,7 +554,7 @@
             myObj.cards.forEach((c, idx) => {
                 let isRed = (c.suit === '♥️' || c.suit === '♦️');
                 fanBox.innerHTML += `
-                    <div class="fan-card ${isRed ? 'red' : ''}" onclick="playCard(${idx})">
+                    <div class="fan-card ${isRed ? 'red' : ''} ${!myTurn || data.mode === 'bidding' ? 'disabled' : ''}" onclick="playCard(${idx})">
                         <div>${c.rank}</div>
                         <div style="align-self:center; font-size:16px;">${c.suit}</div>
                         <div style="align-self:flex-end;">${c.rank}</div>
@@ -541,20 +562,33 @@
             });
         }
 
-        let myTurn = (data.turnIndex === myIndex);
         let biddingBox = document.getElementById('bidding-screen');
-
         if (myTurn && data.mode === 'bidding') {
             biddingBox.classList.remove('hidden');
-            startTimer(10, () => makeBid('pass'));
         } else {
             biddingBox.classList.add('hidden');
         }
 
+        // إشهار العداد فوق اللاعب المعني للجميع
+        updateActivePlayerTimer(data.turnIndex);
+
         let currPlayer = pList[data.turnIndex];
         if (currPlayer && currPlayer.type === 'آلي' && isHost) {
             startTimer(3, () => handleBotTurn(data, data.turnIndex));
+        } else if (myTurn) {
+            startTimer(10, () => autoTimeOutAction(data));
         }
+    }
+
+    function updateActivePlayerTimer(turnIndex) {
+        let topIdx = (myIndex + 2) % 4;
+        let rightIdx = (myIndex + 1) % 4;
+        let leftIdx = (myIndex + 3) % 4;
+
+        document.getElementById('timer-bottom').classList.toggle('hidden', turnIndex !== myIndex);
+        document.getElementById('timer-top').classList.toggle('hidden', turnIndex !== topIdx);
+        document.getElementById('timer-right').classList.toggle('hidden', turnIndex !== rightIdx);
+        document.getElementById('timer-left').classList.toggle('hidden', turnIndex !== leftIdx);
     }
 
     function renderBackCards(elemId, playerObj) {
@@ -570,10 +604,19 @@
     function startTimer(sec, onTimeout) {
         clearInterval(timerInterval);
         let left = sec;
-        document.getElementById('timer-display').innerText = left;
+        
+        ['bottom', 'top', 'right', 'left'].forEach(pos => {
+            let el = document.getElementById(`timer-${pos}`);
+            if (el) el.innerText = `⏳ ${left}s`;
+        });
+
         timerInterval = setInterval(() => {
             left--;
-            document.getElementById('timer-display').innerText = left;
+            ['bottom', 'top', 'right', 'left'].forEach(pos => {
+                let el = document.getElementById(`timer-${pos}`);
+                if (el) el.innerText = `⏳ ${left}s`;
+            });
+
             if (left <= 0) {
                 clearInterval(timerInterval);
                 if (onTimeout) onTimeout();
@@ -581,7 +624,14 @@
         }, 1000);
     }
 
-    // شراء مباشر وتوزيع فوري للـ 8 أوراق
+    function autoTimeOutAction(data) {
+        if (data.mode === 'bidding') {
+            makeBid('pass');
+        } else {
+            playCard(0);
+        }
+    }
+
     function makeBid(choice) {
         clearInterval(timerInterval);
         db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
@@ -604,7 +654,6 @@
                     data.turnIndex = nextTurn;
                 }
             } else {
-                // عند الشراء المباشر: إضافة المكشوفة للمشتري وتوزيع باقي الـ 8 كروت فوراً للجميع
                 let buyerIndex = data.turnIndex;
                 let buyer = data.players[buyerIndex];
                 
@@ -620,7 +669,7 @@
                 });
 
                 data.mode = 'playing_cards';
-                data.turnIndex = (data.dealerIndex + 1) % 4; // يبدأ اللعب فوراً من يمين الموزع
+                data.turnIndex = (data.dealerIndex + 1) % 4;
             }
 
             db.ref('baloot_rooms/' + currentRoomCode).set(data);
@@ -636,9 +685,13 @@
     }
 
     function playCard(index) {
-        clearInterval(timerInterval);
         db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
             let data = snap.val();
+            
+            // حماية صارمة: منع لعب أوراق إذا لم يكن دور اللاعب الحقيقي الحالي
+            if (data.turnIndex !== myIndex || data.mode === 'bidding') return;
+
+            clearInterval(timerInterval);
             let playerObj = data.players[data.turnIndex];
             
             if (playerObj && playerObj.cards && playerObj.cards[index]) {
