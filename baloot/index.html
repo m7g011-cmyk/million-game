@@ -23,7 +23,6 @@
             overflow: hidden; 
         }
         
-        /* الطاولة والمجلس العربي */
         .majlis-container {
             width: 100vw;
             max-width: 440px;
@@ -39,7 +38,6 @@
             box-shadow: 0 0 30px rgba(0,0,0,0.9);
         }
 
-        /* السجادة بمنتصف الطاولة */
         .carpet-floor {
             position: absolute;
             top: 15%;
@@ -63,7 +61,6 @@
             opacity: 0.3;
         }
 
-        /* لوحة النشرة النمطية (أعلى اليمين) */
         .score-card-top {
             position: absolute;
             top: 12px;
@@ -83,7 +80,6 @@
         .score-us { color: #16A34A; }
         .score-them { color: #DC2626; }
 
-        /* تفاصيل أعلى اليسار والرمز */
         .top-left-bar {
             position: absolute;
             top: 12px;
@@ -106,7 +102,6 @@
             color: #FFF;
         }
 
-        /* أماكن اللاعبين الأربعة */
         .player-avatar-box {
             position: absolute;
             display: flex;
@@ -151,13 +146,11 @@
             white-space: nowrap;
         }
 
-        /* توزيع الأماكن */
         .player-top { top: 60px; left: 50%; transform: translateX(-50%); }
         .player-left { top: 38%; left: 10px; }
         .player-right { top: 38%; right: 10px; }
         .player-bottom { bottom: 120px; right: 14px; }
 
-        /* كروت الخصوم المقلوبة */
         .cards-back-fan { display: flex; gap: -10px; margin-top: 2px; }
         .card-back-blue {
             width: 24px;
@@ -169,7 +162,6 @@
             margin-left: -10px;
         }
 
-        /* وسط الفرشة (الورقة المكشوفة) */
         .center-deck-area {
             position: absolute;
             top: 50%;
@@ -197,7 +189,32 @@
         }
         .revealed-big-card-img.red { color: #DC2626; }
 
-        /* أزرار الحراج الملونة بالأسفل */
+        .floor-played-area {
+            display: flex;
+            gap: 6px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 18;
+        }
+        .played-card-floor {
+            width: 44px;
+            height: 62px;
+            background: #FFF;
+            color: #000;
+            font-weight: bold;
+            font-size: 13px;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #333;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+        .played-card-floor.red { color: #DC2626; }
+
         .bidding-bar-yellow {
             position: absolute;
             bottom: 125px;
@@ -224,7 +241,6 @@
         .btn-yellow { background: linear-gradient(180deg, #FCD34D, #F59E0B); color: #451A03; }
         .btn-white { background: linear-gradient(180deg, #FFFFFF, #E2E8F0); color: #1E293B; }
 
-        /* أوراق اللاعب بالأسفل (طريقة مروحية احترافية) */
         .my-hand-fan {
             position: absolute;
             bottom: 10px;
@@ -236,19 +252,19 @@
             width: 100%;
         }
         .fan-card {
-            width: 58px;
-            height: 86px;
+            width: 46px;
+            height: 72px;
             background: #FFFFFF;
-            border-radius: 8px;
+            border-radius: 6px;
             border: 1px solid #94A3B8;
             box-shadow: -2px 4px 8px rgba(0,0,0,0.4);
-            margin-left: -18px;
+            margin-left: -14px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 4px;
+            padding: 3px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 12px;
             color: #000;
             cursor: pointer;
             transition: transform 0.2s;
@@ -256,7 +272,6 @@
         .fan-card:hover, .fan-card:active { transform: translateY(-12px); }
         .fan-card.red { color: #DC2626; }
 
-        /* شريط سفلي للمايك والدردشة */
         .bottom-mic-bar {
             position: absolute;
             bottom: 6px;
@@ -287,7 +302,7 @@
         </div>
     </div>
 
-    <!-- أزرار الإعدادات (أعلى اليسار) -->
+    <!-- أزرار الإعدادات والمؤقت (أعلى اليسار) -->
     <div class="top-left-bar">
         <div class="icon-btn-round">☰</div>
         <div class="icon-btn-round" style="color:#EF4444; font-size:12px; font-weight:bold;">⏳<span id="timer-display">10</span></div>
@@ -315,9 +330,7 @@
             <span class="dealer-badge-green hidden" id="dealer-top">الموزع</span>
         </div>
         <span class="player-name-lbl" id="name-top">الخوي</span>
-        <div class="cards-back-fan">
-            <div class="card-back-blue"></div><div class="card-back-blue"></div><div class="card-back-blue"></div>
-        </div>
+        <div class="cards-back-fan" id="cards-top-back"></div>
     </div>
 
     <!-- الخصم الأيسر (يسار الطاولة) -->
@@ -327,20 +340,20 @@
             <span class="dealer-badge-green hidden" id="dealer-left">الموزع</span>
         </div>
         <span class="player-name-lbl" id="name-left">خصم يسار</span>
-        <div class="cards-back-fan" style="flex-direction:column; margin-top:4px;">
-            <div class="card-back-blue" style="margin-left:0; margin-top:-20px;"></div>
-            <div class="card-back-blue" style="margin-left:0; margin-top:-20px;"></div>
-        </div>
+        <div class="cards-back-fan" id="cards-left-back" style="flex-direction:column; margin-top:4px;"></div>
     </div>
 
-    <!-- الورقة المكشوفة بالوسط -->
-    <div class="center-deck-area">
+    <!-- الورقة المكشوفة بمنتصف الفرشة -->
+    <div class="center-deck-area" id="center-deck-area">
         <div id="revealed-card-center" class="revealed-big-card-img">
             <div>-</div>
             <div style="align-self: center; font-size: 24px;">♠️</div>
             <div style="align-self: flex-end;">-</div>
         </div>
     </div>
+
+    <!-- كروت اللعب في الفرشة -->
+    <div class="floor-played-area" id="floor-played-area"></div>
 
     <!-- الخصم الأيمن (يمين الطاولة) -->
     <div class="player-avatar-box player-right">
@@ -349,13 +362,10 @@
             <span class="dealer-badge-green hidden" id="dealer-right">الموزع</span>
         </div>
         <span class="player-name-lbl" id="name-right">خصم يمين</span>
-        <div class="cards-back-fan" style="flex-direction:column; margin-top:4px;">
-            <div class="card-back-blue" style="margin-left:0; margin-top:-20px;"></div>
-            <div class="card-back-blue" style="margin-left:0; margin-top:-20px;"></div>
-        </div>
+        <div class="cards-back-fan" id="cards-right-back" style="flex-direction:column; margin-top:4px;"></div>
     </div>
 
-    <!-- أزرار الحراج والشراء (الكبسات البيضاء والصفراء) -->
+    <!-- أزرار الحراج والشراء الملونة -->
     <div id="bidding-screen" class="bidding-bar-yellow hidden">
         <button class="btn-bid-pill btn-yellow" onclick="makeBid('hokm')">حكم</button>
         <button class="btn-bid-pill btn-yellow" onclick="makeBid('sun')">صن</button>
@@ -371,10 +381,10 @@
         </div>
     </div>
 
-    <!-- كروتك المروحية بالأسفل -->
+    <!-- كروتك المروحية بالأسفل (8 أوراق عند اكتمال اللعب) -->
     <div class="my-hand-fan" id="my-cards-fan"></div>
 
-    <!-- شريط الصوت والأدوات بالأسفل -->
+    <!-- شريط الأدوات بالأسفل -->
     <div class="bottom-mic-bar">
         <div class="icon-btn-round" style="font-size:14px;">🎙️</div>
         <div class="icon-btn-round" style="font-size:14px;">💬</div>
@@ -403,7 +413,6 @@
     let timerInterval = null;
 
     const SUITS = ['♠️', '♥️', '♦️', '♣️'];
-    const RANK_POWER = { 'A': 8, '10': 7, 'K': 6, 'Q': 5, 'J': 4, '9': 3, '8': 2, '7': 1 };
 
     function saveName(name) { myName = name; localStorage.setItem('baloot_player_name', name); }
 
@@ -421,7 +430,7 @@
     function joinRoom() {
         let name = document.getElementById('player-name').value.trim();
         let code = document.getElementById('room-code-input').value.trim();
-        if (!name || !code) return alert('أدخل التواصيل كاملاً!');
+        if (!name || !code) return alert('أدخل بياناتك كاملة!');
         saveName(name); currentRoomCode = code;
         db.ref('baloot_rooms/' + code).get().then(snap => {
             if (snap.exists()) {
@@ -457,13 +466,20 @@
             { name: 'خصم يسار 🤖', team: 'them', isHost: false, type: 'آلي' }
         ];
         
+        startNewRound(players, 0);
+    }
+
+    function startNewRound(playersList, dealerIdx) {
         let deck = buildBalootDeck();
-        players.forEach(p => { p.cards = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()]; });
+        // توزيع 5 كروت فقط لكل لاعب في المرحلة الأولى
+        playersList.forEach(p => { p.cards = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()]; });
+        // كشف ورقة عشوائية واحدة في الوسط
         let revealed = deck.pop();
+        let rightOfDealer = (dealerIdx + 1) % 4;
 
         db.ref('baloot_rooms/' + currentRoomCode).set({
-            status: 'playing', scoreUsTotal: 0, scoreThemTotal: 0, dealerIndex: 0, turnIndex: 1, bidRound: 1,
-            players: players, revealedCard: revealed, deck: deck, mode: 'bidding'
+            status: 'playing', scoreUsTotal: 0, scoreThemTotal: 0, dealerIndex: dealerIdx, turnIndex: rightOfDealer, bidRound: 1,
+            players: playersList, revealedCard: revealed, deck: deck, mode: 'bidding', floorCards: [], passesCount: 0
         }).then(() => { listenToRoom(); });
     }
 
@@ -483,21 +499,38 @@
         document.getElementById('name-right').innerText = pList[(myIndex + 1) % 4] ? pList[(myIndex + 1) % 4].name : 'خصم يمين';
         document.getElementById('name-left').innerText = pList[(myIndex + 3) % 4] ? pList[(myIndex + 3) % 4].name : 'خصم يسار';
 
-        // إظهار الشارة الخضراء للموزع
+        renderBackCards('cards-top-back', pList[(myIndex + 2) % 4]);
+        renderBackCards('cards-right-back', pList[(myIndex + 1) % 4]);
+        renderBackCards('cards-left-back', pList[(myIndex + 3) % 4]);
+
         document.getElementById('dealer-top').classList.toggle('hidden', data.dealerIndex !== (myIndex + 2) % 4);
         document.getElementById('dealer-right').classList.toggle('hidden', data.dealerIndex !== (myIndex + 1) % 4);
         document.getElementById('dealer-left').classList.toggle('hidden', data.dealerIndex !== (myIndex + 3) % 4);
         document.getElementById('dealer-bottom').classList.toggle('hidden', data.dealerIndex !== myIndex);
 
-        // إظهار الورقة المكشوفة بالمنتصف
-        let centerCard = document.getElementById('revealed-card-center');
-        if (data.revealedCard) {
+        // إظهار أو إخفاء الورقة المكشوفة بالوسط (تختفي إذا الشتراها أحد)
+        let centerDeckArea = document.getElementById('center-deck-area');
+        if (data.revealedCard && data.mode === 'bidding') {
+            centerDeckArea.classList.remove('hidden');
+            let centerCard = document.getElementById('revealed-card-center');
             let isRed = (data.revealedCard.suit === '♥️' || data.revealedCard.suit === '♦️');
             centerCard.className = `revealed-big-card-img ${isRed ? 'red' : ''}`;
             centerCard.innerHTML = `<div>${data.revealedCard.rank}</div><div style="align-self:center; font-size:24px;">${data.revealedCard.suit}</div><div style="align-self:flex-end;">${data.revealedCard.rank}</div>`;
+        } else {
+            centerDeckArea.classList.add('hidden');
         }
 
-        // إظهار أوراقي بالأسفل مروحية
+        // إظهار كروت اللعب في الفرشة
+        let floorArea = document.getElementById('floor-played-area');
+        floorArea.innerHTML = '';
+        if (data.floorCards) {
+            data.floorCards.forEach(c => {
+                let isRed = (c.suit === '♥️' || c.suit === '♦️');
+                floorArea.innerHTML += `<div class="played-card-floor ${isRed ? 'red' : ''}">${c.rank}<br>${c.suit}</div>`;
+            });
+        }
+
+        // إظهار أوراقي بالأسفل
         let myObj = pList[myIndex];
         let fanBox = document.getElementById('my-cards-fan');
         fanBox.innerHTML = '';
@@ -507,13 +540,12 @@
                 fanBox.innerHTML += `
                     <div class="fan-card ${isRed ? 'red' : ''}" onclick="playCard(${idx})">
                         <div>${c.rank}</div>
-                        <div style="align-self:center; font-size:18px;">${c.suit}</div>
+                        <div style="align-self:center; font-size:16px;">${c.suit}</div>
                         <div style="align-self:flex-end;">${c.rank}</div>
                     </div>`;
             });
         }
 
-        // أزرار الحراج الملونة بالأسفل
         let myTurn = (data.turnIndex === myIndex);
         let biddingBox = document.getElementById('bidding-screen');
 
@@ -524,10 +556,20 @@
             biddingBox.classList.add('hidden');
         }
 
-        // البوت يلعب خلال 3 ثوانٍ
+        // البوت يقرر خلال 3 ثوانٍ
         let currPlayer = pList[data.turnIndex];
         if (currPlayer && currPlayer.type === 'آلي' && isHost) {
             startTimer(3, () => handleBotTurn(data, data.turnIndex));
+        }
+    }
+
+    function renderBackCards(elemId, playerObj) {
+        let el = document.getElementById(elemId);
+        el.innerHTML = '';
+        if (!playerObj || !playerObj.cards) return;
+        let cnt = playerObj.cards.length;
+        for (let i = 0; i < cnt; i++) {
+            el.innerHTML += `<div class="card-back-blue"></div>`;
         }
     }
 
@@ -545,29 +587,82 @@
         }, 1000);
     }
 
+    // الشراء: إضافة الورقة المكشوفة للمشتري وتكملة الـ 8 كروت لكل لاعب
     function makeBid(choice) {
         clearInterval(timerInterval);
         db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
             let data = snap.val();
-            let nextTurn = (data.turnIndex + 1) % 4;
-            data.turnIndex = nextTurn;
+
+            if (choice === 'pass') {
+                let pCount = (data.passesCount || 0) + 1;
+                let nextTurn = (data.turnIndex + 1) % 4;
+
+                if (pCount === 4 && data.bidRound === 1) {
+                    data.bidRound = 2;
+                    data.passesCount = 0;
+                    data.turnIndex = (data.dealerIndex + 1) % 4;
+                } else if (pCount === 4 && data.bidRound === 2) {
+                    // تكويش وتوزيع جديد عند تمرير الجميع بالدورة الثانية
+                    let nextDealer = (data.dealerIndex + 1) % 4;
+                    startNewRound(data.players, nextDealer);
+                    return;
+                } else {
+                    data.passesCount = pCount;
+                    data.turnIndex = nextTurn;
+                }
+            } else {
+                // شراء الورقة المكشوفة وتوزيع بقية الكروت ليصل كل لاعب إلى 8 كروت
+                let buyerIndex = data.turnIndex;
+                let buyer = data.players[buyerIndex];
+                
+                // إضافة الورقة المكشوفة للمشتري
+                buyer.cards.push(data.revealedCard);
+                data.revealedCard = null; // إخفاء الورقة من الوسط
+
+                // استكمال التوزيع (3 كروت إضافية للشاري، و3 كروت لبقية اللاعبين)
+                data.players.forEach((p, idx) => {
+                    if (idx === buyerIndex) {
+                        // المشتري يكتمل لـ 8 كروت (معه 5 + المكشوفة + كرتين إضافية)
+                        p.cards.push(data.deck.pop(), data.deck.pop());
+                    } else {
+                        // بقية اللاعبين يكتملون لـ 8 كروت (معهم 5 + 3 كروت إضافية)
+                        p.cards.push(data.deck.pop(), data.deck.pop(), data.deck.pop());
+                    }
+                });
+
+                data.mode = 'playing_cards';
+                data.turnIndex = (data.dealerIndex + 1) % 4; // تبدأ اللعبة من يمين الموزع
+            }
+
             db.ref('baloot_rooms/' + currentRoomCode).set(data);
         });
     }
 
     function handleBotTurn(data, botIndex) {
-        let nextTurn = (data.turnIndex + 1) % 4;
-        data.turnIndex = nextTurn;
-        db.ref('baloot_rooms/' + currentRoomCode).set(data);
+        if (data.mode === 'bidding') {
+            makeBid('pass');
+        } else {
+            // البوت ينزل الكرت الأول التلقائي
+            playCard(0);
+        }
     }
 
     function playCard(index) {
         clearInterval(timerInterval);
         db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
             let data = snap.val();
-            let myPlayer = data.players[myIndex];
-            if (myPlayer && myPlayer.cards && myPlayer.cards[index]) {
-                myPlayer.cards.splice(index, 1);
+            let playerObj = data.players[data.turnIndex];
+            
+            if (playerObj && playerObj.cards && playerObj.cards[index]) {
+                let played = playerObj.cards.splice(index, 1)[0];
+                if (!data.floorCards) data.floorCards = [];
+                data.floorCards.push(played);
+
+                // إزاحة الأكلة عند نزول 4 كروت
+                if (data.floorCards.length === 4) {
+                    data.floorCards = [];
+                }
+
                 data.turnIndex = (data.turnIndex + 1) % 4;
             }
             db.ref('baloot_rooms/' + currentRoomCode).set(data);
