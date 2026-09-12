@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة البلوت أونلاين ♠️</title>
+    <title>لعبة البلوت الاحترافية ♠️</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
         body { background-color: #064E3B; color: white; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 12px; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
-        .card { background-color: #022C22; border: 2px solid #F59E0B; border-radius: 16px; padding: 16px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.6); }
+        .card { background-color: #022C22; border: 2px solid #F59E0B; border-radius: 16px; padding: 16px; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.6); position: relative; }
         h1 { color: #F59E0B; margin-bottom: 6px; font-size: 24px; }
         input, select { width: 100%; padding: 10px; margin: 6px 0; border-radius: 8px; border: 1px solid #065F46; background-color: #064E3B; color: white; box-sizing: border-box; font-size: 14px; text-align: center; }
         button { width: 100%; padding: 11px; margin: 5px 0; border-radius: 8px; border: none; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; }
@@ -20,23 +20,25 @@
         .btn-danger { background-color: #EF4444; color: #fff; }
         .btn-secondary { background-color: #475569; color: #fff; }
         
-        .score-board { display: flex; justify-content: space-around; background: #064E3B; border: 1px solid #10B981; border-radius: 10px; padding: 10px; margin: 10px 0; font-weight: bold; }
+        .score-board { display: flex; justify-content: space-around; background: #064E3B; border: 1px solid #10B981; border-radius: 10px; padding: 8px; margin: 8px 0; font-weight: bold; }
         .score-box { text-align: center; }
-        .score-val { font-size: 20px; color: #F59E0B; }
+        .score-val { font-size: 18px; color: #F59E0B; }
         
-        .players-list { background-color: #064E3B; border: 1px solid #065F46; border-radius: 10px; padding: 8px; margin: 10px 0; text-align: right; }
-        .player-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; margin: 4px 0; background: #022C22; border-radius: 6px; font-size: 13px; }
+        .timer-badge { font-size: 15px; color: #EF4444; font-weight: bold; background: #0F172A; padding: 2px 8px; border-radius: 6px; border: 1px solid #EF4444; }
+        
+        .players-list { background-color: #064E3B; border: 1px solid #065F46; border-radius: 10px; padding: 6px; margin: 8px 0; text-align: right; }
+        .player-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; margin: 4px 0; background: #022C22; border-radius: 6px; font-size: 13px; }
         .player-item.active-turn { border: 2px solid #F59E0B; background: #15803D; }
         
-        .cards-container { display: flex; justify-content: center; gap: 4px; margin: 10px 0; flex-wrap: wrap; }
-        .playing-card { background-color: #FFF; color: #000; font-weight: bold; font-size: 13px; padding: 8px 4px; border-radius: 6px; width: 42px; height: 58px; border: 1px solid #CBD5E1; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: center; cursor: pointer; }
+        .cards-container { display: flex; justify-content: center; gap: 4px; margin: 8px 0; flex-wrap: wrap; }
+        .playing-card { background-color: #FFF; color: #000; font-weight: bold; font-size: 13px; padding: 6px 4px; border-radius: 6px; width: 42px; height: 58px; border: 1px solid #CBD5E1; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: center; cursor: pointer; }
         .playing-card.red { color: #DC2626; }
         
-        /* الورقة المكشوفة الكبيرة بالوسط */
-        .revealed-big-card { background-color: #FFF; color: #000; font-weight: bold; font-size: 22px; width: 70px; height: 95px; border-radius: 10px; border: 3px solid #F59E0B; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 10px auto; box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
+        .revealed-big-card { background-color: #FFF; color: #000; font-weight: bold; font-size: 20px; width: 65px; height: 85px; border-radius: 10px; border: 3px solid #F59E0B; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 6px auto; box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }
         .revealed-big-card.red { color: #DC2626; }
 
-        .bidding-box { background-color: #064E3B; border: 1px solid #F59E0B; border-radius: 8px; padding: 10px; margin-top: 10px; }
+        .bidding-box { background-color: #064E3B; border: 1px solid #F59E0B; border-radius: 8px; padding: 8px; margin-top: 8px; }
+        .project-alert { background: rgba(245, 158, 11, 0.2); border: 1px solid #F59E0B; color: #FCD34D; padding: 6px; border-radius: 6px; font-size: 12px; margin: 6px 0; }
         .hidden { display: none; }
         .flex-row { display: flex; gap: 6px; }
     </style>
@@ -52,7 +54,7 @@
             <div>لنا 🟩</div>
             <div class="score-val" id="score-us">0</div>
         </div>
-        <div style="font-size:20px; color:#F59E0B;">VS</div>
+        <div style="font-size:18px; color:#F59E0B;">VS</div>
         <div class="score-box">
             <div>لهم 🟥</div>
             <div class="score-val" id="score-them">0</div>
@@ -79,26 +81,46 @@
 
     <!-- 3. طاولة اللعب والحراج -->
     <div id="game-screen" class="hidden">
-        <div style="font-size: 12px; color: #F59E0B; margin-bottom: 4px;">
-            الموزع: <strong id="dealer-name">-</strong>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <span style="font-size: 12px; color: #F59E0B;">الموزع: <strong id="dealer-name">-</strong></span>
+            <span class="timer-badge">⏳ <span id="timer-display">10</span>s</span>
         </div>
 
         <!-- الورقة المكشوفة الكبيرة بالمنتصف -->
-        <div style="font-size:12px; color:#CBD5E1;">الورقة المكشوفة بالوسط:</div>
+        <div style="font-size:11px; color:#CBD5E1;">الورقة المكشوفة بالوسط:</div>
         <div id="revealed-big-box" class="revealed-big-card">-</div>
 
         <div class="players-list" id="game-board-players"></div>
 
+        <!-- لوحة المشاريع (قبل نزول الكرت الأول) -->
+        <div id="project-declaration-box" class="bidding-box hidden">
+            <div class="project-alert">إشهار المشاريع قبل نزول أول ورقة (تُعرض بـ الأكلة الثانية)</div>
+            <div class="flex-row">
+                <button class="btn-primary" onclick="declareProject('sira')">سرا (3 كروت متتالية)</button>
+                <button class="btn-primary" onclick="declareProject('50')">50 (4 كروت متتالية)</button>
+            </div>
+            <div class="flex-row" style="margin-top:4px;">
+                <button class="btn-primary" onclick="declareProject('100')">100</button>
+                <button class="btn-primary" onclick="declareProject('400')">400 (4 أكك)</button>
+                <button class="btn-secondary" onclick="declareProject('none')">بدون مشروع</button>
+            </div>
+        </div>
+
         <!-- لوحة خيارات الحراج والدورات -->
         <div id="bidding-screen" class="bidding-box hidden">
             <h4 style="margin:2px 0; color:#F59E0B;" id="bidding-title">مرحلة الشراء (الدورة الأولى) 📢</h4>
-            <div id="bidding-buttons-container" style="margin-top:8px;"></div>
+            <div id="bidding-buttons-container" style="margin-top:6px;"></div>
         </div>
 
         <!-- أوراق اللاعب الخاصة -->
         <div style="margin: 6px 0;">
             <div style="font-size: 12px; color: #CBD5E1;">أوراقك الخاصة:</div>
             <div id="my-cards" class="cards-container"></div>
+        </div>
+
+        <!-- الفرشة النازلة -->
+        <div id="table-played-cards" class="cards-container" style="background:#064E3B; border:1px solid #10B981; border-radius:8px; min-height:65px; align-items:center;">
+            <span style="font-size:11px; color:#A7F3D0;" id="floor-status-text">أوراق الفرشة النازلة</span>
         </div>
     </div>
 </div>
@@ -120,6 +142,7 @@
     let currentRoomCode = null;
     let myName = "";
     let isHost = false;
+    let timerInterval = null;
 
     const SUITS = ['♠️', '♥️', '♦️', '♣️'];
 
@@ -130,9 +153,9 @@
         if (!name) return alert('أدخل اسمك أولاً!');
         saveName(name); isHost = true;
         currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
-        let p = { name: name, team: 'us', isHost: true, type: 'حقيقي' };
+        let p = { name: name, team: 'us', isHost: true, type: 'حقيقي', project: '' };
         db.ref('baloot_rooms/' + currentRoomCode).set({
-            status: 'waiting', scoreUs: 0, scoreThem: 0, dealerIndex: 0, turnIndex: 1, bidRound: 1, players: [p]
+            status: 'waiting', scoreUs: 0, scoreThem: 0, dealerIndex: 0, turnIndex: 1, bidRound: 1, trickCount: 0, players: [p]
         }).then(() => { listenToRoom(); openWaiting(); });
     }
 
@@ -146,7 +169,7 @@
                 let pList = snap.val().players || [];
                 if (pList.length >= 4) return alert('طاولة البلوت مكتملة!');
                 let team = (pList.length % 2 === 0) ? 'us' : 'them';
-                pList.push({ name: name, team: team, isHost: false, type: 'حقيقي' });
+                pList.push({ name: name, team: team, isHost: false, type: 'حقيقي', project: '' });
                 db.ref('baloot_rooms/' + code + '/players').set(pList).then(() => { listenToRoom(); openWaiting(); });
             } else alert('الطاولة غير موجودة!');
         });
@@ -182,13 +205,13 @@
 
     function startNewRound(pList, dealerIdx) {
         let deck = buildBalootDeck();
-        pList.forEach(p => { p.cards = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()]; });
+        pList.forEach(p => { p.cards = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()]; p.project = ''; });
         let revealed = deck.pop();
-        let rightOfDealer = (dealerIdx + 1) % 4; // اليمين يبدأ
+        let rightOfDealer = (dealerIdx + 1) % 4;
 
         db.ref('baloot_rooms/' + currentRoomCode).update({
             status: 'playing', players: pList, revealedCard: revealed, deck: deck,
-            dealerIndex: dealerIdx, turnIndex: rightOfDealer, bidRound: 1, passesCount: 0
+            dealerIndex: dealerIdx, turnIndex: rightOfDealer, bidRound: 1, passesCount: 0, trickCount: 0, mode: 'bidding'
         });
     }
 
@@ -207,7 +230,6 @@
         let pList = data.players || [];
         document.getElementById('dealer-name').innerText = pList[data.dealerIndex] ? pList[data.dealerIndex].name : '-';
 
-        // عرض الكرت المكشوف بالوسط بشكل كبير وواضح
         let bigBox = document.getElementById('revealed-big-box');
         if (data.revealedCard) {
             let isRed = (data.revealedCard.suit === '♥️' || data.revealedCard.suit === '♦️');
@@ -226,27 +248,86 @@
             let isDealer = (i === data.dealerIndex);
             board.innerHTML += `
                 <div class="player-item ${isTurn ? 'active-turn' : ''}">
-                    <span>${p.name} ${isDealer ? '🎲 (الموزع)' : ''}</span>
+                    <span>${p.name} ${isDealer ? '🎲 (الموزع)' : ''} ${p.project ? `[مشروع: ${p.project}]` : ''}</span>
                     <span class="badge">${p.team === 'us' ? 'فريقنا 🟩' : 'فريقهم 🟥'}</span>
                 </div>`;
         });
 
         if (myObj && myObj.cards) {
             let mc = document.getElementById('my-cards'); mc.innerHTML = '';
-            myObj.cards.forEach((c) => {
+            myObj.cards.forEach((c, idx) => {
                 let isRed = (c.suit === '♥️' || c.suit === '♦️');
-                mc.innerHTML += `<div class="playing-card ${isRed?'red':''}">${c.rank}<br>${c.suit}</div>`;
+                mc.innerHTML += `<div class="playing-card ${isRed?'red':''}" onclick="playCard(${idx})">${c.rank}<br>${c.suit}</div>`;
             });
         }
 
-        let myTurn = (pList[data.turnIndex] && pList[data.turnIndex].name === myName);
+        let currPlayer = pList[data.turnIndex];
+
+        // المعالجة المباشرة لدور البوت السريع (3 ثوانٍ فقط)
+        if (currPlayer && currPlayer.type === 'آلي' && isHost) {
+            startTimer(3, () => handleBotTurn(data));
+            return;
+        }
+
+        let myTurn = (currPlayer && currPlayer.name === myName);
         let biddingBox = document.getElementById('bidding-screen');
-        
+        let projectBox = document.getElementById('project-declaration-box');
+
         if (myTurn) {
-            biddingBox.classList.remove('hidden');
-            setupBiddingControls(data);
+            if (data.mode === 'bidding') {
+                biddingBox.classList.remove('hidden');
+                projectBox.classList.add('hidden');
+                setupBiddingControls(data);
+            } else if (data.mode === 'declare_projects') {
+                projectBox.classList.remove('hidden');
+                biddingBox.classList.add('hidden');
+            } else {
+                biddingBox.classList.add('hidden');
+                projectBox.classList.add('hidden');
+            }
+            startTimer(10, () => autoTimeOutAction(data));
         } else {
             biddingBox.classList.add('hidden');
+            projectBox.classList.add('hidden');
+        }
+
+        // إظهار وتنظيف المشاريع في الأكلة الثانية (ثاني أكله)
+        if (data.trickCount === 2) {
+            document.getElementById('floor-status-text').innerText = '🔥 تم إشهار وتنزيل المشاريع المقبولة لـ الأكلة الثانية!';
+        }
+    }
+
+    function startTimer(sec, onTimeout) {
+        clearInterval(timerInterval);
+        let left = sec;
+        document.getElementById('timer-display').innerText = left;
+        timerInterval = setInterval(() => {
+            left--;
+            document.getElementById('timer-display').innerText = left;
+            if (left <= 0) {
+                clearInterval(timerInterval);
+                if (onTimeout) onTimeout();
+            }
+        }, 1000);
+    }
+
+    function autoTimeOutAction(data) {
+        if (data.mode === 'bidding') {
+            makeBid(data.bidRound === 1 ? 'pass' : 'pass2');
+        } else if (data.mode === 'declare_projects') {
+            declareProject('none');
+        } else {
+            playCard(0);
+        }
+    }
+
+    function handleBotTurn(data) {
+        if (data.mode === 'bidding') {
+            makeBid(data.bidRound === 1 ? 'pass' : 'pass2');
+        } else if (data.mode === 'declare_projects') {
+            declareProject('none');
+        } else {
+            playCard(0);
         }
     }
 
@@ -269,7 +350,6 @@
         } else {
             title.innerText = 'مرحلة الشراء (الدورة الثانية) 🔄';
             if (isDealer) {
-                // خيارات الموزع بالدورة الثانية (صن ثاني / حكم ثاني / ورق للتكويش)
                 container.innerHTML = `
                     <div class="flex-row">
                         <button class="btn-primary" onclick="makeBid('sun2')">صن ثاني ☀️</button>
@@ -277,7 +357,6 @@
                     </div>
                     <button class="btn-danger" style="margin-top:4px;" onclick="makeBid('kawash')">ورق (تكويش الجولة 🔄)</button>`;
             } else {
-                // خيارات بقية اللاعبين بالدورة الثانية (صن ثاني / حكم ثاني / ولا)
                 container.innerHTML = `
                     <div class="flex-row">
                         <button class="btn-primary" onclick="makeBid('sun2')">صن ثاني ☀️</button>
@@ -289,11 +368,11 @@
     }
 
     function makeBid(choice) {
+        clearInterval(timerInterval);
         db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
             let data = snap.val();
 
             if (choice === 'kawash') {
-                // تكويش الجولة ونقل التوزيع ليمين الموزع
                 alert('تم التكويش! انتقال التوزيع للاعب التالي 🔄');
                 let nextDealer = (data.dealerIndex + 1) % 4;
                 startNewRound(data.players, nextDealer);
@@ -305,18 +384,53 @@
                 let nextTurn = (data.turnIndex + 1) % 4;
 
                 if (pCount === 4 && data.bidRound === 1) {
-                    // الانتقال للدورة الثانية
                     data.bidRound = 2;
                     data.passesCount = 0;
-                    data.turnIndex = (data.dealerIndex + 1) % 4; // تبدأ الدورة الثانية من يمين الموزع
+                    data.turnIndex = (data.dealerIndex + 1) % 4;
+                } else if (pCount === 4 && data.bidRound === 2) {
+                    let nextDealer = (data.dealerIndex + 1) % 4;
+                    startNewRound(data.players, nextDealer);
+                    return;
                 } else {
                     data.passesCount = pCount;
                     data.turnIndex = nextTurn;
                 }
             } else {
-                alert(`تم اختيار: ${choice} بنجاح!`);
+                // الانتقال لمرحلة إشهار المشاريع
+                data.mode = 'declare_projects';
+                data.contract = choice;
             }
 
+            db.ref('baloot_rooms/' + currentRoomCode).set(data);
+        });
+    }
+
+    function declareProject(type) {
+        clearInterval(timerInterval);
+        db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
+            let data = snap.val();
+            let myPlayer = data.players[data.turnIndex];
+            if (myPlayer) myPlayer.project = (type !== 'none' ? type : '');
+
+            let nextTurn = (data.turnIndex + 1) % 4;
+            if (nextTurn === (data.dealerIndex + 1) % 4) {
+                data.mode = 'playing_cards';
+            }
+            data.turnIndex = nextTurn;
+            db.ref('baloot_rooms/' + currentRoomCode).set(data);
+        });
+    }
+
+    function playCard(index) {
+        clearInterval(timerInterval);
+        db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
+            let data = snap.val();
+            let myPlayer = data.players[data.turnIndex];
+            if (myPlayer && myPlayer.cards && myPlayer.cards[index]) {
+                myPlayer.cards.splice(index, 1);
+                data.turnIndex = (data.turnIndex + 1) % 4;
+                if (data.turnIndex === 0) data.trickCount = (data.trickCount || 0) + 1;
+            }
             db.ref('baloot_rooms/' + currentRoomCode).set(data);
         });
     }
@@ -326,13 +440,13 @@
         saveName(name);
         currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
         let players = [
-            { name: name, team: 'us', isHost: true, type: 'حقيقي' },
-            { name: 'خصم 1 🤖', team: 'them', isHost: false, type: 'آلي' },
-            { name: 'زملك 🤖', team: 'us', isHost: false, type: 'آلي' },
-            { name: 'خصم 2 🤖', team: 'them', isHost: false, type: 'آلي' }
+            { name: name, team: 'us', isHost: true, type: 'حقيقي', project: '' },
+            { name: 'خصم 1 🤖', team: 'them', isHost: false, type: 'آلي', project: '' },
+            { name: 'زملك 🤖', team: 'us', isHost: false, type: 'آلي', project: '' },
+            { name: 'خصم 2 🤖', team: 'them', isHost: false, type: 'آلي', project: '' }
         ];
         db.ref('baloot_rooms/' + currentRoomCode).set({
-            status: 'waiting', scoreUs: 0, scoreThem: 0, dealerIndex: 0, turnIndex: 1, bidRound: 1, players: players
+            status: 'waiting', scoreUs: 0, scoreThem: 0, dealerIndex: 0, turnIndex: 1, bidRound: 1, trickCount: 0, players: players
         }).then(() => { listenToRoom(); openWaiting(); });
     }
 
