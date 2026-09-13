@@ -27,8 +27,51 @@
             padding: 16px;
             display: flex;
             justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
 
+        /* شاشة تسجيل الدخول */
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            background: var(--card-bg);
+            border: 2px solid var(--primary-color);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .login-card h2 { color: var(--primary-color); font-size: 18px; margin-top: 0; }
+        .login-card h3 { color: var(--secondary-color); font-size: 14px; margin-bottom: 20px; font-weight: 600; }
+        
+        .login-group { text-align: right; margin-bottom: 14px; }
+        .login-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #475569; }
+        .login-group select, .login-group input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+        .btn-login:hover { background-color: #047857; }
+
+        /* شاشة النظام الرئيسية */
         .container {
             width: 100%;
             max-width: 980px;
@@ -44,9 +87,24 @@
             border-bottom: 2px solid var(--primary-color);
             padding-bottom: 14px;
             margin-bottom: 20px;
+            position: relative;
         }
         .header h1 { color: var(--primary-color); font-size: 20px; margin: 0 0 4px 0; }
         .header h2 { color: var(--secondary-color); font-size: 15px; margin: 0; font-weight: 600; }
+
+        .btn-logout {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #EF4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
         .info-grid {
             display: grid;
@@ -113,10 +171,10 @@
             text-align: center;
         }
         .btn-save { background-color: #2563EB; color: white; }
+        .btn-update { background-color: #D97706; color: white; }
         .btn-print { background-color: var(--primary-color); color: white; }
         .btn-action:hover { opacity: 0.9; }
 
-        /* سجل التقييمات والفلترة */
         .history-box {
             background: #F8FAFC;
             border: 1px solid var(--border-color);
@@ -155,24 +213,59 @@
         }
         .sig-box { flex: 1; line-height: 1.6; }
 
+        .btn-edit-sm {
+            background: #F59E0B;
+            color: #000;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
         .badge-diff-up { color: #16A34A; font-weight: bold; }
         .badge-diff-down { color: #DC2626; font-weight: bold; }
         .badge-diff-equal { color: #64748B; font-weight: bold; }
 
+        .hidden { display: none !important; }
+
         @media print {
             body { padding: 0; background: white; }
             .container { border: none; box-shadow: none; width: 100%; max-width: 100%; }
-            .btn-flex, .history-box, .chart-box { display: none !important; }
+            .btn-flex, .history-box, .chart-box, .edit-col, .btn-logout { display: none !important; }
             select { border: none; background: transparent; appearance: none; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+<!-- واجهة تسجيل الدخول -->
+<div class="login-card" id="login-screen">
+    <h2>جمعية النبهانية للخدمات الإنسانية والاجتماعية</h2>
+    <h3>تسجيل دخول بوابة تقييم الأداء 🔐</h3>
+    
+    <div class="login-group">
+        <label>اسم المستخدم</label>
+        <select id="login-username">
+            <option value="محمد سليمان">محمد سليمان</option>
+        </select>
+    </div>
+
+    <div class="login-group">
+        <label>الرقم السري</label>
+        <input type="password" id="login-password" placeholder="أدخل الرقم السري">
+    </div>
+
+    <button class="btn-login" onclick="handleLogin()">دخول النظام 🚀</button>
+</div>
+
+<!-- واجهة التطبيق الرئيسية بعد الدخول -->
+<div class="container hidden" id="main-system">
     <div class="header">
+        <button class="btn-logout" onclick="handleLogout()">خروج 🚪</button>
         <h1>جمعية النبهانية للخدمات الإنسانية والاجتماعية</h1>
-        <h2>استمارة تقييم الأداء الوظيفي التخصصية والسجل التراكمي</h2>
+        <h2>استمارة تقييم الأداء الوظيفي التخصصية والسجل التاريخي</h2>
     </div>
 
     <!-- الإدخالات الرئيسية -->
@@ -215,7 +308,7 @@
         </div>
         <div class="form-group">
             <label>اسم الشخص المقيّم</label>
-            <input type="text" id="evaluator-name" placeholder="أدخل اسم المقيّم">
+            <input type="text" id="evaluator-name" placeholder="أدخل اسم المقيّم" value="محمد سليمان">
         </div>
     </div>
 
@@ -246,16 +339,16 @@
 
     <!-- أزرار الإجراءات -->
     <div class="btn-flex">
-        <button class="btn-action btn-save" onclick="saveEvaluation()">حفظ التقييم بالسجل 💾</button>
+        <button class="btn-action btn-save" id="save-btn" onclick="saveEvaluation()">حفظ التقييم بالسجل 💾</button>
         <button class="btn-action btn-print" onclick="window.print()">طباعة / حفظ التقرير PDF 🖨️</button>
     </div>
 
     <!-- التوقيعات -->
     <div class="signatures" id="signatures-box"></div>
 
-    <!-- سجل تقييمات الموظفين الرسمية -->
+    <!-- سجل التقييمات التفاعلي -->
     <div class="history-box">
-        <div class="section-title" style="margin-top: 0;">سجل تقييمات الموظفين التاريخي والتتبع</div>
+        <div class="section-title" style="margin-top: 0;">سجل التقييمات وإمكانية التعديل التاريخي</div>
         
         <div class="filter-btns">
             <button class="filter-btn active" onclick="filterHistory('الكل', this)">الكل</button>
@@ -275,7 +368,7 @@
                     <th>النتيجة</th>
                     <th>التحسن/النزول</th>
                     <th>المقيّم</th>
-                    <th>التاريخ</th>
+                    <th class="edit-col">تعديل</th>
                 </tr>
             </thead>
             <tbody id="history-table-body">
@@ -286,7 +379,7 @@
         <!-- الرسم البياني -->
         <div class="chart-box">
             <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: var(--primary-color);">
-                📊 الرسم البياني لتطور مستوى الموظف المSelected عبر الفترات:
+                📊 الرسم البياني لتطور مستوى الموظف المحدد عبر الفترات:
             </div>
             <canvas id="performanceChart" height="100"></canvas>
         </div>
@@ -294,6 +387,33 @@
 </div>
 
 <script>
+    const AUTH_PASS = "6112998";
+
+    function handleLogin() {
+        let user = document.getElementById('login-username').value;
+        let pass = document.getElementById('login-password').value.trim();
+
+        if (pass === AUTH_PASS) {
+            localStorage.setItem('auth_session', user);
+            showMainSystem();
+        } else {
+            alert('❌ الرقم السري غير صحيح!');
+        }
+    }
+
+    function handleLogout() {
+        localStorage.removeItem('auth_session');
+        location.reload();
+    }
+
+    function showMainSystem() {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('main-system').classList.remove('hidden');
+        onJobChange();
+        renderHistoryRecords('الكل');
+        updateChart();
+    }
+
     const JOB_QUESTIONS = {
         exec: [
             "متابعة وتنفيذ قرارات مجلس الإدارة الخططية", "إدارة وتوجيه الأقسام التنفيذية بالجمعية", "تطوير بيئة العمل وتحفيز فريق العمل",
@@ -323,6 +443,7 @@
 
     let evaluationRecords = JSON.parse(localStorage.getItem('eval_records_db') || '[]');
     let myChart = null;
+    let currentEditId = null;
 
     function onJobChange() {
         let job = document.getElementById('job-title-select').value;
@@ -402,27 +523,86 @@
 
     function saveEvaluation() {
         let empName = document.getElementById('emp-name-select').value;
+        let jobVal = document.getElementById('job-title-select').value;
         let jobTitleText = document.getElementById('job-title-select').options[document.getElementById('job-title-select').selectedIndex].text;
         let period = document.getElementById('eval-period').value;
         let evaluator = document.getElementById('evaluator-name').value.trim() || 'غير محدد';
         let score = calculateScore();
 
-        let record = {
-            id: Date.now(),
-            empName: empName,
-            jobTitle: jobTitleText,
-            period: period,
-            evaluator: evaluator,
-            score: score,
-            date: new Date().toLocaleDateString('ar-SA')
-        };
+        let scoresArray = [];
+        document.querySelectorAll('.score-input').forEach(sel => scoresArray.push(sel.value));
 
-        evaluationRecords.push(record);
+        if (currentEditId) {
+            let index = evaluationRecords.findIndex(r => r.id === currentEditId);
+            if (index !== -1) {
+                evaluationRecords[index] = {
+                    id: currentEditId,
+                    empName: empName,
+                    jobVal: jobVal,
+                    jobTitle: jobTitleText,
+                    period: period,
+                    evaluator: evaluator,
+                    score: score,
+                    scoresArray: scoresArray,
+                    date: evaluationRecords[index].date
+                };
+                alert('✅ تم تحديث بيانات التقييم بالسجل بنجاح!');
+            }
+            currentEditId = null;
+            resetSaveBtn();
+        } else {
+            let record = {
+                id: Date.now(),
+                empName: empName,
+                jobVal: jobVal,
+                jobTitle: jobTitleText,
+                period: period,
+                evaluator: evaluator,
+                score: score,
+                scoresArray: scoresArray,
+                date: new Date().toLocaleDateString('ar-SA')
+            };
+            evaluationRecords.push(record);
+            alert('✅ تم حفظ التقييم بنجاح في سجل الموظفين!');
+        }
+
         localStorage.setItem('eval_records_db', JSON.stringify(evaluationRecords));
-
-        alert('✅ تم حفظ التقييم بنجاح في سجل الموظفين!');
         renderHistoryRecords('الكل');
         updateChart();
+    }
+
+    function editRecord(id) {
+        let rec = evaluationRecords.find(r => r.id === id);
+        if (!rec) return;
+
+        currentEditId = id;
+        document.getElementById('emp-name-select').value = rec.empName;
+        document.getElementById('job-title-select').value = rec.jobVal || 'exec';
+        onJobChange();
+
+        document.getElementById('eval-period').value = rec.period;
+        document.getElementById('evaluator-name').value = rec.evaluator;
+
+        if (rec.scoresArray && rec.scoresArray.length > 0) {
+            let inputs = document.querySelectorAll('.score-input');
+            rec.scoresArray.forEach((val, idx) => {
+                if (inputs[idx]) inputs[idx].value = val;
+            });
+        }
+
+        calculateScore();
+
+        let saveBtn = document.getElementById('save-btn');
+        saveBtn.innerText = 'تحديث التقييم المعدل 🔄';
+        saveBtn.className = 'btn-action btn-update';
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetSaveBtn() {
+        let saveBtn = document.getElementById('save-btn');
+        saveBtn.innerText = 'حفظ التقييم بالسجل 💾';
+        saveBtn.className = 'btn-action btn-save';
     }
 
     function renderHistoryRecords(filterPeriod = 'الكل') {
@@ -438,8 +618,7 @@
             return;
         }
 
-        filtered.forEach((rec, idx) => {
-            // حساب نسبة التحسن أو النزول عن التقييم السابق لنفس الموظف
+        filtered.forEach((rec) => {
             let prevRecord = evaluationRecords.filter(r => r.empName === rec.empName && r.id < rec.id).pop();
             let diffBadge = '-';
             
@@ -458,7 +637,7 @@
                     <td><strong>${rec.score}%</strong></td>
                     <td>${diffBadge}</td>
                     <td>${rec.evaluator}</td>
-                    <td>${rec.date}</td>
+                    <td class="edit-col"><button class="btn-edit-sm" onclick="editRecord(${rec.id})">تعديل ✏️</button></td>
                 </tr>`;
         });
     }
@@ -502,9 +681,10 @@
     }
 
     window.onload = function() {
-        onJobChange();
-        renderHistoryRecords('الكل');
-        updateChart();
+        let session = localStorage.getItem('auth_session');
+        if (session) {
+            showMainSystem();
+        }
     };
 </script>
 
