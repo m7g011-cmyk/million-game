@@ -478,19 +478,15 @@
     let myIndex = 0;
     let isHost = false;
     let timerInterval = null;
-    let currentActiveTurn = -1;
+    let currentGameState = null;
 
     const SUITS = ['♠️', '♥️', '♦️', '♣️'];
 
-    // 1. أوزان الصن الحقيقية: A > 10 > K > Q > J > 9 > 8 > 7
     const SUN_RANK_ORDER = { 'A': 8, '10': 7, 'K': 6, 'Q': 5, 'J': 4, '9': 3, '8': 2, '7': 1 };
-    
-    // 2. أوزان الحكم الحقيقية لورق الحكم: J > 9 > A > 10 > K > Q > 8 > 7
     const HOKM_RANK_ORDER = { 'J': 8, '9': 7, 'A': 6, '10': 5, 'K': 4, 'Q': 3, '8': 2, '7': 1 };
 
     function saveName(name) { myName = name; localStorage.setItem('baloot_player_name', name); }
 
-    // دالة ترتيب الأوراق الذكية حسب نوع اللعبة (صن / حكم)
     function sortHandCards(cards, contractType = 'sun', trumpSuit = null) {
         if (!cards) return [];
         return cards.sort((a, b) => {
@@ -614,7 +610,7 @@
             let data = snap.val();
             let pList = data.players || [];
             
-            const botNames = ['الخوي 🤖', 'خصم يمين 🤖', 'خصم يسار 🤖'];
+            const botNames = ['خصم يمين 🤖', 'الخوي 🤖', 'خصم يسار 🤖'];
             while (pList.length < 4) {
                 let idx = pList.length;
                 let team = (idx % 2 === 0) ? 'us' : 'them';
@@ -669,6 +665,7 @@
     }
 
     function renderGame(data) {
+        currentGameState = data;
         let pList = data.players || [];
         
         document.getElementById('name-top').innerText = pList[(myIndex + 2) % 4] ? pList[(myIndex + 2) % 4].name : 'الخوي';
@@ -740,20 +737,19 @@
             biddingBox.classList.add('hidden');
         }
 
-        if (currentActiveTurn !== data.turnIndex) {
-            currentActiveTurn = data.turnIndex;
-            updateActivePlayerTimer(data.turnIndex);
+        updateActivePlayerTimer(data.turnIndex);
 
-            let currPlayer = pList[data.turnIndex];
-            let isBot = (currPlayer && currPlayer.type === 'آلي');
-            let duration = isBot ? 2 : 10;
+        let currPlayer = pList[data.turnIndex];
+        let isBot = (currPlayer && currPlayer.type === 'آلي');
 
-            startUniversalTimer(duration, () => {
-                if (isHost && isBot) {
-                    handleBotTurn(data, data.turnIndex);
-                } else if (myTurn) {
-                    autoTimeOutAction(data);
-                }
+        // تشغيل البوت تلقائياً ومباشرة دون أي توقف
+        if (isHost && isBot) {
+            setTimeout(() => {
+                processBotDecision(data, data.turnIndex);
+            }, 1200);
+        } else if (myTurn) {
+            startUniversalTimer(10, () => {
+                autoTimeOutAction(data);
             });
         }
     }
@@ -819,62 +815,17 @@
         }
     }
 
-    function makeBid(choice) {
-        clearInterval(timerInterval);
-        
-        let processBid = (data) => {
-            if (choice === 'pass') {
-                let pCount = (data.passesCount || 0) + 1;
-                let nextTurn = (data.turnIndex + 1) % 4;
-
-                if (pCount === 4 && data.bidRound === 1) {
-                    data.bidRound = 2;
-                    data.passesCount = 0;
-                    data.turnIndex = (data.dealerIndex + 1) % 4;
-                } else if (pCount === 4 && data.bidRound === 2) {
-                    let nextDealer = (data.dealerIndex + 1) % 4;
-                    startNewRound(data.players, nextDealer);
-                    return;
-                } else {
-                    data.passesCount = pCount;
-                    data.turnIndex = nextTurn;
-                }
-            } else {
-                let buyerIndex = data.turnIndex;
-                let buyer = data.players[buyerIndex];
-                let trumpSuit = (choice === 'hokm' && data.revealedCard) ? data.revealedCard.suit : null;
-                
-                buyer.cards.push(data.revealedCard);
-                data.revealedCard = null;
-
-                data.players.forEach((p, idx) => {
-                    if (idx === buyerIndex) {
-                        p.cards.push(data.deck.pop(), data.deck.pop());
-                    } else {
-                        p.cards.push(data.deck.pop(), data.deck.pop(), data.deck.pop());
-                    }
-                    // ترتيب الورق تلقائياً بالاعتماد على الترتيب الصحيح للصن أو الحكم
-                    p.cards = sortHandCards(p.cards, choice, trumpSuit);
-                });
-
-                data.mode = 'playing_cards';
-                data.contractType = choice;
-                data.trumpSuit = trumpSuit;
-                data.turnIndex = (data.dealerIndex + 1) % 4;
-            }
-
-            if (db) db.ref('baloot_rooms/' + currentRoomCode).set(data);
-            else renderGame(data);
-        };
-
-        if (db) {
-            db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => { processBid(snap.val()); });
-        }
-    }
-
-    function handleBotTurn(data, botIndex) {
+    // قرار البوت المطور والذكي في الشراء واللعب
+    function processBotDecision(data, botIndex) {
         if (data.mode === 'bidding') {
-            makeBid('pass');
+            let botObj = data.players[botIndex];
+            let aceCount = botObj.cards.filter(c => c.rank === 'A').length;
+            
+            let choice = 'pass';
+            if (aceCount >= 2) choice = 'sun';
+            else if (data.revealedCard && botObj.cards.some(c => c.suit === data.revealedCard.suit && (c.rank === 'J' || c.rank === '9'))) choice = 'hokm';
+
+            makeBid(choice, botIndex);
         } else {
             let botObj = data.players[botIndex];
             if (!botObj || !botObj.cards || botObj.cards.length === 0) return;
@@ -891,30 +842,73 @@
         }
     }
 
-    function playCard(index) {
-        let processPlay = (data) => {
-            if (data.turnIndex !== myIndex || data.mode === 'bidding') return;
+    function makeBid(choice, playerIdxOverride = null) {
+        clearInterval(timerInterval);
+        let activeIdx = playerIdxOverride !== null ? playerIdxOverride : myIndex;
+        let data = currentGameState;
 
-            let myObj = data.players[myIndex];
-            let leadSuit = (data.floorCards && data.floorCards.length > 0) ? data.floorCards[0].suit : null;
-            
-            if (leadSuit && myObj && myObj.cards) {
-                let hasSuit = myObj.cards.some(c => c.suit === leadSuit);
-                let chosenCard = myObj.cards[index];
-                
-                if (hasSuit && chosenCard.suit !== leadSuit) {
-                    alert('مجبور تلعب من نفس النوع النازل بالفرشة!');
-                    return;
-                }
+        if (choice === 'pass') {
+            let pCount = (data.passesCount || 0) + 1;
+            let nextTurn = (data.turnIndex + 1) % 4;
+
+            if (pCount === 4 && data.bidRound === 1) {
+                data.bidRound = 2;
+                data.passesCount = 0;
+                data.turnIndex = (data.dealerIndex + 1) % 4;
+            } else if (pCount === 4 && data.bidRound === 2) {
+                let nextDealer = (data.dealerIndex + 1) % 4;
+                startNewRound(data.players, nextDealer);
+                return;
+            } else {
+                data.passesCount = pCount;
+                data.turnIndex = nextTurn;
             }
+        } else {
+            let buyerIndex = activeIdx;
+            let buyer = data.players[buyerIndex];
+            let trumpSuit = (choice === 'hokm' && data.revealedCard) ? data.revealedCard.suit : null;
+            
+            buyer.cards.push(data.revealedCard);
+            data.revealedCard = null;
 
-            clearInterval(timerInterval);
-            executeCardPlay(data, myIndex, index);
-        };
+            data.players.forEach((p, idx) => {
+                if (idx === buyerIndex) {
+                    p.cards.push(data.deck.pop(), data.deck.pop());
+                } else {
+                    p.cards.push(data.deck.pop(), data.deck.pop(), data.deck.pop());
+                }
+                p.cards = sortHandCards(p.cards, choice, trumpSuit);
+            });
 
-        if (db) {
-            db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => { processPlay(snap.val()); });
+            data.mode = 'playing_cards';
+            data.contractType = choice;
+            data.trumpSuit = trumpSuit;
+            data.turnIndex = (data.dealerIndex + 1) % 4;
         }
+
+        if (db) db.ref('baloot_rooms/' + currentRoomCode).set(data);
+        else renderGame(data);
+    }
+
+    function playCard(index) {
+        let data = currentGameState;
+        if (data.turnIndex !== myIndex || data.mode === 'bidding') return;
+
+        let myObj = data.players[myIndex];
+        let leadSuit = (data.floorCards && data.floorCards.length > 0) ? data.floorCards[0].suit : null;
+        
+        if (leadSuit && myObj && myObj.cards) {
+            let hasSuit = myObj.cards.some(c => c.suit === leadSuit);
+            let chosenCard = myObj.cards[index];
+            
+            if (hasSuit && chosenCard.suit !== leadSuit) {
+                alert('مجبور تلعب من نفس النوع النازل بالفرشة!');
+                return;
+            }
+        }
+
+        clearInterval(timerInterval);
+        executeCardPlay(data, myIndex, index);
     }
 
     function executeCardPlay(data, playerIndex, cardIndex) {
