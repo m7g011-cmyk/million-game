@@ -102,6 +102,51 @@
             color: #FFF;
         }
 
+        .modal-box {
+            position: absolute;
+            top: 20%;
+            width: 88%;
+            background: rgba(15, 23, 42, 0.98);
+            border: 2px solid #F59E0B;
+            padding: 18px;
+            border-radius: 16px;
+            z-index: 50;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+        }
+        
+        .waiting-list {
+            background: #0F172A;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 12px 0;
+            text-align: right;
+        }
+        .player-row-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px;
+            border-bottom: 1px solid #1E293B;
+            font-size: 13px;
+        }
+        .player-row-item:last-child { border-bottom: none; }
+
+        .btn-action-lg {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 4px 0;
+            transition: 0.2s;
+        }
+        .btn-amber { background: #F59E0B; color: #000; }
+        .btn-green { background: #10B981; color: #FFF; }
+        .btn-slate { background: #475569; color: #FFF; }
+
         .player-avatar-box {
             position: absolute;
             display: flex;
@@ -288,15 +333,6 @@
         .fan-card.disabled { opacity: 0.8; cursor: not-allowed; }
         .fan-card.red { color: #DC2626; }
 
-        .bottom-mic-bar {
-            position: absolute;
-            bottom: 6px;
-            left: 12px;
-            display: flex;
-            gap: 6px;
-            z-index: 30;
-        }
-
         .hidden { display: none !important; }
     </style>
 </head>
@@ -304,7 +340,6 @@
 
 <div class="majlis-container">
 
-    <!-- النشرة الكلية -->
     <div class="score-card-top">
         <div class="score-title-row">
             <span class="score-us">لنا</span>
@@ -318,27 +353,53 @@
         </div>
     </div>
 
-    <!-- أزرار الإعدادات -->
     <div class="top-left-bar">
         <div class="icon-btn-round">☰</div>
     </div>
 
-    <!-- السجادة بمنتصف الطاولة -->
     <div class="carpet-floor">
         <div class="carpet-pattern"></div>
     </div>
 
-    <!-- شاشة اللوبي والانتظار -->
-    <div id="lobby-screen" style="position:absolute; top:25%; width:85%; background:rgba(15, 23, 42, 0.95); border:2px solid #F59E0B; padding:16px; border-radius:16px; z-index:50; text-align:center;">
-        <h3 style="color:#F59E0B; margin-top:0;">دخول لعبة البلوت ♠️</h3>
-        <input type="text" id="player-name" placeholder="أدخل اسمك" style="width:90%; padding:10px; border-radius:8px; border:1px solid #334155; background:#0F172A; color:#FFF; text-align:center; margin-bottom:8px;" />
-        <button id="btn-create-room" style="width:95%; padding:10px; background:#F59E0B; color:#000; font-weight:bold; border-radius:8px; border:none; margin:4px 0; cursor:pointer;" onclick="createRoom()">إنشاء طاولة</button>
-        <button style="width:95%; padding:10px; background:#475569; color:#FFF; font-weight:bold; border-radius:8px; border:none; margin:4px 0; cursor:pointer;" onclick="startVsBots()">اللعب ضد الكمبيوتر 🤖</button>
-        <input type="number" id="room-code-input" placeholder="رمز الطاولة" style="width:90%; padding:10px; border-radius:8px; border:1px solid #334155; background:#0F172A; color:#FFF; text-align:center; margin-top:8px;" />
-        <button style="width:95%; padding:10px; background:#10B981; color:#FFF; font-weight:bold; border-radius:8px; border:none; margin:4px 0; cursor:pointer;" onclick="joinRoom()">انضمام</button>
+    <!-- شاشة الدخول والتسجيل -->
+    <div id="lobby-screen" class="modal-box">
+        <h3 style="color:#F59E0B; margin-top:0;">لعبة البلوت الأونلاين ♠️</h3>
+        
+        <div style="text-align:right; font-size:12px; margin-bottom:4px; color:#94A3B8;">اسم اللاعب:</div>
+        <input type="text" id="player-name" placeholder="أدخل اسمك أولاً" style="width:100%; padding:10px; border-radius:8px; border:1px solid #334155; background:#0F172A; color:#FFF; text-align:center; margin-bottom:12px;" />
+        
+        <!-- التوجيه بالدعوة الفورية أو الرمز -->
+        <div id="invite-notice-box" class="hidden" style="background:#065F46; padding:8px; border-radius:8px; margin-bottom:10px; font-size:12px; color:#FFF;">
+            📩 أنت مدعو للانضمام للطاولة رقم: <strong id="invite-code-lbl" style="color:#F59E0B;"></strong>
+        </div>
+
+        <button id="btn-join-direct" class="btn-action-lg btn-green hidden" onclick="joinRoomDirect()">انضمام مباشر للطاولة 🚀</button>
+
+        <div id="standard-options">
+            <button id="btn-create" class="btn-action-lg btn-amber" onclick="createRoom()">إنشاء طاولة جديدة ➕</button>
+            <button class="btn-action-lg btn-slate" onclick="startVsBots()">اللعب ضد الكمبيوتر 🤖</button>
+            
+            <div style="margin: 10px 0 6px 0; font-size:12px; color:#94A3B8;">أو أدخل رمز الطاولة للانضمام:</div>
+            <input type="number" id="room-code-input" placeholder="رمز الطاولة (مثال: 4821)" style="width:100%; padding:10px; border-radius:8px; border:1px solid #334155; background:#0F172A; color:#FFF; text-align:center; margin-bottom:6px;" />
+            <button class="btn-action-lg btn-green" onclick="joinRoomFromInput()">انضمام بالرمز 🚀</button>
+        </div>
     </div>
 
-    <!-- الخوي (أعلى الطاولة مقابل لك) -->
+    <!-- غرفة الانتظار -->
+    <div id="waiting-room-screen" class="modal-box hidden">
+        <h3 style="color:#F59E0B; margin-top:0;">غرفة الانتظار 🛋️</h3>
+        <div style="font-size:13px; color:#CBD5E1;">رمز الطاولة: <strong id="display-room-code" style="color:#F59E0B; font-size:16px;">-</strong></div>
+        
+        <div class="waiting-list">
+            <div style="font-weight:bold; font-size:12px; margin-bottom:6px; color:#94A3B8;">اللاعبين الحاضرين:</div>
+            <div id="players-waiting-container"></div>
+        </div>
+
+        <button class="btn-action-lg btn-green" onclick="shareInviteLink()">مشاركة رابط الدعوة 📲</button>
+        <button id="btn-start-game" class="btn-action-lg btn-amber hidden" onclick="launchMultiplayerGame()">إكمال الباقي بوتات وبدء اللعب 🎮</button>
+    </div>
+
+    <!-- الخوي -->
     <div class="player-avatar-box player-top">
         <div class="avatar-circle">
             🧔🏻‍♂️
@@ -349,7 +410,7 @@
         <div class="cards-back-fan" id="cards-top-back"></div>
     </div>
 
-    <!-- الخصم الأيسر (يسار الطاولة) -->
+    <!-- الخصم الأيسر -->
     <div class="player-avatar-box player-left">
         <div class="avatar-circle">
             👨🏽‍
@@ -360,7 +421,6 @@
         <div class="cards-back-fan" id="cards-left-back" style="flex-direction:column; margin-top:4px;"></div>
     </div>
 
-    <!-- الورقة المكشوفة بمنتصف الفرشة -->
     <div class="center-deck-area" id="center-deck-area">
         <div id="revealed-card-center" class="revealed-big-card-img">
             <div>-</div>
@@ -369,10 +429,9 @@
         </div>
     </div>
 
-    <!-- كروت اللعب في الفرشة -->
     <div class="floor-played-area" id="floor-played-area"></div>
 
-    <!-- الخصم الأيمن (يمين الطاولة) -->
+    <!-- الخصم الأيمن -->
     <div class="player-avatar-box player-right">
         <div class="avatar-circle">
             🧔🏽
@@ -383,7 +442,6 @@
         <div class="cards-back-fan" id="cards-right-back" style="flex-direction:column; margin-top:4px;"></div>
     </div>
 
-    <!-- أزرار الحراج والشراء الملونة -->
     <div id="bidding-screen" class="bidding-bar-yellow hidden">
         <button class="btn-bid-pill btn-yellow" onclick="makeBid('hokm')">حكم</button>
         <button class="btn-bid-pill btn-yellow" onclick="makeBid('sun')">صن</button>
@@ -391,7 +449,7 @@
         <button class="btn-bid-pill btn-yellow" onclick="makeBid('pass')">بس</button>
     </div>
 
-    <!-- أنت (أسفل الطاولة) -->
+    <!-- أنت -->
     <div class="player-avatar-box player-bottom">
         <div class="avatar-circle">
             🇸🇦
@@ -400,14 +458,7 @@
         </div>
     </div>
 
-    <!-- كروتك المروحية بالأسفل -->
     <div class="my-hand-fan" id="my-cards-fan"></div>
-
-    <!-- شريط الأدوات بالأسفل -->
-    <div class="bottom-mic-bar">
-        <div class="icon-btn-round" style="font-size:14px;">🎙️</div>
-        <div class="icon-btn-round" style="font-size:14px;">💬</div>
-    </div>
 
 </div>
 
@@ -426,9 +477,7 @@
     try {
         firebase.initializeApp(firebaseConfig);
         db = firebase.database();
-    } catch(e) {
-        console.log("Firebase Init Error:", e);
-    }
+    } catch(e) { console.log(e); }
 
     let currentRoomCode = null;
     let myName = "";
@@ -442,46 +491,58 @@
     function saveName(name) { myName = name; localStorage.setItem('baloot_player_name', name); }
 
     function createRoom() {
-        let nameInput = document.getElementById('player-name');
-        let name = nameInput.value.trim();
+        let name = document.getElementById('player-name').value.trim();
         if (!name) return alert('أدخل اسمك أولاً!');
         
-        let btn = document.getElementById('btn-create-room');
-        btn.innerText = 'جاري الإنشاء... ⏳';
-        btn.disabled = true;
-
         saveName(name); isHost = true; myIndex = 0;
         currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
+        
         let p = { name: name, team: 'us', isHost: true, type: 'حقيقي' };
 
-        let roomData = {
-            status: 'waiting', scoreUsTotal: 0, scoreThemTotal: 0, dealerIndex: 0, turnIndex: 1, bidRound: 1, players: [p]
-        };
+        document.getElementById('lobby-screen').classList.add('hidden');
+        document.getElementById('waiting-room-screen').classList.remove('hidden');
+        document.getElementById('display-room-code').innerText = currentRoomCode;
 
         if (db) {
-            db.ref('baloot_rooms/' + currentRoomCode).set(roomData).then(() => {
-                alert('تم إنشاء الطاولة! رمز الطاولة: ' + currentRoomCode);
-                listenToRoom();
-            }).catch(err => {
-                console.log('Firebase write failed, starting local mode:', err);
-                startVsBots();
-            }).finally(() => {
-                btn.innerText = 'إنشاء طاولة';
-                btn.disabled = false;
+            db.ref('baloot_rooms/' + currentRoomCode).set({
+                status: 'waiting', scoreUsTotal: 0, scoreThemTotal: 0, dealerIndex: 0, players: [p]
             });
+            listenToRoom();
         } else {
-            startVsBots();
-            btn.innerText = 'إنشاء طاولة';
-            btn.disabled = false;
+            renderWaitingRoom([p]);
         }
     }
 
-    function joinRoom() {
+    function shareInviteLink() {
+        let url = window.location.origin + window.location.pathname + '?room=' + currentRoomCode;
+        if (navigator.share) {
+            navigator.share({
+                title: 'بلوت أونلاين ♠️',
+                text: `تعال العب معي بلوت أونلاين! اكتب اسمك وانضم للطاولة مباشره:`,
+                url: url
+            });
+        } else {
+            navigator.clipboard.writeText(url);
+            alert(`تم نسخ رابط الدعوة! أرسله لأصحابك للعب معك:\n${url}`);
+        }
+    }
+
+    function joinRoomDirect() {
+        let name = document.getElementById('player-name').value.trim();
+        if (!name) return alert('أدخل اسمك أولاً للانضمام!');
+        executeJoin(currentRoomCode, name);
+    }
+
+    function joinRoomFromInput() {
         let name = document.getElementById('player-name').value.trim();
         let code = document.getElementById('room-code-input').value.trim();
-        if (!name || !code) return alert('أدخل بياناتك كاملة!');
+        if (!name || !code) return alert('أدخل اسمك ورمز الطاولة!');
+        executeJoin(code, name);
+    }
+
+    function executeJoin(code, name) {
         saveName(name); currentRoomCode = code;
-        
+
         if (db) {
             db.ref('baloot_rooms/' + code).get().then(snap => {
                 if (snap.exists()) {
@@ -490,10 +551,14 @@
                     myIndex = pList.length;
                     let team = (myIndex % 2 === 0) ? 'us' : 'them';
                     pList.push({ name: name, team: team, isHost: false, type: 'حقيقي' });
-                    db.ref('baloot_rooms/' + code + '/players').set(pList).then(() => { listenToRoom(); });
-                } else alert('الطاولة غير موجودة!');
-            }).catch(err => {
-                alert('عذراً، لم نتمكن من الاتصال بالغرفة.');
+
+                    db.ref('baloot_rooms/' + code + '/players').set(pList).then(() => {
+                        document.getElementById('lobby-screen').classList.add('hidden');
+                        document.getElementById('waiting-room-screen').classList.remove('hidden');
+                        document.getElementById('display-room-code').innerText = currentRoomCode;
+                        listenToRoom();
+                    });
+                } else alert('رمز الطاولة غير صحيح أو المجموعه أغلقت!');
             });
         }
     }
@@ -503,16 +568,52 @@
         db.ref('baloot_rooms/' + currentRoomCode).on('value', snap => {
             if (!snap.exists()) return;
             let data = snap.val();
-            document.getElementById('score-us-val').innerText = data.scoreUsTotal || 0;
-            document.getElementById('score-them-val').innerText = data.scoreThemTotal || 0;
+
+            if (data.status === 'waiting') {
+                renderWaitingRoom(data.players || []);
+            } else if (data.status === 'playing') {
+                document.getElementById('waiting-room-screen').classList.add('hidden');
+                document.getElementById('lobby-screen').classList.add('hidden');
+                renderGame(data);
+            }
+        });
+    }
+
+    function renderWaitingRoom(pList) {
+        let container = document.getElementById('players-waiting-container');
+        container.innerHTML = '';
+        pList.forEach((p, idx) => {
+            container.innerHTML += `
+                <div class="player-row-item">
+                    <span>${idx + 1}. <strong>${p.name}</strong> (${p.team === 'us' ? 'فريقنا' : 'فريق الخصم'})</span>
+                    <span style="color:#10B981;">جاهز ✅</span>
+                </div>`;
+        });
+
+        let btnStart = document.getElementById('btn-start-game');
+        if (isHost) btnStart.classList.remove('hidden');
+    }
+
+    function launchMultiplayerGame() {
+        if (!db) return startVsBots();
+
+        db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
+            let data = snap.val();
+            let pList = data.players || [];
             
-            if (data.status === 'playing') renderGame(data);
+            const botNames = ['الخوي 🤖', 'خصم يمين 🤖', 'خصم يسار 🤖'];
+            while (pList.length < 4) {
+                let idx = pList.length;
+                let team = (idx % 2 === 0) ? 'us' : 'them';
+                pList.push({ name: botNames[idx - 1] || 'لاعب 🤖', team: team, isHost: false, type: 'آلي' });
+            }
+
+            startNewRound(pList, 0);
         });
     }
 
     function startVsBots() {
-        let nameInput = document.getElementById('player-name');
-        let name = nameInput.value.trim() || 'اللاعب';
+        let name = document.getElementById('player-name').value.trim() || 'اللاعب';
         saveName(name); myIndex = 0;
         currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
         let players = [
@@ -551,8 +652,6 @@
     }
 
     function renderGame(data) {
-        document.getElementById('lobby-screen').classList.add('hidden');
-
         let pList = data.players || [];
         
         document.getElementById('name-top').innerText = pList[(myIndex + 2) % 4] ? pList[(myIndex + 2) % 4].name : 'الخوي';
@@ -810,6 +909,17 @@
     window.onload = function() {
         let saved = localStorage.getItem('baloot_player_name');
         if (saved) document.getElementById('player-name').value = saved;
+
+        // الفحص التلقائي لروابط الدعوة
+        let urlParams = new URLSearchParams(window.location.search);
+        let roomParam = urlParams.get('room');
+        if (roomParam) {
+            currentRoomCode = roomParam;
+            document.getElementById('invite-code-lbl').innerText = roomParam;
+            document.getElementById('invite-notice-box').classList.remove('hidden');
+            document.getElementById('btn-join-direct').classList.remove('hidden');
+            document.getElementById('standard-options').classList.add('hidden');
+        }
     };
 </script>
 
