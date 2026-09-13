@@ -53,18 +53,8 @@
         th { color: #F59E0B; background: #0F172A; }
         tr:nth-child(even) { background: rgba(255,255,255,0.03); }
 
-        .rank-badge { 
-            display: inline-block; 
-            width: 20px; 
-            height: 20px; 
-            line-height: 20px; 
-            text-align: center; 
-            border-radius: 50%; 
-            font-weight: bold; 
-            font-size: 11px; 
-        }
-        .top-1 { background: #F59E0B; color: #000; }
-        .top-4 { background: #10B981; color: #fff; }
+        .rank-num { font-weight: bold; color: #F59E0B; text-align: center; width: 24px; }
+        .team-name { font-weight: bold; }
 
         .btn-back {
             display: block;
@@ -79,6 +69,14 @@
             font-size: 13px;
         }
         .hidden { display: none; }
+        
+        .widget-frame {
+            width: 100%;
+            height: 520px;
+            border: none;
+            border-radius: 12px;
+            background: #FFF;
+        }
     </style>
 </head>
 <body>
@@ -88,73 +86,18 @@
 
     <!-- شريط التنقل بين الإحصائيات -->
     <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('standings', this)">الترتيب</button>
-        <button class="tab-btn" onclick="switchTab('scorers', this)">الهدافين</button>
-        <button class="tab-btn" onclick="switchTab('assists', this)">المساعدات</button>
-        <button class="tab-btn" onclick="switchTab('clean-sheets', this)">أفضل الحراس</button>
+        <button class="tab-btn active" onclick="switchTab('standings', this)">الترتيب والنتائج الحية</button>
+        <button class="tab-btn" onclick="switchTab('scorers', this)">الهدافين والمساعدين</button>
     </div>
 
-    <!-- 1. جدول ترتيب الدوري -->
+    <!-- 1. جدول ترتيب الدوري الحقيقي والتفاعلي -->
     <div id="standings-view">
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>الفرقة</th>
-                    <th>لعب</th>
-                    <th>له/عليه</th>
-                    <th>النقاط</th>
-                </tr>
-            </thead>
-            <tbody id="standings-body">
-                <!-- يتم تعبئتها تلقائياً عبر API أو البيانات التفاعلية -->
-            </tbody>
-        </table>
+        <iframe class="widget-frame" src="https://widget.fotmob.com/m/table?id=9292"></iframe>
     </div>
 
-    <!-- 2. جدول الهدافين -->
+    <!-- 2. جدول الهدافين والمصنعين الحقيقي والتفاعلي -->
     <div id="scorers-view" class="hidden">
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>اللاعب</th>
-                    <th>الفريق</th>
-                    <th>الأهداف</th>
-                </tr>
-            </thead>
-            <tbody id="scorers-body"></tbody>
-        </table>
-    </div>
-
-    <!-- 3. جدول المساعدات (الصناع) -->
-    <div id="assists-view" class="hidden">
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>اللاعب</th>
-                    <th>الفريق</th>
-                    <th>صناعة (Assists)</th>
-                </tr>
-            </thead>
-            <tbody id="assists-body"></tbody>
-        </table>
-    </div>
-
-    <!-- 4. جدول أفضل الحراس -->
-    <div id="clean-sheets-view" class="hidden">
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>الحارس</th>
-                    <th>الفريق</th>
-                    <th>شباك نظيفة (Clean Sheet)</th>
-                </tr>
-            </thead>
-            <tbody id="clean-sheets-body"></tbody>
-        </table>
+        <iframe class="widget-frame" src="https://widget.fotmob.com/m/stats?id=9292"></iframe>
     </div>
 
     <a href="../index.html" class="btn-back">العودة للبوابة الرئيسية 🏠</a>
@@ -165,7 +108,7 @@
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        ['standings', 'scorers', 'assists', 'clean-sheets'].forEach(v => {
+        ['standings', 'scorers'].forEach(v => {
             document.getElementById(`${v}-view`).classList.add('hidden');
         });
         document.getElementById(`${viewId}-view`).classList.remove('hidden');
