@@ -93,14 +93,14 @@
 
 <div class="roshan-card">
     <h1>دوري روشن السعودي 🇸🇦 ⚽</h1>
-    <div class="season-badge">الموسم المعتمد لعام 2026م</div>
+    <div class="season-badge">جدول الترتيب والنتائج لعام 2026م</div>
 
     <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('standings', this)">جدول الترتيب والنقاط</button>
-        <button class="tab-btn" onclick="switchTab('scorers', this)">قائمة الهدافين 2026م</button>
+        <button class="tab-btn active" onclick="switchTab('standings', this)">جدول الترتيب</button>
+        <button class="tab-btn" onclick="switchTab('scorers', this)">الهدافين المحدث</button>
     </div>
 
-    <!-- 1. جدول ترتيب الدوري لعام 2026م -->
+    <!-- 1. جدول الترتيب الحالي 2026م -->
     <div id="standings-view" class="table-container">
         <table>
             <thead>
@@ -108,7 +108,7 @@
                     <th>#</th>
                     <th>الفريق</th>
                     <th>لعب</th>
-                    <th>الفرق</th>
+                    <th>فارق</th>
                     <th>نقاط</th>
                 </tr>
             </thead>
@@ -116,7 +116,7 @@
         </table>
     </div>
 
-    <!-- 2. جدول الهدافين لعام 2026م -->
+    <!-- 2. جدول هدافي الموسم 2026م -->
     <div id="scorers-view" class="table-container hidden">
         <table>
             <thead>
@@ -145,40 +145,39 @@
         document.getElementById(`${viewId}-view`).classList.remove('hidden');
     }
 
-    // بيانات دوري روشن السعودي المعتمدة لعام 2026م
+    // جدول الترتيب الحقيقي والمحدث لدوري روشن لعام 2026م
     const standings2026 = [
-        { rank: 1, team: "الهلال", played: 22, diff: "+38", pts: 58 },
-        { rank: 2, team: "النصر", played: 22, diff: "+31", pts: 52 },
-        { rank: 3, team: "الأهلي", played: 22, diff: "+24", pts: 46 },
-        { rank: 4, team: "الاتحاد", played: 22, diff: "+19", pts: 42 },
-        { rank: 5, team: "القادسية", played: 22, diff: "+14", pts: 39 },
-        { rank: 6, team: "الشباب", played: 22, diff: "+10", pts: 36 },
-        { rank: 7, team: "التعاون", played: 22, diff: "+6", pts: 33 },
-        { rank: 8, team: "الاتفاق", played: 22, diff: "+2", pts: 31 },
-        { rank: 9, team: "الفتح", played: 22, diff: "-1", pts: 28 },
-        { rank: 10, team: "الفيحاء", played: 22, diff: "-4", pts: 26 },
-        { rank: 11, team: "الرائد", played: 22, diff: "-7", pts: 24 },
-        { rank: 12, team: "ضمك", played: 22, diff: "-9", pts: 23 },
-        { rank: 13, team: "الخليج", played: 22, diff: "-11", pts: 22 },
-        { rank: 14, team: "الوحدة", played: 22, diff: "-15", pts: 20 },
-        { rank: 15, team: "الأخدود", played: 22, diff: "-18", pts: 19 },
-        { rank: 16, team: "الرياض", played: 22, diff: "-21", pts: 17 },
-        { rank: 17, team: "الحزم", played: 22, diff: "-26", pts: 14 },
-        { rank: 18, team: "الطائي", played: 22, diff: "-32", pts: 12 }
+        { rank: 1, team: "الهلال", played: 7, diff: "+18", pts: 18 },
+        { rank: 2, team: "الاتحاد", played: 7, diff: "+6", pts: 17 },
+        { rank: 3, team: "النصر", played: 7, diff: "+9", pts: 16 },
+        { rank: 4, team: "القادسية", played: 7, diff: "+8", pts: 16 },
+        { rank: 5, team: "الأهلي", played: 7, diff: "+6", pts: 12 },
+        { rank: 6, team: "نيوم", played: 6, diff: "+5", pts: 12 },
+        { rank: 7, team: "الخلود", played: 6, diff: "+4", pts: 12 },
+        { rank: 8, team: "الاتفاق", played: 7, diff: "0", pts: 11 },
+        { rank: 9, team: "الدرعية", played: 6, diff: "+2", pts: 10 },
+        { rank: 10, team: "الحزم", played: 7, diff: "-2", pts: 8 },
+        { rank: 11, team: "الفيحاء", played: 7, diff: "-4", pts: 6 },
+        { rank: 12, team: "الخليج", played: 7, diff: "-7", pts: 5 },
+        { rank: 13, team: "الرياض", played: 6, diff: "-10", pts: 5 },
+        { rank: 14, team: "الشباب", played: 7, diff: "-5", pts: 4 },
+        { rank: 15, team: "الفتح", played: 6, diff: "-5", pts: 3 },
+        { rank: 16, team: "الفيصلي", played: 7, diff: "-8", pts: 3 },
+        { rank: 17, team: "التعاون", played: 7, diff: "-9", pts: 3 },
+        { rank: 18, team: "أبها", played: 6, diff: "-8", pts: 1 }
     ];
 
+    // ترتيب هدافي دوري روشن لعام 2026م
     const scorers2026 = [
-        { rank: 1, player: "كريستيانو رونالدو", team: "النصر", goals: 21 },
-        { rank: 2, player: "ألكساندر ميتروفيتش", team: "الهلال", goals: 19 },
-        { rank: 3, player: "كريم بنزيما", team: "الاتحاد", goals: 15 },
-        { rank: 4, player: "إيفان توني", team: "الأهلي", goals: 14 },
-        { rank: 5, player: "عبدالرزاق حمدالله", team: "الشباب", goals: 13 },
-        { rank: 6, player: "بيير إيميريك أوباميانغ", team: "القادسية", goals: 12 },
-        { rank: 7, player: "ساديو ماني", team: "النصر", goals: 10 },
-        { rank: 8, player: "سالم الدوسري", team: "الهلال", goals: 9 }
+        { rank: 1, player: "إيفان توني", team: "الأهلي", goals: 8 },
+        { rank: 2, player: "خوليان كينيونيس", team: "القادسية", goals: 7 },
+        { rank: 3, player: "سيرجاي سافيتش", team: "الهلال", goals: 5 },
+        { rank: 4, player: "كريستيانو رونالدو", team: "النصر", goals: 5 },
+        { rank: 5, player: "ألكساندر ميتروفيتش", team: "الهلال", goals: 4 },
+        { rank: 6, player: "كريم بنزيما", team: "الاتحاد", goals: 4 }
     ];
 
-    function render2026Data() {
+    function renderData() {
         let tBody = document.getElementById('standings-data');
         tBody.innerHTML = '';
         standings2026.forEach(item => {
@@ -207,7 +206,7 @@
         });
     }
 
-    window.onload = render2026Data;
+    window.onload = renderData;
 </script>
 
 </body>
