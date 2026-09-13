@@ -1,79 +1,173 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة الألعاب الأونلاين 🎮</title>
-    <style>
-        * { box-sizing: border-box; }
-        body { 
-            background: radial-gradient(circle, #1E1B4B 0%, #0F172A 100%); 
-            color: white; 
-            font-family: system-ui, -apple-system, sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            padding: 16px; 
-        }
-        .card { 
-            background: rgba(15, 23, 42, 0.95); 
-            border: 2px solid #F59E0B; 
-            border-radius: 20px; 
-            padding: 24px; 
-            width: 100%; 
-            max-width: 420px; 
-            text-align: center; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
-        }
-        h1 { color: #F59E0B; margin: 0 0 8px 0; font-size: 24px; }
-        p { color: #94A3B8; font-size: 14px; margin-bottom: 24px; }
-        .game-btn { 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%; 
-            padding: 14px; 
-            margin: 12px 0; 
-            border-radius: 14px; 
-            border: none; 
-            font-weight: bold; 
-            font-size: 16px; 
-            text-decoration: none; 
-            box-sizing: border-box; 
-            transition: all 0.2s ease; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-        }
-        .game-btn:active { transform: scale(0.97); }
-        .btn-million { background: linear-gradient(135deg, #F59E0B, #D97706); color: #000; }
-        .btn-baloot { background: linear-gradient(135deg, #10B981, #047857); color: #fff; }
-        .btn-quiz { background: linear-gradient(135deg, #3B82F6, #1D4ED8); color: #fff; }
-        .btn-roshan { background: linear-gradient(135deg, #059669, #047857); color: #fff; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>منصة الألعاب الخاصة</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent-color: #3b82f6;
+      --gold: #f59e0b;
+      --text-color: #f8fafc;
+      --subtext-color: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 20px 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 650px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    header h1 {
+      color: #60a5fa;
+      font-size: 1.8rem;
+      margin-bottom: 5px;
+    }
+
+    header p {
+      color: var(--subtext-color);
+      font-size: 0.95rem;
+    }
+
+    .games-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .game-card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      border: 1px solid #334155;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .game-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-color);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .game-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #f8fafc;
+    }
+
+    .game-code {
+      background-color: #334155;
+      color: var(--gold);
+      font-size: 0.8rem;
+      font-weight: bold;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-family: monospace;
+    }
+
+    .game-desc {
+      color: var(--subtext-color);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .play-btn {
+      display: inline-block;
+      text-align: center;
+      background-color: var(--accent-color);
+      color: white;
+      text-decoration: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: bold;
+      transition: opacity 0.2s;
+      margin-top: 5px;
+    }
+
+    .play-btn:hover {
+      opacity: 0.9;
+    }
+  </style>
 </head>
 <body>
 
-<div class="card">
-    <h1>بوابة الألعاب الأونلاين 🎮</h1>
-    <p>اختر اللعبة المفضلة وابدأ التحدي والمنافسة الآن</p>
-    
-    <a href="./million/index.html" class="game-btn btn-million">
-        🃏 لعبة المليون أونلاين
-    </a>
-    
-    <a href="./baloot/index.html" class="game-btn btn-baloot">
-        ♠️ لعبة البلوت أونلاين
-    </a>
+<div class="container">
+  <header>
+    <h1>🎮 منصة الألعاب الخاصة</h1>
+    <p>اختر اللعبة لبدء قيد النقاط والمتابعة</p>
+  </header>
 
-    <a href="./quiz/index.html" class="game-btn btn-quiz">
-        🏆 تحدي من سيربح المليون
-    </a>
+  <div class="games-grid">
 
-    <a href="./roshan/index.html" class="game-btn btn-roshan">
-        ⚽ نتائج وترتيب دوري روشن السعودي
-    </a>
+    <!-- لعبة نششرة اللاعبين -->
+    <div class="game-card">
+      <div class="card-header">
+        <span class="game-title">نششرة اللاعبين</span>
+        <span class="game-code">GAME-08N</span>
+      </div>
+      <p class="game-desc">
+        حساب النقاط لعدد من 2 إلى 8 لاعبين، البداية من 100 نقطة، تحديد هدف الفوز (من مضاعفات 1000)، مع إمكانية الزيادة والخصم بسهولة.
+      </p>
+      <a href="./GAME-08N/index.html" class="play-btn">تشغيل اللعبة 🚀</a>
+    </div>
+
+    <!-- لعبة حاسبة البالوت -->
+    <div class="game-card">
+      <div class="card-header">
+        <span class="game-title">حساب البالوت</span>
+        <span class="game-code">BALOOT-01</span>
+      </div>
+      <p class="game-desc">
+        حساب أبناط الصن والحكم، قيد النشرات، متابعة السكوش، وحساب الدبل والدبل المشارك.
+      </p>
+      <a href="./BALOOT-01/index.html" class="play-btn">تشغيل اللعبة 🃏</a>
+    </div>
+
+    <!-- دوري السعادة فيفا -->
+    <div class="game-card">
+      <div class="card-header">
+        <span class="game-title">دوري السعادة فيفا</span>
+        <span class="game-code">FIFA26-S</span>
+      </div>
+      <p class="game-desc">
+        جدول الترتيب، النقاط، المواجهات المباشرة، وسجل النتائج للبطولة.
+      </p>
+      <a href="./FIFA26-S/index.html" class="play-btn">عرض الدوري ⚽</a>
+    </div>
+
+  </div>
 </div>
 
 </body>
