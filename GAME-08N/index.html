@@ -12,14 +12,16 @@
       --green: #22c55e;
       --red: #ef4444;
       --gold: #f59e0b;
+      --silver: #94a3b8;
+      --bronze: #d97706;
       --text-color: #f8fafc;
     }
 
     * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; }
     body { background-color: var(--bg-color); color: var(--text-color); padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
     .container { width: 100%; max-width: 600px; }
-    .header-tag { text-align: center; background-color: #334155; color: #94a3b8; font-size: 0.85rem; padding: 4px 12px; border-radius: 20px; width: fit-content; margin: 0 auto 10px auto; font-weight: bold; }
-    h1 { text-align: center; margin-bottom: 15px; color: #60a5fa; }
+    .header-tag { text-align: center; background-color: #334155; color: var(--gold); font-size: 0.85rem; padding: 4px 12px; border-radius: 20px; width: fit-content; margin: 0 auto 10px auto; font-weight: bold; }
+    h1, h2, h3 { text-align: center; margin-bottom: 15px; color: #60a5fa; }
     .card { background-color: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); }
     .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
     label { font-size: 0.9rem; color: #94a3b8; display: block; margin-bottom: 4px; }
@@ -30,15 +32,38 @@
     .btn-green { background-color: var(--green); }
     .btn-red { background-color: var(--red); }
     .btn-reset { background-color: #475569; margin-top: 10px; }
+    .btn-gold { background-color: var(--gold); color: #000; font-weight: bold; }
+
     .players-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
     .player-card { background-color: #334155; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
     .player-card.selected { border-color: var(--gold); background-color: #1e293b; transform: scale(1.02); }
     .player-name { font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; color: #cbd5e1; }
     .player-score { font-size: 1.8rem; font-weight: bold; color: #38bdf8; }
     .action-btns { display: flex; gap: 10px; margin-top: 10px; }
-    .winner-banner { background-color: var(--gold); color: #000; text-align: center; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 1.2rem; margin-bottom: 15px; display: none; }
+
+    /* Tables & Stats */
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.9rem; text-align: center; }
+    th, td { padding: 8px; border-bottom: 1px solid #334155; }
+    th { color: var(--gold); background-color: #0f172a; }
+
+    .rank-1 { color: var(--gold); font-weight: bold; }
+    .rank-2 { color: var(--silver); font-weight: bold; }
+    .rank-3 { color: var(--bronze); font-weight: bold; }
+
     .back-nav { margin-bottom: 10px; text-align: right; }
     .back-nav a { color: #94a3b8; text-decoration: none; font-size: 0.9rem; }
+
+    /* Modal / Overlay for End Game Leaderboard */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.95); z-index: 100;
+      justify-content: center; align-items: center; padding: 15px;
+    }
+    .modal-content {
+      background: var(--card-bg); border-radius: 15px; padding: 20px;
+      width: 100%; max-width: 500px; text-align: center; border: 2px solid var(--gold);
+      max-height: 90vh; overflow-y: auto;
+    }
   </style>
 </head>
 <body>
@@ -47,11 +72,11 @@
   <div class="back-nav">
     <a href="../index.html">➔ العودة لمنصة الألعاب</a>
   </div>
-  
+
   <div class="header-tag">كود اللعبة: GAME-08N</div>
   <h1>نششرة اللاعبين</h1>
 
-  <!-- شاشة التجهيز -->
+  <!-- شاشة التجهيز والإحصائيات السابقة -->
   <div id="setup-screen" class="card">
     <div style="margin-bottom: 15px;">
       <label>اختر عدد اللاعبين (من 2 إلى 8):</label>
@@ -66,7 +91,7 @@
       </select>
     </div>
 
-    <label style="margin-bottom: 8px;">أسماء اللاعبين:</label>
+    <label style="margin-bottom: 8px;">أسماء اللاعبين المشاركين:</label>
     <div class="setup-grid" id="names-inputs"></div>
 
     <div style="margin-bottom: 15px;">
@@ -83,12 +108,44 @@
     </div>
 
     <button class="btn btn-green" onclick="startGame()">بدء اللعب 🚀</button>
+
+    <!-- لوحة إحصائيات المباريات السابقة (قبل اللعب) -->
+    <div style="margin-top: 25px; border-top: 1px dashed #334155; padding-top: 15px;">
+      <h3 style="color: var(--gold);">🏆 لوحة الأبطال والسجل التراكمي</h3>
+      
+      <h4 style="font-size: 0.95rem; color: #94a3b8; margin: 10px 0 5px 0;">أكثر اللاعبين فوزاً (المركز الأول):</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>المركز</th>
+            <th>اللاعب</th>
+            <th>عدد الانتصرات 🏆</th>
+          </tr>
+        </thead>
+        <tbody id="wins-leaderboard">
+          <tr><td colspan="3" style="color:#64748b;">لا توجد سجلات بعد</td></tr>
+        </tbody>
+      </table>
+
+      <h4 style="font-size: 0.95rem; color: #94a3b8; margin: 15px 0 5px 0;">أكثر المشاركات وإجمالي النقاط:</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>اللاعب</th>
+            <th>المباريات</th>
+            <th>مجموع النقاط 🎖️</th>
+          </tr>
+        </thead>
+        <tbody id="stats-leaderboard">
+          <tr><td colspan="3" style="color:#64748b;">لا توجد سجلات بعد</td></tr>
+        </tbody>
+      </table>
+      <button class="btn btn-reset" style="font-size: 0.8rem; padding: 6px;" onclick="clearHistory()">مسح السجل التاريخي 🗑️</button>
+    </div>
   </div>
 
-  <!-- شاشة اللعب -->
+  <!-- شاشة اللعب النشطة -->
   <div id="game-screen" style="display: none;">
-    <div id="winner-banner" class="winner-banner"></div>
-
     <div class="players-grid" id="players-grid"></div>
 
     <div class="card">
@@ -105,7 +162,29 @@
       </div>
     </div>
 
-    <button class="btn btn-reset" onclick="resetGame()">إعادة ضبط وإعداد جديد 🔄</button>
+    <button class="btn btn-reset" onclick="resetGame()">إلغاء وإعادة إعداد اللعبة 🔄</button>
+  </div>
+</div>
+
+<!-- Modal: شاشة الصدارة والتكريم عند نهاية اللعبة -->
+<div id="end-modal" class="modal-overlay">
+  <div class="modal-content">
+    <h2 style="color: var(--gold); font-size: 1.6rem;">🎉 انتهت اللعبة! 🎉</h2>
+    <p id="winner-announcement" style="font-size: 1.1rem; margin-bottom: 15px;"></p>
+
+    <h3>📊 الترتيب النهائي للاعبين</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>المركز</th>
+          <th>اسم اللاعب</th>
+          <th>النقاط النهائة</th>
+        </tr>
+      </thead>
+      <tbody id="game-rank-body"></tbody>
+    </table>
+
+    <button class="btn btn-gold" style="margin-top: 20px;" onclick="closeModalAndReset()">إنهاء والعودة للشاشة الرئيسية 🔄</button>
   </div>
 </div>
 
@@ -113,6 +192,9 @@
   let players = [];
   let targetScore = 1000;
   let selectedPlayerIndex = 0;
+
+  // Real-time local database setup using localStorage
+  let globalStats = JSON.parse(localStorage.getItem('game08n_stats')) || {};
 
   function generateNameInputs() {
     const count = parseInt(document.getElementById('player-count-select').value);
@@ -130,6 +212,7 @@
   }
 
   generateNameInputs();
+  renderGlobalLeaderboards();
 
   document.getElementById('target-score-select').addEventListener('change', function() {
     const customInput = document.getElementById('custom-target');
@@ -221,18 +304,112 @@
 
   function checkWinner() {
     const winner = players.find(p => p.score >= targetScore);
-    const banner = document.getElementById('winner-banner');
     if (winner) {
-      banner.innerText = `🎉 الفائز هو: ${winner.name} بـ ${winner.score} نقطة! 🎉`;
-      banner.style.display = 'block';
-    } else {
-      banner.style.display = 'none';
+      endGame(winner);
     }
+  }
+
+  function endGame(winner) {
+    // 1. Sort current game players descending
+    const sortedGame = [...players].sort((a, b) => b.score - a.score);
+
+    // 2. Save stats to LocalStorage
+    sortedGame.forEach((p, index) => {
+      if (!globalStats[p.name]) {
+        globalStats[p.name] = { wins: 0, games: 0, totalPoints: 0 };
+      }
+      globalStats[p.name].games += 1;
+      globalStats[p.name].totalPoints += p.score;
+      if (index === 0) {
+        globalStats[p.name].wins += 1;
+      }
+    });
+
+    localStorage.setItem('game08n_stats', JSON.stringify(globalStats));
+
+    // 3. Render Modal Leaderboard
+    document.getElementById('winner-announcement').innerText = `🏆 بطل اللعبة: ${winner.name} بـ (${winner.score}) نقطة!`;
+
+    const rankTbody = document.getElementById('game-rank-body');
+    rankTbody.innerHTML = '';
+    sortedGame.forEach((p, idx) => {
+      let medal = idx === 0 ? '🏆 1' : idx === 1 ? '🥈 2' : idx === 2 ? '🥉 3' : (idx + 1);
+      let rankClass = idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : '';
+      rankTbody.innerHTML += `
+        <tr class="${rankClass}">
+          <td>${medal}</td>
+          <td>${p.name}</td>
+          <td>${p.score}</td>
+        </tr>
+      `;
+    });
+
+    document.getElementById('end-modal').style.display = 'flex';
+  }
+
+  function closeModalAndReset() {
+    document.getElementById('end-modal').style.display = 'none';
+    resetGame();
   }
 
   function resetGame() {
     document.getElementById('game-screen').style.display = 'none';
     document.getElementById('setup-screen').style.display = 'block';
+    renderGlobalLeaderboards();
+  }
+
+  function renderGlobalLeaderboards() {
+    const statsArray = Object.keys(globalStats).map(name => ({
+      name: name,
+      wins: globalStats[name].wins,
+      games: globalStats[name].games,
+      totalPoints: globalStats[name].totalPoints
+    }));
+
+    // Sort by Wins
+    const byWins = [...statsArray].sort((a, b) => b.wins - a.wins).filter(p => p.wins > 0);
+    const winsTbody = document.getElementById('wins-leaderboard');
+    winsTbody.innerHTML = '';
+    if (byWins.length === 0) {
+      winsTbody.innerHTML = '<tr><td colspan="3" style="color:#64748b;">لا توجد انتصارات مسجلة بعد</td></tr>';
+    } else {
+      byWins.forEach((p, idx) => {
+        let medal = idx === 0 ? '🏆 1' : idx === 1 ? '🥈 2' : idx === 2 ? '🥉 3' : (idx + 1);
+        winsTbody.innerHTML += `
+          <tr>
+            <td class="rank-${idx + 1}">${medal}</td>
+            <td>${p.name}</td>
+            <td style="font-weight:bold; color:var(--gold);">${p.wins}</td>
+          </tr>
+        `;
+      });
+    }
+
+    // Sort by Games Played / Points
+    const byGames = [...statsArray].sort((a, b) => b.games - a.games || b.totalPoints - a.totalPoints);
+    const statsTbody = document.getElementById('stats-leaderboard');
+    statsTbody.innerHTML = '';
+    if (byGames.length === 0) {
+      statsTbody.innerHTML = '<tr><td colspan="3" style="color:#64748b;">لا توجد مشاركات مسجلة بعد</td></tr>';
+    } else {
+      byGames.forEach(p => {
+        statsTbody.innerHTML += `
+          <tr>
+            <td>${p.name}</td>
+            <td>${p.games}</td>
+            <td style="color:#38bdf8;">${p.totalPoints}</td>
+          </tr>
+        `;
+      });
+    }
+  }
+
+  function clearHistory() {
+    if (confirm("هل أنت تأكد من مسح جميع السجلات التاريخية والأبطال؟")) {
+      localStorage.removeItem('game08n_stats');
+      globalStats = {};
+      renderGlobalLeaderboards();
+    }
   }
 </script>
 </body>
