@@ -10,6 +10,8 @@
       --card-bg: #1e293b;
       --accent-color: #3b82f6;
       --gold: #f59e0b;
+      --green: #22c55e;
+      --purple: #8b5cf6;
       --text-color: #f8fafc;
       --subtext-color: #94a3b8;
     }
@@ -33,7 +35,7 @@
 
     .container {
       width: 100%;
-      max-width: 650px;
+      max-width: 680px;
     }
 
     header {
@@ -43,8 +45,8 @@
 
     header h1 {
       color: #60a5fa;
-      font-size: 1.8rem;
-      margin-bottom: 5px;
+      font-size: 1.9rem;
+      margin-bottom: 6px;
     }
 
     header p {
@@ -53,9 +55,18 @@
     }
 
     .games-grid {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 1fr;
       gap: 15px;
+    }
+
+    @media (min-width: 600px) {
+      .games-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .full-width {
+        grid-column: span 2;
+      }
     }
 
     .game-card {
@@ -66,12 +77,13 @@
       border: 1px solid #334155;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      justify-content: space-between;
+      gap: 12px;
       transition: transform 0.2s, border-color 0.2s;
     }
 
     .game-card:hover {
-      transform: translateY(-2px);
+      transform: translateY(-3px);
       border-color: var(--accent-color);
     }
 
@@ -90,7 +102,7 @@
     .game-code {
       background-color: #334155;
       color: var(--gold);
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: bold;
       padding: 3px 10px;
       border-radius: 20px;
@@ -99,12 +111,12 @@
 
     .game-desc {
       color: var(--subtext-color);
-      font-size: 0.9rem;
-      line-height: 1.4;
+      font-size: 0.88rem;
+      line-height: 1.45;
     }
 
     .play-btn {
-      display: inline-block;
+      display: block;
       text-align: center;
       background-color: var(--accent-color);
       color: white;
@@ -113,58 +125,73 @@
       border-radius: 8px;
       font-weight: bold;
       transition: opacity 0.2s;
-      margin-top: 5px;
     }
 
     .play-btn:hover {
       opacity: 0.9;
     }
+
+    .btn-green { background-color: var(--green); }
+    .btn-purple { background-color: var(--purple); }
+    .btn-gold { background-color: var(--gold); color: #000; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <header>
-    <h1>🎮 منصة الألعاب الخاصة</h1>
-    <p>اختر اللعبة لبدء قيد النقاط والمتابعة</p>
+    <h1>🎮 منصة الألعاب الشاملة</h1>
+    <p>إدارة وقيد النشرات، الدوريات، والتحديات الخاصة</p>
   </header>
 
   <div class="games-grid">
 
-    <!-- لعبة نششرة اللاعبين -->
-    <div class="game-card">
+    <!-- 1. حاسبة نششرة اللاعبين (الحاسبة الوحيدة المعمدة) -->
+    <div class="game-card full-width">
       <div class="card-header">
-        <span class="game-title">نششرة اللاعبين</span>
+        <span class="game-title">نششرة اللاعبين (2 إلى 8 لاعبين)</span>
         <span class="game-code">GAME-08N</span>
       </div>
       <p class="game-desc">
-        حساب النقاط لعدد من 2 إلى 8 لاعبين، البداية من 100 نقطة، تحديد هدف الفوز (من مضاعفات 1000)، مع إمكانية الزيادة والخصم بسهولة.
+        حاسبة النقاط الخاصة: اختيار عدد اللاعبين من 2 إلى 8، يبدأ الجميع من 100 نقطة، اختيار شرط الفوز (مضاعفات 1000)، والتعديل بالزيادة والخصم بسهولة.
       </p>
-      <a href="./GAME-08N/index.html" class="play-btn">تشغيل اللعبة 🚀</a>
+      <a href="./GAME-08N/index.html" class="play-btn btn-green">فتح حاسبة النشرة 🚀</a>
     </div>
 
-    <!-- لعبة حاسبة البالوت -->
+    <!-- 2. دوري روشن السعودي 2026 -->
     <div class="game-card">
       <div class="card-header">
-        <span class="game-title">حساب البالوت</span>
-        <span class="game-code">BALOOT-01</span>
+        <span class="game-title">دوري روشن السعودي 2026</span>
+        <span class="game-code">ROSHN-2026</span>
       </div>
       <p class="game-desc">
-        حساب أبناط الصن والحكم، قيد النشرات، متابعة السكوش، وحساب الدبل والدبل المشارك.
+        جدول الترتيب، الهدافين، ونتائج المباريات للجولات الرسمية.
       </p>
-      <a href="./BALOOT-01/index.html" class="play-btn">تشغيل اللعبة 🃏</a>
+      <a href="./ROSHN-2026/index.html" class="play-btn btn-purple">متابعة دوري روشن 🇸🇦</a>
     </div>
 
-    <!-- دوري السعادة فيفا -->
+    <!-- 3. دوري السعادة فيفا 26 -->
     <div class="game-card">
       <div class="card-header">
-        <span class="game-title">دوري السعادة فيفا</span>
+        <span class="game-title">دوري السعادة فيفا 26</span>
         <span class="game-code">FIFA26-S</span>
       </div>
       <p class="game-desc">
-        جدول الترتيب، النقاط، المواجهات المباشرة، وسجل النتائج للبطولة.
+        إدارة البطولة والتنافس: جدول الترتيب وسجل مواجهات فيفا.
       </p>
-      <a href="./FIFA26-S/index.html" class="play-btn">عرض الدوري ⚽</a>
+      <a href="./FIFA26-S/index.html" class="play-btn">عرض دوري السعادة ⚽</a>
+    </div>
+
+    <!-- 4. مسابقة المليون -->
+    <div class="game-card full-width">
+      <div class="card-header">
+        <span class="game-title">تحدي لعبة المليون</span>
+        <span class="game-code">MILLION-01</span>
+      </div>
+      <p class="game-desc">
+        مسابقة الأسئلة والتحدي التفاعلية مع وسائل المساعدة.
+      </p>
+      <a href="./MILLION-01/index.html" class="play-btn btn-gold">بدء التحدي 🏆</a>
     </div>
 
   </div>
