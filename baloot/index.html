@@ -332,10 +332,10 @@
     <div id="lobby-screen" style="position:absolute; top:25%; width:85%; background:rgba(15, 23, 42, 0.95); border:2px solid #F59E0B; padding:16px; border-radius:16px; z-index:50; text-align:center;">
         <h3 style="color:#F59E0B; margin-top:0;">دخول لعبة البلوت ♠️</h3>
         <input type="text" id="player-name" placeholder="أدخل اسمك" style="width:90%; padding:10px; border-radius:8px; border:1px solid #334155; background:#0F172A; color:#FFF; text-align:center; margin-bottom:8px;" />
-        <button style="width:95%; padding:10px; background:#F59E0B; color:#000; font-weight:bold; border-radius:8px; border:none; margin:4px 0;" onclick="createRoom()">إنشاء طاولة</button>
-        <button style="width:95%; padding:10px; background:#475569; color:#FFF; font-weight:bold; border-radius:8px; border:none; margin:4px 0;" onclick="startVsBots()">اللعب ضد الكمبيوتر 🤖</button>
+        <button id="btn-create-room" style="width:95%; padding:10px; background:#F59E0B; color:#000; font-weight:bold; border-radius:8px; border:none; margin:4px 0; cursor:pointer;" onclick="createRoom()">إنشاء طاولة</button>
+        <button style="width:95%; padding:10px; background:#475569; color:#FFF; font-weight:bold; border-radius:8px; border:none; margin:4px 0; cursor:pointer;" onclick="startVsBots()">اللعب ضد الكمبيوتر 🤖</button>
         <input type="number" id="room-code-input" placeholder="رمز الطاولة" style="width:90%; padding:10px; border-radius:8px; border:1px solid #334155; background:#0F172A; color:#FFF; text-align:center; margin-top:8px;" />
-        <button style="width:95%; padding:10px; background:#10B981; color:#FFF; font-weight:bold; border-radius:8px; border:none; margin:4px 0;" onclick="joinRoom()">انضمام</button>
+        <button style="width:95%; padding:10px; background:#10B981; color:#FFF; font-weight:bold; border-radius:8px; border:none; margin:4px 0; cursor:pointer;" onclick="joinRoom()">انضمام</button>
     </div>
 
     <!-- الخوي (أعلى الطاولة مقابل لك) -->
@@ -391,7 +391,7 @@
         <button class="btn-bid-pill btn-yellow" onclick="makeBid('pass')">بس</button>
     </div>
 
-    <!-- أنت (أسفل الطاولة - كروتك المكشوفة لك) -->
+    <!-- أنت (أسفل الطاولة) -->
     <div class="player-avatar-box player-bottom">
         <div class="avatar-circle">
             🇸🇦
@@ -422,8 +422,13 @@
         appId: "1:6658146268:web:0467d3f63e11b818fb9919"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    let db = null;
+    try {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+    } catch(e) {
+        console.log("Firebase Init Error:", e);
+    }
 
     let currentRoomCode = null;
     let myName = "";
@@ -437,14 +442,38 @@
     function saveName(name) { myName = name; localStorage.setItem('baloot_player_name', name); }
 
     function createRoom() {
-        let name = document.getElementById('player-name').value.trim();
+        let nameInput = document.getElementById('player-name');
+        let name = nameInput.value.trim();
         if (!name) return alert('أدخل اسمك أولاً!');
+        
+        let btn = document.getElementById('btn-create-room');
+        btn.innerText = 'جاري الإنشاء... ⏳';
+        btn.disabled = true;
+
         saveName(name); isHost = true; myIndex = 0;
         currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
         let p = { name: name, team: 'us', isHost: true, type: 'حقيقي' };
-        db.ref('baloot_rooms/' + currentRoomCode).set({
+
+        let roomData = {
             status: 'waiting', scoreUsTotal: 0, scoreThemTotal: 0, dealerIndex: 0, turnIndex: 1, bidRound: 1, players: [p]
-        }).then(() => { listenToRoom(); });
+        };
+
+        if (db) {
+            db.ref('baloot_rooms/' + currentRoomCode).set(roomData).then(() => {
+                alert('تم إنشاء الطاولة! رمز الطاولة: ' + currentRoomCode);
+                listenToRoom();
+            }).catch(err => {
+                console.log('Firebase write failed, starting local mode:', err);
+                startVsBots();
+            }).finally(() => {
+                btn.innerText = 'إنشاء طاولة';
+                btn.disabled = false;
+            });
+        } else {
+            startVsBots();
+            btn.innerText = 'إنشاء طاولة';
+            btn.disabled = false;
+        }
     }
 
     function joinRoom() {
@@ -452,19 +481,25 @@
         let code = document.getElementById('room-code-input').value.trim();
         if (!name || !code) return alert('أدخل بياناتك كاملة!');
         saveName(name); currentRoomCode = code;
-        db.ref('baloot_rooms/' + code).get().then(snap => {
-            if (snap.exists()) {
-                let pList = snap.val().players || [];
-                if (pList.length >= 4) return alert('الطاولة مكتملة!');
-                myIndex = pList.length;
-                let team = (myIndex % 2 === 0) ? 'us' : 'them';
-                pList.push({ name: name, team: team, isHost: false, type: 'حقيقي' });
-                db.ref('baloot_rooms/' + code + '/players').set(pList).then(() => { listenToRoom(); });
-            } else alert('الطاولة غير موجودة!');
-        });
+        
+        if (db) {
+            db.ref('baloot_rooms/' + code).get().then(snap => {
+                if (snap.exists()) {
+                    let pList = snap.val().players || [];
+                    if (pList.length >= 4) return alert('الطاولة مكتملة!');
+                    myIndex = pList.length;
+                    let team = (myIndex % 2 === 0) ? 'us' : 'them';
+                    pList.push({ name: name, team: team, isHost: false, type: 'حقيقي' });
+                    db.ref('baloot_rooms/' + code + '/players').set(pList).then(() => { listenToRoom(); });
+                } else alert('الطاولة غير موجودة!');
+            }).catch(err => {
+                alert('عذراً، لم نتمكن من الاتصال بالغرفة.');
+            });
+        }
     }
 
     function listenToRoom() {
+        if (!db || !currentRoomCode) return;
         db.ref('baloot_rooms/' + currentRoomCode).on('value', snap => {
             if (!snap.exists()) return;
             let data = snap.val();
@@ -476,7 +511,8 @@
     }
 
     function startVsBots() {
-        let name = document.getElementById('player-name').value.trim() || 'اللاعب';
+        let nameInput = document.getElementById('player-name');
+        let name = nameInput.value.trim() || 'اللاعب';
         saveName(name); myIndex = 0;
         currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
         let players = [
@@ -495,10 +531,16 @@
         let revealed = deck.pop();
         let rightOfDealer = (dealerIdx + 1) % 4;
 
-        db.ref('baloot_rooms/' + currentRoomCode).set({
+        let gameData = {
             status: 'playing', scoreUsTotal: 0, scoreThemTotal: 0, dealerIndex: dealerIdx, turnIndex: rightOfDealer, bidRound: 1,
             players: playersList, revealedCard: revealed, deck: deck, mode: 'bidding', floorCards: [], passesCount: 0
-        }).then(() => { listenToRoom(); });
+        };
+
+        if (db) {
+            db.ref('baloot_rooms/' + currentRoomCode).set(gameData).then(() => { listenToRoom(); });
+        } else {
+            renderGame(gameData);
+        }
     }
 
     function buildBalootDeck() {
@@ -579,7 +621,6 @@
             biddingBox.classList.add('hidden');
         }
 
-        // تشغيل مؤقت الدور التنازلي التفاعلي الموحد لجميع اللاعبين والبوتات
         if (currentActiveTurn !== data.turnIndex) {
             currentActiveTurn = data.turnIndex;
             updateActivePlayerTimer(data.turnIndex);
@@ -619,7 +660,6 @@
         }
     }
 
-    // عداد تنازلي عام محدث وشامل لجميع الشاشات والأدوار
     function startUniversalTimer(sec, onTimeout) {
         clearInterval(timerInterval);
         let left = sec;
@@ -662,6 +702,7 @@
 
     function makeBid(choice) {
         clearInterval(timerInterval);
+        if (!db) return;
         db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
             let data = snap.val();
 
@@ -725,6 +766,7 @@
     }
 
     function playCard(index) {
+        if (!db) return;
         db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
             let data = snap.val();
             
@@ -762,8 +804,13 @@
 
             data.turnIndex = (data.dealerIndex + 1) % 4;
         }
-        db.ref('baloot_rooms/' + currentRoomCode).set(data);
+        if (db) db.ref('baloot_rooms/' + currentRoomCode).set(data);
     }
+
+    window.onload = function() {
+        let saved = localStorage.getItem('baloot_player_name');
+        if (saved) document.getElementById('player-name').value = saved;
+    };
 </script>
 
 </body>
