@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام تقييم الأداء - جمعية النبهانية للخدمات الإنسانية والاجتماعية</title>
+    <title>نظام تقييم الأداء الوظيفي - جمعية النبهانية للخدمات الإنسانية والاجتماعية</title>
     <style>
         :root {
             --primary-color: #065F46;
@@ -11,23 +11,23 @@
             --bg-color: #F8FAFC;
             --card-bg: #FFFFFF;
             --text-color: #1E293B;
-            --border-color: #E2E8F0;
+            --border-color: #CBD5E1;
         }
 
         * { box-sizing: border-box; }
         body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 16px;
             display: flex;
             justify-content: center;
         }
 
         .container {
             width: 100%;
-            max-width: 900px;
+            max-width: 950px;
             background: var(--card-bg);
             border-radius: 16px;
             border: 1px solid var(--border-color);
@@ -38,86 +38,74 @@
         .header {
             text-align: center;
             border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 16px;
-            margin-bottom: 24px;
+            padding-bottom: 14px;
+            margin-bottom: 20px;
         }
-        .header h1 {
-            color: var(--primary-color);
-            font-size: 20px;
-            margin: 0 0 6px 0;
-        }
-        .header h2 {
-            color: var(--secondary-color);
-            font-size: 16px;
-            margin: 0;
-            font-weight: 600;
-        }
+        .header h1 { color: var(--primary-color); font-size: 20px; margin: 0 0 4px 0; }
+        .header h2 { color: var(--secondary-color); font-size: 15px; margin: 0; font-weight: 600; }
 
         .info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
             background: #F1F5F9;
-            padding: 16px;
+            padding: 14px;
             border-radius: 12px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
         .form-group { display: flex; flex-direction: column; text-align: right; }
-        .form-group label { font-size: 12px; font-weight: bold; margin-bottom: 6px; color: #475569; }
+        .form-group label { font-size: 12px; font-weight: bold; margin-bottom: 4px; color: #475569; }
         .form-group input, .form-group select {
-            padding: 8px 12px;
+            padding: 8px 10px;
             border-radius: 6px;
             border: 1px solid var(--border-color);
-            font-size: 14px;
+            font-size: 13px;
             outline: none;
+            background: #FFF;
         }
 
         .section-title {
-            font-size: 16px;
+            font-size: 15px;
             color: var(--primary-color);
             border-right: 4px solid var(--secondary-color);
             padding-right: 8px;
-            margin: 20px 0 12px 0;
+            margin: 16px 0 10px 0;
             font-weight: bold;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 24px;
-            font-size: 13px;
+            margin-bottom: 20px;
+            font-size: 12px;
         }
-        th, td {
-            border: 1px solid var(--border-color);
-            padding: 10px;
-            text-align: right;
-        }
+        th, td { border: 1px solid var(--border-color); padding: 8px; text-align: right; }
         th { background-color: #F1F5F9; color: #334155; }
-        td select { width: 100%; padding: 6px; border-radius: 4px; border: 1px solid #CBD5E1; }
+        td select { width: 100%; padding: 4px; border-radius: 4px; border: 1px solid #CBD5E1; }
 
         .result-box {
             background: #ECFDF5;
             border: 1px solid #10B981;
             border-radius: 12px;
-            padding: 16px;
+            padding: 14px;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
-        .score-val { font-size: 24px; font-weight: bold; color: var(--primary-color); }
-        .grade-badge { font-size: 18px; font-weight: bold; color: var(--secondary-color); }
+        .score-val { font-size: 22px; font-weight: bold; color: var(--primary-color); }
+        .grade-badge { font-size: 16px; font-weight: bold; color: var(--secondary-color); }
 
         .signatures {
             display: flex;
             justify-content: space-between;
-            margin-top: 40px;
-            padding-top: 20px;
+            margin-top: 30px;
+            padding-top: 16px;
             border-top: 1px dashed var(--border-color);
-            font-size: 13px;
+            font-size: 12px;
             text-align: center;
         }
-        .sig-box { flex: 1; }
+        .sig-box { flex: 1; line-height: 1.6; }
 
         .btn-print {
             background-color: var(--primary-color);
@@ -146,26 +134,35 @@
 <div class="container">
     <div class="header">
         <h1>جمعية النبهانية للخدمات الإنسانية والاجتماعية</h1>
-        <h2>نظام تقييم وتطوير الأداء الوظيفي الدوري</h2>
+        <h2>استمارة تقييم الأداء الوظيفي التخصصية (30 معياراً)</h2>
     </div>
 
+    <!-- الإدخالات الرئيسية -->
     <div class="info-grid">
         <div class="form-group">
-            <label>اسم الموظف</label>
-            <input type="text" id="emp-name" placeholder="أدخل اسم الموظف">
-        </div>
-        <div class="form-group">
             <label>المسمى الوظيفي</label>
-            <input type="text" id="emp-title" placeholder="المسمى الوظيفي">
+            <select id="job-title-select" onchange="onJobChange()">
+                <option value="exec">مدير تنفيذي</option>
+                <option value="gov_fund">أخصائي حوكمة ومدير تنمية موارد مالية</option>
+                <option value="pm">مدير مشاريع</option>
+                <option value="accountant">محاسب</option>
+                <option value="researcher_m">باحث اجتماعي</option>
+                <option value="researcher_f">باحثة اجتماعية</option>
+                <option value="tech_dir">مدير تقني</option>
+                <option value="worker">عامل تحميل وتنزيل</option>
+            </select>
         </div>
         <div class="form-group">
-            <label>القسم / الإدارة</label>
-            <select id="emp-dept">
-                <option>البرامج والخدمات الإنسانية</option>
-                <option>الشؤون المالية والإدارية</option>
-                <option>الإعلام والاتصال المؤسسي</option>
-                <option>التطوع والمبادرات</option>
-                <option>إدارة الجمعية</option>
+            <label>اسم الموظف</label>
+            <select id="emp-name-select">
+                <option>محمد سليمان الغانم</option>
+                <option>محمد غازي المطرفي</option>
+                <option>محمد ضيف الله المطرفي</option>
+                <option>طلال عبدالله الحربي</option>
+                <option>خليفه علي الحصنان</option>
+                <option>حنان نفاع الحربي</option>
+                <option>فهد حمد العلوي</option>
+                <option>أحمد محمد البكاوي</option>
             </select>
         </div>
         <div class="form-group">
@@ -175,78 +172,27 @@
                 <option>الربع الثاني</option>
                 <option>الربع الثالث</option>
                 <option>الربع الرابع</option>
-                <option>التقييم السنوي</option>
+                <option>التقييم السنوي الشامل</option>
             </select>
         </div>
     </div>
 
-    <div class="section-title">معايير ومؤشرات تقييم الأداء</div>
+    <!-- جدول الـ 30 سؤالاً -->
+    <div class="section-title">بنود ومعايير التقييم التخصصية (30 سؤالاً)</div>
     <table>
         <thead>
             <tr>
                 <th style="width: 5%;">#</th>
-                <th style="width: 45%;">معيار التقييم</th>
-                <th style="width: 25%;">الوزن الأقصى</th>
-                <th style="width: 25%;">الدرجة المستحقة</th>
+                <th style="width: 65%;">المعيار التخصصي للوظيفة والعمل بالجمعية</th>
+                <th style="width: 30%;">التقييم المستحق</th>
             </tr>
         </thead>
-        <tbody>
-            <tr>
-                <td>1</td>
-                <td>الالتزام بالدوام الرسمي والتعليمات الإدارية</td>
-                <td>20 نقطة</td>
-                <td>
-                    <select class="score-input" onchange="calculateScore()">
-                        <option value="20">20 - ممتاز جداً</option>
-                        <option value="16">16 - جيد جداً</option>
-                        <option value="12">12 - جيد</option>
-                        <option value="8">8 - مقبولة</option>
-                        <option value="4">4 - تحتاج تحسين</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>إنجاز المهام والخطط التشغيلية في المواعيد المحددة</td>
-                <td>30 نقطة</td>
-                <td>
-                    <select class="score-input" onchange="calculateScore()">
-                        <option value="30">30 - إنجاز تام وقياسي</option>
-                        <option value="24">24 - إنجاز جيد جداً</option>
-                        <option value="18">18 - إنجاز متوسط</option>
-                        <option value="12">12 - تأخير محدد</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>دقة المخرجات وجودة التقارير الإدارية/الميدانية</td>
-                <td>25 نقطة</td>
-                <td>
-                    <select class="score-input" onchange="calculateScore()">
-                        <option value="25">25 - جودة عالية ودقيقة</option>
-                        <option value="20">20 - جودة جيدة جداً</option>
-                        <option value="15">15 - جودة مقبولة</option>
-                        <option value="10">10 - تحتاج مراجعة وتدقيق</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td>التعاون الميداني والعمل بروح الفريق وتطوير بيئة العمل</td>
-                <td>25 نقطة</td>
-                <td>
-                    <select class="score-input" onchange="calculateScore()">
-                        <option value="25">25 - تعاون ومبادرة ممتازة</option>
-                        <option value="20">20 - تعاون جيد جداً</option>
-                        <option value="15">15 - تعامل متوقع</option>
-                        <option value="10">10 - يحتاج لتفعيل التعاون</option>
-                    </select>
-                </td>
-            </tr>
+        <tbody id="questions-table-body">
+            <!-- يتم توليد الـ 30 سؤالاً ديناميكياً هنا -->
         </tbody>
     </table>
 
+    <!-- النتيجة والتقدير -->
     <div class="result-box">
         <div>
             <div style="font-size: 12px; color: #475569;">المجموع الكلي:</div>
@@ -258,54 +204,122 @@
         </div>
     </div>
 
-    <div class="form-group" style="margin-bottom: 20px;">
-        <label>توصيات وملاحظات المشرف المباشر:</label>
-        <input type="text" id="notes" placeholder="اكتب أية ملاحظات إيجابية أو مجالات للتطوير..." style="padding: 10px;">
-    </div>
-
-    <div class="signatures">
-        <div class="sig-box">
-            <strong>المشرف المباشر</strong><br><br>
-            التوقيع: .....................
-        </div>
-        <div class="sig-box">
-            <strong>اعتماد المدير التنفيذي</strong><br><br>
-            التوقيع: .....................
-        </div>
+    <!-- التوقيعات والاعتمادات حسب الوظيفة -->
+    <div class="signatures" id="signatures-box">
+        <!-- يتم تغيير جهات التوقيع تلقائياً -->
     </div>
 
     <br>
-    <button class="btn-print" onclick="window.print()">طباعة / حفظ التقرير PDF 🖨️</button>
+    <button class="btn-print" onclick="window.print()">طباعة / حفظ استمارة التقييم PDF 🖨️</button>
 </div>
 
 <script>
+    // بنك الأسئلة الـ 30 تخصصية بحسب احتياج جمعية النبهانية
+    const JOB_QUESTIONS = {
+        exec: [
+            "متابعة وتنفيذ قرارات مجلس الإدارة الخططية", "إدارة وتوجيه الأقسام التنفيذية بالجمعية", "تطوير بيئة العمل وتحفيز فريق العمل",
+            "تمثيل الجمعية أمام الجهات الرسمية والشريكة", "الإشراف على إعداد الميزانية السنوية وحوكمتها", "متابعة مؤشرات أداء البرامج الاجتماعية والإنسانية",
+            "تحقيق مستهدفات الاستدامة المالية بالجمعية", "ضمان تطبيق أنظمة الحوكمة ومقاييس التميز", "تطوير العلاقات الاستراتيجية والداعمين",
+            "الإشراف على التغطيات الإعلامية والاتصال المؤسسي", "متابعة السجلات الإدارية ونسب الإنجاز", "الاستجابة الحثيثة للمبادرات الطارئة بالمنطقة",
+            "الالتزام بسياسات اللائحة الأساسية للجمعية", "تنفيذ برامج الشفافية والإفصاح المالي", "إدارة المخاطر التشغيلية والمالية بحزم",
+            "متابعة جودة خدمات المستفيدين بالنبهانية", "الارتقاء بالفرص التطوعية واستقطاب المتطوعين", "عقد اجتماعات المتابعة الدورية للأقسام",
+            "التأكد من التحديث المستمر لقواعد البيانات", "قيادة التحول الرقمي والتطوير التقني بالجمعية", "متابعة خطط الصرف والمساعدات الميدانية",
+            "القدرة على حل المشكلات واتخاذ القرارات السليمة", "إعداد التقارير السنوية الختامية بدقة", "تفعيل الشراكات المجتمعية والمبادرات",
+            "تنمية بيئة محفزة للابتكار والخدمة الاجتماعية", "المحافظة على أصول وتجهيزات الجمعية", "الالتزام بالأنظمة والمقاييس الوزارية",
+            "قياس التغذية الراجعة ورضا المستفيدين", "الاهتمام بالتطوير المهني المستمر للكادر", "الانضباط والتواجد الإداري الفعال"
+        ],
+        default30: [
+            "الالتزام بالدوام الرسمي وساعات العمل", "سرعة ودقة تنفيذ المهام الموكلة", "التعاون بروح الفريق الواحد مع الزملاء",
+            "التواصل الفعال والمحترم مع المستفيدين والزوار", "المحافظة على أصول ممتلكات وأجهزة الجمعية", "الالتزام بتعليمات وتسلسلات الإدارة التنفيذية",
+            "سرعة الإنجاز وتحمل ضغط العمل الميداني/الإداري", "المبادرة في تقديم أفكار لتطوير بيئة العمل", "الالتزام بالسرية التامة لبيانات المستفيدين",
+            "حضور الاجتماعات والدورات التدريبية بفاعلية", "المرونة في أداء المهام الإضافية الموكلة", "الدقة في حفظ وصيانة الملفات والسجلات",
+            "الالتزام بقواعد السلامة والصحة المهنية", "جودة وتنسيق المخرجات والتقارير الدورية", "حسن التصرف في الحالات الطارئة ومتابعتها",
+            "استخدام التقنية والأدوات الذكية بمهارة", "الاهتمام بالمظهر العام والهندام المهني", "التقيد باللائحة الداخلية للجمعية",
+            "المساهمة في دعم البرامج والمبادرات المجتمعية", "متابعة استكمال النماذج والأوراق المعتمدة", "تقبل التوجيهات والملاحظات من الرؤساء",
+            "التنسيق المباشر والمستمر مع الأقسام ذات العلاقة", "القدرة على ترتيب الأولويات التشغيلية", "التركيز على رضا أصحاب المصلحة والمستفيدين",
+            "الالتزام بمعايير الحوكمة والنزاهة الوظيفية", "استغلال وقت العمل بشكل إيجابي ومنتج", "تحديث البيانات بصفة دورية ودقيقة",
+            "القدرة على العمل بشكل مستقل وبكفاءة", "الإسهام في إنجاز خطط القسم المحددة", "المظهر التنافسي والإخلاص في خدمة المجتمع"
+        ]
+    };
+
+    function onJobChange() {
+        let job = document.getElementById('job-title-select').value;
+        renderQuestions(job);
+        renderSignatures(job);
+    }
+
+    function renderQuestions(job) {
+        let tbody = document.getElementById('questions-table-body');
+        tbody.innerHTML = '';
+        let list = (job === 'exec') ? JOB_QUESTIONS.exec : JOB_QUESTIONS.default30;
+
+        list.forEach((qText, idx) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td>${qText}</td>
+                    <td>
+                        <select class="score-input" onchange="calculateScore()">
+                            <option value="3.33">ممتاز جداً (كامل)</option>
+                            <option value="2.66">جيد جداً</option>
+                            <option value="2.00">جيد</option>
+                            <option value="1.33">مقبول</option>
+                            <option value="0.66">ضعيف</option>
+                        </select>
+                    </td>
+                </tr>`;
+        });
+        calculateScore();
+    }
+
     function calculateScore() {
         let inputs = document.querySelectorAll('.score-input');
         let total = 0;
-        inputs.forEach(sel => {
-            total += parseInt(sel.value);
-        });
-
-        document.getElementById('total-score').innerText = total + " / 100";
+        inputs.forEach(sel => { total += parseFloat(sel.value); });
+        
+        let rounded = Math.min(100, Math.round(total));
+        document.getElementById('total-score').innerText = rounded + " / 100";
 
         let badge = document.getElementById('grade-badge');
-        if (total >= 90) {
-            badge.innerText = "ممتاز 🌟";
-            badge.style.color = "#065F46";
-        } else if (total >= 80) {
-            badge.innerText = "جيد جداً 👍";
-            badge.style.color = "#2563EB";
-        } else if (total >= 70) {
-            badge.innerText = "جيد 🟢";
-            badge.style.color = "#D97706";
-        } else if (total >= 60) {
-            badge.innerText = "مرضي 🟠";
-            badge.style.color = "#E11D48";
+        if (rounded >= 90) { badge.innerText = "ممتاز 🌟"; badge.style.color = "#065F46"; }
+        else if (rounded >= 80) { badge.innerText = "جيد جداً 👍"; badge.style.color = "#2563EB"; }
+        else if (rounded >= 70) { badge.innerText = "جيد 🟢"; badge.style.color = "#D97706"; }
+        else if (rounded >= 60) { badge.innerText = "مقبول 🟠"; badge.style.color = "#E11D48"; }
+        else { badge.innerText = "ضعيف 🔴"; badge.style.color = "#991B1B"; }
+    }
+
+    function renderSignatures(job) {
+        let sigBox = document.getElementById('signatures-box');
+        if (job === 'exec') {
+            sigBox.innerHTML = `
+                <div class="sig-box">
+                    <strong>عضو لجنة الحوكمة والتقييم والمراجعة</strong><br><br>
+                    الاسم: .......................................<br>
+                    التوقيع: ....................................
+                </div>
+                <div class="sig-box">
+                    <strong>رئيس مجلس الإدارة</strong><br><br>
+                    الأستاذ: خالد بن ضيف الله المطرفي<br>
+                    التوقيع: ....................................
+                </div>`;
         } else {
-            badge.innerText = "غير مرضي 🔴";
-            badge.style.color = "#991B1B";
+            sigBox.innerHTML = `
+                <div class="sig-box">
+                    <strong>اعتماد المدير التنفيذي</strong><br><br>
+                    التوقيع: ....................................
+                </div>
+                <div class="sig-box">
+                    <strong>مصادقة رئيس مجلس الإدارة</strong><br><br>
+                    الأستاذ: خالد بن ضيف الله المطرفي<br>
+                    التوقيع: ....................................
+                </div>`;
         }
     }
+
+    // تشغيل عند الفتح
+    window.onload = function() {
+        onJobChange();
+    };
 </script>
 
 </body>
