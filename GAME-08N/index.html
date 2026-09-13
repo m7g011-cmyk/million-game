@@ -119,7 +119,7 @@
           <tr>
             <th>المركز</th>
             <th>اللاعب</th>
-            <th>عدد الانتصرات 🏆</th>
+            <th>عدد الانتصارات 🏆</th>
           </tr>
         </thead>
         <tbody id="wins-leaderboard">
@@ -140,7 +140,7 @@
           <tr><td colspan="3" style="color:#64748b;">لا توجد سجلات بعد</td></tr>
         </tbody>
       </table>
-      <button class="btn btn-reset" style="font-size: 0.8rem; padding: 6px;" onclick="clearHistory()">مسح السجل التاريخي 🗑️</button>
+      <button class="btn btn-reset" style="font-size: 0.8rem; padding: 6px;" onclick="clearHistory()">مسح السجل التاريخي 🔒</button>
     </div>
   </div>
 
@@ -178,7 +178,7 @@
         <tr>
           <th>المركز</th>
           <th>اسم اللاعب</th>
-          <th>النقاط النهائة</th>
+          <th>النقاط النهائية</th>
         </tr>
       </thead>
       <tbody id="game-rank-body"></tbody>
@@ -371,7 +371,7 @@
     const winsTbody = document.getElementById('wins-leaderboard');
     winsTbody.innerHTML = '';
     if (byWins.length === 0) {
-      winsTbody.innerHTML = '<tr><td colspan="3" style="color:#64748b;">لا توجد انتصارات مسجلة بعد</td></tr>';
+      winsTbody.innerHTML = '<tr><td colspan="3" style="color:#64748b;">لا توجد سجلات بعد</td></tr>';
     } else {
       byWins.forEach((p, idx) => {
         let medal = idx === 0 ? '🏆 1' : idx === 1 ? '🥈 2' : idx === 2 ? '🥉 3' : (idx + 1);
@@ -390,7 +390,7 @@
     const statsTbody = document.getElementById('stats-leaderboard');
     statsTbody.innerHTML = '';
     if (byGames.length === 0) {
-      statsTbody.innerHTML = '<tr><td colspan="3" style="color:#64748b;">لا توجد مشاركات مسجلة بعد</td></tr>';
+      statsTbody.innerHTML = '<tr><td colspan="3" style="color:#64748b;">لا توجد سجلات بعد</td></tr>';
     } else {
       byGames.forEach(p => {
         statsTbody.innerHTML += `
@@ -405,10 +405,16 @@
   }
 
   function clearHistory() {
-    if (confirm("هل أنت تأكد من مسح جميع السجلات التاريخية والأبطال؟")) {
-      localStorage.removeItem('game08n_stats');
-      globalStats = {};
-      renderGlobalLeaderboards();
+    const pin = prompt("أدخل الرقم السري لمسح السجل التاريخي للأبطال:");
+    if (pin === "2998") {
+      if (confirm("هل أنت تأكد من مسح جميع السجلات التاريخية والأبطال؟")) {
+        localStorage.removeItem('game08n_stats');
+        globalStats = {};
+        renderGlobalLeaderboards();
+        alert("تم مسح السجل بنجاح ✅");
+      }
+    } else if (pin !== null) {
+      alert("الرقم السري خاطئ! لا يمكنك مسح السجل.");
     }
   }
 </script>
