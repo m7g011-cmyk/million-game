@@ -95,7 +95,7 @@
 
 <div class="roshan-card">
     <h1>دوري روشن السعودي 🇸🇦 ⚽</h1>
-    <div class="season-badge">موسم 2026م وطاقات فيفا 2027م</div>
+    <div class="season-badge">أحدث البيانات لعام 2026م 🚀</div>
 
     <!-- شريط الأزرار للتحويل بين الأقسام الستة -->
     <div class="tab-bar">
@@ -123,7 +123,7 @@
         </table>
     </div>
 
-    <!-- 2. الهدافين -->
+    <!-- 2. الهدافين المحدثين -->
     <div id="scorers-view" class="table-container hidden">
         <table>
             <thead>
@@ -138,7 +138,7 @@
         </table>
     </div>
 
-    <!-- 3. أفضل الحراس -->
+    <!-- 3. أفضل الحراس الحالية -->
     <div id="keepers-view" class="table-container hidden">
         <table>
             <thead>
@@ -153,7 +153,7 @@
         </table>
     </div>
 
-    <!-- 4. المساعدات -->
+    <!-- 4. المساعدات (الصناع) -->
     <div id="assists-view" class="table-container hidden">
         <table>
             <thead>
@@ -168,13 +168,13 @@
         </table>
     </div>
 
-    <!-- 5. طاقات فيفا 2027 (EA FC 27) -->
+    <!-- 5. طاقات فيفا 2027 المحدثة بالكامل -->
     <div id="fifa-view" class="table-container hidden">
         <table>
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>اللاعب</th>
+                    <th>اللاعب الحالي</th>
                     <th>الفريق</th>
                     <th>طاقة فيفا 27 🎮</th>
                 </tr>
@@ -183,13 +183,13 @@
         </table>
     </div>
 
-    <!-- 6. أغلى العقود -->
+    <!-- 6. أغلى العقود الحالية 2026 -->
     <div id="contracts-view" class="table-container hidden">
         <table>
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>اللاعب</th>
+                    <th>اللاعب الحالي</th>
                     <th>الفريق</th>
                     <th>العقد السنوي</th>
                 </tr>
@@ -212,7 +212,7 @@
         document.getElementById(`${viewId}-view`).classList.remove('hidden');
     }
 
-    // 1. بيانات الترتيب
+    // 1. ترتيب الدوري لعام 2026م
     const standings2026 = [
         { rank: 1, team: "الهلال", played: 7, diff: "+18", pts: 18 },
         { rank: 2, team: "الاتحاد", played: 7, diff: "+6", pts: 17 },
@@ -226,7 +226,7 @@
         { rank: 10, team: "الحزم", played: 7, diff: "-2", pts: 8 }
     ];
 
-    // 2. بيانات الهدافين
+    // 2. الهدافون الحاليون لعام 2026م
     const scorers2026 = [
         { rank: 1, player: "إيفان توني", team: "الأهلي", stat: "8 أهداف" },
         { rank: 2, player: "خوليان كينيونيس", team: "القادسية", stat: "7 أهداف" },
@@ -235,7 +235,7 @@
         { rank: 5, player: "ألكساندر ميتروفيتش", team: "الهلال", stat: "4 أهداف" }
     ];
 
-    // 3. أفضل الحراس
+    // 3. أحدث قائمة لأفضل الحراس 2026م
     const keepers2026 = [
         { rank: 1, player: "ياسين بونو", team: "الهلال", stat: "3 مباريات" },
         { rank: 2, player: "مارسين بولكا", team: "نيوم", stat: "3 مباريات" },
@@ -244,7 +244,7 @@
         { rank: 5, player: "بينتو كريبسكي", team: "النصر", stat: "2 مباريات" }
     ];
 
-    // 4. أفضل المساعدين
+    // 4. أحدث قائمة لمصنعي الأهداف 2026م
     const assists2026 = [
         { rank: 1, player: "روبن نيفيز", team: "الهلال", stat: "3 صناعة" },
         { rank: 2, player: "أوسكار رودريغيز", team: "الدرعية", stat: "3 صناعة" },
@@ -253,32 +253,32 @@
         { rank: 5, player: "مصعب الجوير", team: "القادسية", stat: "2 صناعة" }
     ];
 
-    // 5. طاقات فيفا 2027 (EA FC 27)
+    // 5. طاقات فيفا 2027 (EA FC 27) المحدثة بالكامل للاعبين الحاليين بالدوري
     const fifa2027 = [
         { rank: 1, player: "روبن نيفيز", team: "الهلال", stat: "86 ⚡" },
         { rank: 2, player: "سيرجاي سافيتش", team: "الهلال", stat: "85 ⚡" },
         { rank: 3, player: "كريستيانو رونالدو", team: "النصر", stat: "85 ⚡" },
-        { rank: 4, player: "كريم بنزيما", team: "الاتحاد", stat: "85 ⚡" },
-        { rank: 5, player: "نجولو كانتي", team: "الاتحاد", stat: "85 ⚡" },
-        { rank: 6, player: "ياسين بونو", team: "الهلال", stat: "84 ⚡" },
-        { rank: 7, player: "رياض محرز", team: "الأهلي", stat: "84 ⚡" },
-        { rank: 8, player: "موسى ديابي", team: "الاتحاد", stat: "84 ⚡" },
+        { rank: 4, player: "إيفان توني", team: "الأهلي", stat: "84 ⚡" },
+        { rank: 5, player: "ياسين بونو", team: "الهلال", stat: "84 ⚡" },
+        { rank: 6, player: "رياض محرز", team: "الأهلي", stat: "84 ⚡" },
+        { rank: 7, player: "ألكساندر ميتروفيتش", team: "الهلال", stat: "83 ⚡" },
+        { rank: 8, player: "جواو كانسيلو", team: "الهلال", stat: "83 ⚡" },
         { rank: 9, player: "سالم الدوسري", team: "الهلال", stat: "82 ⚡" },
-        { rank: 10, player: "سعد الموسى", team: "الاتحاد", stat: "79 ⚡" }
+        { rank: 10, player: "خوليان كينيونيس", team: "القادسية", stat: "81 ⚡" }
     ];
 
-    // 6. أغلى العقود والمحترفين
+    // 6. أعلى العقود السنوية المحدثة للاعبين المستمرين بالدوري لعام 2026م
     const contracts2026 = [
         { rank: 1, player: "كريستيانو رونالدو", team: "النصر", stat: "800 مليون ر.س (200M$)" },
-        { rank: 2, player: "كريم بنزيما", team: "الاتحاد", stat: "400 مليون ر.س (100M$)" },
-        { rank: 3, player: "رياض محرز", team: "الأهلي", stat: "210 مليون ر.س (52M$)" },
-        { rank: 4, player: "ساديو ماني", team: "النصر", stat: "160 مليون ر.س (40M$)" },
-        { rank: 5, player: "سيرجاي سافيتش", team: "الهلال", stat: "100 مليون ر.س (25M$)" },
-        { rank: 6, player: "ألكساندر ميتروفيتش", team: "الهلال", stat: "100 مليون ر.س (25M$)" },
-        { rank: 7, player: "إيفان توني", team: "الأهلي", stat: "90 مليون ر.س (22M$)" },
-        { rank: 8, player: "نجولو كانتي", team: "الاتحاد", stat: "100 مليون ر.س (25M$)" },
-        { rank: 9, player: "روبن نيفيز", team: "الهلال", stat: "75 مليون ر.س (18M$)" },
-        { rank: 10, player: "جواو كانسيلو", team: "الهلال", stat: "65 مليون ر.س (15M$)" }
+        { rank: 2, player: "رياض محرز", team: "الأهلي", stat: "210 مليون ر.س (52M$)" },
+        { rank: 3, player: "ساديو ماني", team: "النصر", stat: "160 مليون ر.س (40M$)" },
+        { rank: 4, player: "سيرجاي سافيتش", team: "الهلال", stat: "100 مليون ر.س (25M$)" },
+        { rank: 5, player: "ألكساندر ميتروفيتش", team: "الهلال", stat: "100 مليون ر.س (25M$)" },
+        { rank: 6, player: "إيفان توني", team: "الأهلي", stat: "90 مليون ر.س (22M$)" },
+        { rank: 7, player: "روبن نيفيز", team: "الهلال", stat: "75 مليون ر.س (18M$)" },
+        { rank: 8, player: "جواو كانسيلو", team: "الهلال", stat: "65 مليون ر.س (15M$)" },
+        { rank: 9, player: "خوليان كينيونيس", team: "القادسية", stat: "60 مليون ر.س (14M$)" },
+        { rank: 10, player: "ياسين بونو", team: "الهلال", stat: "45 مليون ر.س (10M$)" }
     ];
 
     function renderTable(containerId, list, isStandings = false) {
