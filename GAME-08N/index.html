@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نششرة اللاعبين - GAME-08N</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent-color: #3b82f6;
+      --green: #22c55e;
+      --red: #ef4444;
+      --gold: #f59e0b;
+      --text-color: #f8fafc;
+    }
+
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; }
+    body { background-color: var(--bg-color); color: var(--text-color); padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+    .container { width: 100%; max-width: 600px; }
+    .header-tag { text-align: center; background-color: #334155; color: #94a3b8; font-size: 0.85rem; padding: 4px 12px; border-radius: 20px; width: fit-content; margin: 0 auto 10px auto; font-weight: bold; }
+    h1 { text-align: center; margin-bottom: 15px; color: #60a5fa; }
+    .card { background-color: var(--card-bg); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); }
+    .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+    label { font-size: 0.9rem; color: #94a3b8; display: block; margin-bottom: 4px; }
+    input, select, button { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #334155; background-color: #0f172a; color: var(--text-color); font-size: 1rem; outline: none; }
+    input:focus, select:focus { border-color: var(--accent-color); }
+    .btn { background-color: var(--accent-color); color: white; font-weight: bold; border: none; cursor: pointer; border-radius: 8px; padding: 12px; transition: opacity 0.2s; }
+    .btn:hover { opacity: 0.9; }
+    .btn-green { background-color: var(--green); }
+    .btn-red { background-color: var(--red); }
+    .btn-reset { background-color: #475569; margin-top: 10px; }
+    .players-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
+    .player-card { background-color: #334155; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .player-card.selected { border-color: var(--gold); background-color: #1e293b; transform: scale(1.02); }
+    .player-name { font-weight: bold; font-size: 1.1rem; margin-bottom: 5px; color: #cbd5e1; }
+    .player-score { font-size: 1.8rem; font-weight: bold; color: #38bdf8; }
+    .action-btns { display: flex; gap: 10px; margin-top: 10px; }
+    .winner-banner { background-color: var(--gold); color: #000; text-align: center; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 1.2rem; margin-bottom: 15px; display: none; }
+    .back-nav { margin-bottom: 10px; text-align: right; }
+    .back-nav a { color: #94a3b8; text-decoration: none; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="back-nav">
+    <a href="../index.html">➔ العودة لمنصة الألعاب</a>
+  </div>
+  
+  <div class="header-tag">كود اللعبة: GAME-08N</div>
+  <h1>نششرة اللاعبين</h1>
+
+  <!-- شاشة التجهيز -->
+  <div id="setup-screen" class="card">
+    <div style="margin-bottom: 15px;">
+      <label>اختر عدد اللاعبين (من 2 إلى 8):</label>
+      <select id="player-count-select" onchange="generateNameInputs()">
+        <option value="2">2 لاعبين</option>
+        <option value="3">3 لاعبين</option>
+        <option value="4">4 لاعبين</option>
+        <option value="5">5 لاعبين</option>
+        <option value="6">6 لاعبين</option>
+        <option value="7">7 لاعبين</option>
+        <option value="8" selected>8 لاعبين</option>
+      </select>
+    </div>
+
+    <label style="margin-bottom: 8px;">أسماء اللاعبين:</label>
+    <div class="setup-grid" id="names-inputs"></div>
+
+    <div style="margin-bottom: 15px;">
+      <label>هدف الفوز (مضاعفات 1000):</label>
+      <select id="target-score-select">
+        <option value="1000">1000</option>
+        <option value="2000">2000</option>
+        <option value="3000">3000</option>
+        <option value="4000">4000</option>
+        <option value="5000">5000</option>
+        <option value="custom">رقم آخر من مضاعفات 1000...</option>
+      </select>
+      <input type="number" id="custom-target" placeholder="أدخل مبلغ من مضاعفات 1000" step="1000" style="display:none; margin-top: 8px;">
+    </div>
+
+    <button class="btn btn-green" onclick="startGame()">بدء اللعب 🚀</button>
+  </div>
+
+  <!-- شاشة اللعب -->
+  <div id="game-screen" style="display: none;">
+    <div id="winner-banner" class="winner-banner"></div>
+
+    <div class="players-grid" id="players-grid"></div>
+
+    <div class="card">
+      <h3 style="margin-bottom: 10px; color: #60a5fa;">التحكم بالنقط</h3>
+      <label>اختر اللاعب:</label>
+      <select id="player-select" onchange="highlightPlayerCard(this.value)"></select>
+
+      <label style="margin-top: 10px;">المبلغ المراد إضافته أو تنقيصه:</label>
+      <input type="number" id="score-amount" placeholder="أدخل النقاط (مثال: 50، 100)" min="1">
+
+      <div class="action-btns">
+        <button class="btn btn-green" onclick="modifyScore('add')">+ زيادة</button>
+        <button class="btn btn-red" onclick="modifyScore('subtract')">- تنقيص</button>
+      </div>
+    </div>
+
+    <button class="btn btn-reset" onclick="resetGame()">إعادة ضبط وإعداد جديد 🔄</button>
+  </div>
+</div>
+
+<script>
+  let players = [];
+  let targetScore = 1000;
+  let selectedPlayerIndex = 0;
+
+  function generateNameInputs() {
+    const count = parseInt(document.getElementById('player-count-select').value);
+    const namesInputsContainer = document.getElementById('names-inputs');
+    namesInputsContainer.innerHTML = '';
+    
+    for (let i = 0; i < count; i++) {
+      namesInputsContainer.innerHTML += `
+        <div>
+          <label>اللاعب ${i + 1}:</label>
+          <input type="text" id="pname-${i}" value="لاعب ${i + 1}">
+        </div>
+      `;
+    }
+  }
+
+  generateNameInputs();
+
+  document.getElementById('target-score-select').addEventListener('change', function() {
+    const customInput = document.getElementById('custom-target');
+    customInput.style.display = this.value === 'custom' ? 'block' : 'none';
+  });
+
+  function startGame() {
+    players = [];
+    const count = parseInt(document.getElementById('player-count-select').value);
+    
+    for (let i = 0; i < count; i++) {
+      const name = document.getElementById(`pname-${i}`).value.trim() || `لاعب ${i + 1}`;
+      players.push({ name: name, score: 100 });
+    }
+
+    const targetSelect = document.getElementById('target-score-select').value;
+    if (targetSelect === 'custom') {
+      const customVal = parseInt(document.getElementById('custom-target').value);
+      if (!customVal || customVal % 1000 !== 0 || customVal <= 0) {
+        alert("يرجى إدخال مبلغ صحيح من مضاعفات الـ 1000");
+        return;
+      }
+      targetScore = customVal;
+    } else {
+      targetScore = parseInt(targetSelect);
+    }
+
+    selectedPlayerIndex = 0;
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('game-screen').style.display = 'block';
+
+    renderPlayers();
+    updatePlayerDropdown();
+  }
+
+  function renderPlayers() {
+    const grid = document.getElementById('players-grid');
+    grid.innerHTML = '';
+    players.forEach((p, index) => {
+      const isSelected = index === selectedPlayerIndex ? 'selected' : '';
+      grid.innerHTML += `
+        <div class="player-card ${isSelected}" onclick="selectPlayer(${index})">
+          <div class="player-name">${p.name}</div>
+          <div class="player-score">${p.score}</div>
+        </div>
+      `;
+    });
+    checkWinner();
+  }
+
+  function updatePlayerDropdown() {
+    const select = document.getElementById('player-select');
+    select.innerHTML = '';
+    players.forEach((p, index) => {
+      select.innerHTML += `<option value="${index}">${p.name} (رصيده: ${p.score})</option>`;
+    });
+    select.value = selectedPlayerIndex;
+  }
+
+  function selectPlayer(index) {
+    selectedPlayerIndex = index;
+    document.getElementById('player-select').value = index;
+    renderPlayers();
+  }
+
+  function highlightPlayerCard(index) {
+    selectedPlayerIndex = parseInt(index);
+    renderPlayers();
+  }
+
+  function modifyScore(type) {
+    const amountInput = document.getElementById('score-amount');
+    const amount = parseInt(amountInput.value);
+    if (isNaN(amount) || amount <= 0) {
+      alert("يرجى إدخال قيمة صحيحة!");
+      return;
+    }
+
+    if (type === 'add') {
+      players[selectedPlayerIndex].score += amount;
+    } else {
+      players[selectedPlayerIndex].score -= amount;
+    }
+
+    amountInput.value = '';
+    renderPlayers();
+    updatePlayerDropdown();
+  }
+
+  function checkWinner() {
+    const winner = players.find(p => p.score >= targetScore);
+    const banner = document.getElementById('winner-banner');
+    if (winner) {
+      banner.innerText = `🎉 الفائز هو: ${winner.name} بـ ${winner.score} نقطة! 🎉`;
+      banner.style.display = 'block';
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+
+  function resetGame() {
+    document.getElementById('game-screen').style.display = 'none';
+    document.getElementById('setup-screen').style.display = 'block';
+  }
+</script>
+</body>
+</html>
