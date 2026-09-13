@@ -232,19 +232,20 @@
             flex-direction: column;
             align-items: center;
         }
+        
         .revealed-big-card-img {
-            width: 68px;
-            height: 96px;
+            width: 85px;
+            height: 120px;
             background: #FFFFFF;
-            border-radius: 8px;
-            border: 1px solid #CBD5E1;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            border-radius: 10px;
+            border: 3px solid #F59E0B;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 6px;
+            padding: 8px;
             font-weight: 900;
-            font-size: 18px;
+            font-size: 22px;
             color: #000;
         }
         .revealed-big-card-img.red { color: #DC2626; }
@@ -259,13 +260,13 @@
             z-index: 18;
         }
         .played-card-floor {
-            width: 44px;
-            height: 62px;
+            width: 48px;
+            height: 68px;
             background: #FFF;
             color: #000;
             font-weight: bold;
-            font-size: 13px;
-            border-radius: 5px;
+            font-size: 14px;
+            border-radius: 6px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -312,25 +313,25 @@
             width: 100%;
         }
         .fan-card {
-            width: 44px;
-            height: 68px;
+            width: 46px;
+            height: 72px;
             background: #FFFFFF;
             border-radius: 6px;
             border: 1px solid #94A3B8;
             box-shadow: -2px 4px 8px rgba(0,0,0,0.4);
-            margin-left: -14px;
+            margin-left: -12px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 3px;
+            padding: 4px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 13px;
             color: #000;
             cursor: pointer;
             transition: transform 0.2s;
         }
         .fan-card.restricted { opacity: 0.35; filter: grayscale(80%); cursor: not-allowed; }
-        .fan-card.disabled { opacity: 0.8; cursor: not-allowed; }
+        .fan-card.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
         .fan-card.red { color: #DC2626; }
 
         .hidden { display: none !important; }
@@ -361,14 +362,12 @@
         <div class="carpet-pattern"></div>
     </div>
 
-    <!-- شاشة الدخول والتسجيل -->
     <div id="lobby-screen" class="modal-box">
         <h3 style="color:#F59E0B; margin-top:0;">لعبة البلوت الأونلاين ♠️</h3>
         
         <div style="text-align:right; font-size:12px; margin-bottom:4px; color:#94A3B8;">اسم اللاعب:</div>
         <input type="text" id="player-name" placeholder="أدخل اسمك أولاً" style="width:100%; padding:10px; border-radius:8px; border:1px solid #334155; background:#0F172A; color:#FFF; text-align:center; margin-bottom:12px;" />
         
-        <!-- التوجيه بالدعوة الفورية أو الرمز -->
         <div id="invite-notice-box" class="hidden" style="background:#065F46; padding:8px; border-radius:8px; margin-bottom:10px; font-size:12px; color:#FFF;">
             📩 أنت مدعو للانضمام للطاولة رقم: <strong id="invite-code-lbl" style="color:#F59E0B;"></strong>
         </div>
@@ -385,7 +384,6 @@
         </div>
     </div>
 
-    <!-- غرفة الانتظار -->
     <div id="waiting-room-screen" class="modal-box hidden">
         <h3 style="color:#F59E0B; margin-top:0;">غرفة الانتظار 🛋️</h3>
         <div style="font-size:13px; color:#CBD5E1;">رمز الطاولة: <strong id="display-room-code" style="color:#F59E0B; font-size:16px;">-</strong></div>
@@ -399,7 +397,6 @@
         <button id="btn-start-game" class="btn-action-lg btn-amber hidden" onclick="launchMultiplayerGame()">إكمال الباقي بوتات وبدء اللعب 🎮</button>
     </div>
 
-    <!-- الخوي -->
     <div class="player-avatar-box player-top">
         <div class="avatar-circle">
             🧔🏻‍♂️
@@ -410,7 +407,6 @@
         <div class="cards-back-fan" id="cards-top-back"></div>
     </div>
 
-    <!-- الخصم الأيسر -->
     <div class="player-avatar-box player-left">
         <div class="avatar-circle">
             👨🏽‍
@@ -423,15 +419,14 @@
 
     <div class="center-deck-area" id="center-deck-area">
         <div id="revealed-card-center" class="revealed-big-card-img">
-            <div>-</div>
-            <div style="align-self: center; font-size: 24px;">♠️</div>
-            <div style="align-self: flex-end;">-</div>
+            <div id="revealed-rank-top">-</div>
+            <div id="revealed-suit-center" style="align-self: center; font-size: 36px;">♠️</div>
+            <div id="revealed-rank-bottom" style="align-self: flex-end;">-</div>
         </div>
     </div>
 
     <div class="floor-played-area" id="floor-played-area"></div>
 
-    <!-- الخصم الأيمن -->
     <div class="player-avatar-box player-right">
         <div class="avatar-circle">
             🧔🏽
@@ -449,7 +444,6 @@
         <button class="btn-bid-pill btn-yellow" onclick="makeBid('pass')">بس</button>
     </div>
 
-    <!-- أنت -->
     <div class="player-avatar-box player-bottom">
         <div class="avatar-circle">
             🇸🇦
@@ -488,7 +482,26 @@
 
     const SUITS = ['♠️', '♥️', '♦️', '♣️'];
 
+    // 1. أوزان الصن الحقيقية: A > 10 > K > Q > J > 9 > 8 > 7
+    const SUN_RANK_ORDER = { 'A': 8, '10': 7, 'K': 6, 'Q': 5, 'J': 4, '9': 3, '8': 2, '7': 1 };
+    
+    // 2. أوزان الحكم الحقيقية لورق الحكم: J > 9 > A > 10 > K > Q > 8 > 7
+    const HOKM_RANK_ORDER = { 'J': 8, '9': 7, 'A': 6, '10': 5, 'K': 4, 'Q': 3, '8': 2, '7': 1 };
+
     function saveName(name) { myName = name; localStorage.setItem('baloot_player_name', name); }
+
+    // دالة ترتيب الأوراق الذكية حسب نوع اللعبة (صن / حكم)
+    function sortHandCards(cards, contractType = 'sun', trumpSuit = null) {
+        if (!cards) return [];
+        return cards.sort((a, b) => {
+            if (a.suit !== b.suit) {
+                return SUITS.indexOf(a.suit) - SUITS.indexOf(b.suit);
+            }
+            let isTrump = (contractType === 'hokm' && a.suit === trumpSuit);
+            let orderMap = isTrump ? HOKM_RANK_ORDER : SUN_RANK_ORDER;
+            return orderMap[b.rank] - orderMap[a.rank];
+        });
+    }
 
     function createRoom() {
         let name = document.getElementById('player-name').value.trim();
@@ -628,7 +641,11 @@
 
     function startNewRound(playersList, dealerIdx) {
         let deck = buildBalootDeck();
-        playersList.forEach(p => { p.cards = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()]; });
+        playersList.forEach(p => { 
+            let hand = [deck.pop(), deck.pop(), deck.pop(), deck.pop(), deck.pop()];
+            p.cards = sortHandCards(hand, 'sun');
+        });
+
         let revealed = deck.pop();
         let rightOfDealer = (dealerIdx + 1) % 4;
 
@@ -673,7 +690,10 @@
             let centerCard = document.getElementById('revealed-card-center');
             let isRed = (data.revealedCard.suit === '♥️' || data.revealedCard.suit === '♦️');
             centerCard.className = `revealed-big-card-img ${isRed ? 'red' : ''}`;
-            centerCard.innerHTML = `<div>${data.revealedCard.rank}</div><div style="align-self:center; font-size:24px;">${data.revealedCard.suit}</div><div style="align-self:flex-end;">${data.revealedCard.rank}</div>`;
+            
+            document.getElementById('revealed-rank-top').innerText = data.revealedCard.rank;
+            document.getElementById('revealed-suit-center').innerText = data.revealedCard.suit;
+            document.getElementById('revealed-rank-bottom').innerText = data.revealedCard.rank;
         } else {
             centerDeckArea.classList.add('hidden');
         }
@@ -726,7 +746,7 @@
 
             let currPlayer = pList[data.turnIndex];
             let isBot = (currPlayer && currPlayer.type === 'آلي');
-            let duration = isBot ? 3 : 10;
+            let duration = isBot ? 2 : 10;
 
             startUniversalTimer(duration, () => {
                 if (isHost && isBot) {
@@ -801,10 +821,8 @@
 
     function makeBid(choice) {
         clearInterval(timerInterval);
-        if (!db) return;
-        db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
-            let data = snap.val();
-
+        
+        let processBid = (data) => {
             if (choice === 'pass') {
                 let pCount = (data.passesCount || 0) + 1;
                 let nextTurn = (data.turnIndex + 1) % 4;
@@ -824,6 +842,7 @@
             } else {
                 let buyerIndex = data.turnIndex;
                 let buyer = data.players[buyerIndex];
+                let trumpSuit = (choice === 'hokm' && data.revealedCard) ? data.revealedCard.suit : null;
                 
                 buyer.cards.push(data.revealedCard);
                 data.revealedCard = null;
@@ -834,15 +853,23 @@
                     } else {
                         p.cards.push(data.deck.pop(), data.deck.pop(), data.deck.pop());
                     }
+                    // ترتيب الورق تلقائياً بالاعتماد على الترتيب الصحيح للصن أو الحكم
+                    p.cards = sortHandCards(p.cards, choice, trumpSuit);
                 });
 
                 data.mode = 'playing_cards';
                 data.contractType = choice;
+                data.trumpSuit = trumpSuit;
                 data.turnIndex = (data.dealerIndex + 1) % 4;
             }
 
-            db.ref('baloot_rooms/' + currentRoomCode).set(data);
-        });
+            if (db) db.ref('baloot_rooms/' + currentRoomCode).set(data);
+            else renderGame(data);
+        };
+
+        if (db) {
+            db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => { processBid(snap.val()); });
+        }
     }
 
     function handleBotTurn(data, botIndex) {
@@ -865,10 +892,7 @@
     }
 
     function playCard(index) {
-        if (!db) return;
-        db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => {
-            let data = snap.val();
-            
+        let processPlay = (data) => {
             if (data.turnIndex !== myIndex || data.mode === 'bidding') return;
 
             let myObj = data.players[myIndex];
@@ -886,7 +910,11 @@
 
             clearInterval(timerInterval);
             executeCardPlay(data, myIndex, index);
-        });
+        };
+
+        if (db) {
+            db.ref('baloot_rooms/' + currentRoomCode).get().then(snap => { processPlay(snap.val()); });
+        }
     }
 
     function executeCardPlay(data, playerIndex, cardIndex) {
@@ -901,16 +929,16 @@
                 data.floorCards = [];
             }
 
-            data.turnIndex = (data.dealerIndex + 1) % 4;
+            data.turnIndex = (data.turnIndex + 1) % 4;
         }
         if (db) db.ref('baloot_rooms/' + currentRoomCode).set(data);
+        else renderGame(data);
     }
 
     window.onload = function() {
         let saved = localStorage.getItem('baloot_player_name');
         if (saved) document.getElementById('player-name').value = saved;
 
-        // الفحص التلقائي لروابط الدعوة
         let urlParams = new URLSearchParams(window.location.search);
         let roomParam = urlParams.get('room');
         if (roomParam) {
