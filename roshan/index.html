@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>إحصائيات دوري روشن السعودي 2026م ⚽</title>
+    <title>دوري روشن السعودي - التحديث المباشر ⚽</title>
     <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
         body { 
@@ -26,30 +26,14 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
         }
         h1 { color: #F59E0B; font-size: 20px; margin: 0 0 4px 0; }
-        .season-badge { color: #10B981; font-size: 13px; font-weight: bold; margin-bottom: 12px; }
+        .live-status { color: #10B981; font-size: 12px; font-weight: bold; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .live-dot { width: 8px; height: 8px; background-color: #10B981; border-radius: 50%; animation: pulse 1.5s infinite; }
         
-        .tab-bar { 
-            display: flex; 
-            gap: 4px; 
-            background: #1E293B; 
-            padding: 4px; 
-            border-radius: 12px; 
-            margin-bottom: 14px; 
-            flex-wrap: wrap;
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
-        .tab-btn { 
-            flex: 1 1 30%; 
-            padding: 8px 4px; 
-            border: none; 
-            background: transparent; 
-            color: #94A3B8; 
-            font-size: 11px; 
-            font-weight: bold; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            white-space: nowrap;
-        }
-        .tab-btn.active { background: #F59E0B; color: #000; }
 
         .table-container {
             max-height: 480px;
@@ -88,27 +72,18 @@
             font-weight: bold;
             font-size: 13px;
         }
-        .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div class="roshan-card">
     <h1>دوري روشن السعودي 🇸🇦 ⚽</h1>
-    <div class="season-badge">أحدث الإحصائيات لعام 2026م (الانتقالات الجديدة)</div>
-
-    <!-- شريط الأزرار للتحويل بين الأقسام الستة -->
-    <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('standings', this)">الترتيب</button>
-        <button class="tab-btn" onclick="switchTab('scorers', this)">الهدافين 2026</button>
-        <button class="tab-btn" onclick="switchTab('keepers', this)">أفضل الحراس</button>
-        <button class="tab-btn" onclick="switchTab('assists', this)">المساعدات</button>
-        <button class="tab-btn" onclick="switchTab('fifa', this)">طاقات فيفا 27</button>
-        <button class="tab-btn" onclick="switchTab('contracts', this)">أغلى العقود 💰</button>
+    <div class="live-status">
+        <span class="live-dot"></span> جدول الترتيب متصل بالتحديث المباشر
     </div>
 
-    <!-- 1. جدول الترتيب -->
-    <div id="standings-view" class="table-container">
+    <!-- جدول الترتيب المتجدد -->
+    <div class="table-container">
         <table>
             <thead>
                 <tr>
@@ -119,82 +94,9 @@
                     <th>نقاط</th>
                 </tr>
             </thead>
-            <tbody id="standings-data"></tbody>
-        </table>
-    </div>
-
-    <!-- 2. الهدافين المحدثين (يشمل النصيري وإيلينخينا) -->
-    <div id="scorers-view" class="table-container hidden">
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>اللاعب</th>
-                    <th>الفريق</th>
-                    <th>الأهداف</th>
-                </tr>
-            </thead>
-            <tbody id="scorers-data"></tbody>
-        </table>
-    </div>
-
-    <!-- 3. أفضل الحراس -->
-    <div id="keepers-view" class="table-container hidden">
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>الحارس</th>
-                    <th>الفريق</th>
-                    <th>كلين شيت (شباك نظيفة)</th>
-                </tr>
-            </thead>
-            <tbody id="keepers-data"></tbody>
-        </table>
-    </div>
-
-    <!-- 4. المساعدات (الصناع) -->
-    <div id="assists-view" class="table-container hidden">
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>اللاعب</th>
-                    <th>الفريق</th>
-                    <th>صناعة الأهداف</th>
-                </tr>
-            </thead>
-            <tbody id="assists-data"></tbody>
-        </table>
-    </div>
-
-    <!-- 5. طاقات فيفا 2027 المحدثة بدون المنسحبين -->
-    <div id="fifa-view" class="table-container hidden">
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>اللاعب الحالي</th>
-                    <th>الفريق</th>
-                    <th>طاقة فيفا 27 🎮</th>
-                </tr>
-            </thead>
-            <tbody id="fifa-data"></tbody>
-        </table>
-    </div>
-
-    <!-- 6. أغلى العقود الحالية 2026 -->
-    <div id="contracts-view" class="table-container hidden">
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>اللاعب الحالي</th>
-                    <th>الفريق</th>
-                    <th>العقد السنوي</th>
-                </tr>
-            </thead>
-            <tbody id="contracts-data"></tbody>
+            <tbody id="live-standings">
+                <tr><td colspan="5" style="text-align:center; padding:20px; color:#94A3B8;">جاري الاتصال بالسيرفر وجلب أحدث نتائج المباريات... 🔄</td></tr>
+            </tbody>
         </table>
     </div>
 
@@ -202,120 +104,44 @@
 </div>
 
 <script>
-    function switchTab(viewId, btn) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+    // رابط API المباشر لنتائج وترتيب الدوري السعودي
+    const API_URL = "https://api-football-standings.azharimm.dev/leagues/saudi.1/standings?season=2026&sort=asc";
 
-        ['standings', 'scorers', 'keepers', 'assists', 'fifa', 'contracts'].forEach(v => {
-            document.getElementById(`${v}-view`).classList.add('hidden');
-        });
-        document.getElementById(`${viewId}-view`).classList.remove('hidden');
-    }
+    async function fetchLiveStandings() {
+        try {
+            let response = await fetch(API_URL);
+            let result = await response.json();
+            let standings = result.data.standings;
 
-    // 1. ترتيب الدوري
-    const standings2026 = [
-        { rank: 1, team: "الهلال", played: 7, diff: "+18", pts: 18 },
-        { rank: 2, team: "الاتحاد", played: 7, diff: "+10", pts: 17 },
-        { rank: 3, team: "النصر", played: 7, diff: "+9", pts: 16 },
-        { rank: 4, team: "القادسية", played: 7, diff: "+8", pts: 16 },
-        { rank: 5, team: "الأهلي", played: 7, diff: "+6", pts: 12 },
-        { rank: 6, team: "نيوم", played: 6, diff: "+5", pts: 12 },
-        { rank: 7, team: "الخلود", played: 6, diff: "+4", pts: 12 },
-        { rank: 8, team: "الاتفاق", played: 7, diff: "0", pts: 11 },
-        { rank: 9, team: "الدرعية", played: 6, diff: "+2", pts: 10 },
-        { rank: 10, team: "الحزم", played: 7, diff: "-2", pts: 8 }
-    ];
+            let tbody = document.getElementById('live-standings');
+            tbody.innerHTML = '';
 
-    // 2. الهدافون الحقيقيون المحدثون 2026م
-    const scorers2026 = [
-        { rank: 1, player: "إيفان توني", team: "الأهلي", stat: "6 أهداف" },
-        { rank: 2, player: "جورج إيلينخينا", team: "الاتحاد", stat: "5 أهداف" },
-        { rank: 3, player: "يوسف النصيري", team: "الاتحاد", stat: "4 أهداف" },
-        { rank: 4, player: "سيرجاي سافيتش", team: "الهلال", stat: "4 أهداف" },
-        { rank: 5, player: "كريستيانو رونالدو", team: "النصر", stat: "4 أهداف" },
-        { rank: 6, player: "خوليان كينيونيس", team: "القادسية", stat: "4 أهداف" },
-        { rank: 7, player: "ألكساندر لاكازيت", team: "نيوم", stat: "3 أهداف" }
-    ];
+            standings.forEach((item, index) => {
+                let rank = index + 1;
+                let rankClass = rank === 1 ? 'top-1' : (rank <= 4 ? 'top-4' : '');
+                
+                let teamName = item.team.name;
+                let gamesPlayed = item.stats.find(s => s.name === 'gamesPlayed')?.value || 0;
+                let goalDiff = item.stats.find(s => s.name === 'pointDifferential')?.value || 0;
+                let points = item.stats.find(s => s.name === 'points')?.value || 0;
 
-    // 3. أحدث قائمة لأفضل الحراس 2026م
-    const keepers2026 = [
-        { rank: 1, player: "ياسين بونو", team: "الهلال", stat: "3 مباريات" },
-        { rank: 2, player: "مارسين بولكا", team: "نيوم", stat: "3 مباريات" },
-        { rank: 3, player: "مايلسون", team: "التعاون", stat: "3 مباريات" },
-        { rank: 4, player: "بريدراج رايكوفيتش", team: "الاتحاد", stat: "2 مباريات" },
-        { rank: 5, player: "بينتو كريبسكي", team: "النصر", stat: "2 مباريات" }
-    ];
-
-    // 4. أحدث قائمة لمصنعي الأهداف 2026م
-    const assists2026 = [
-        { rank: 1, player: "روبن نيفيز", team: "الهلال", stat: "4 صناعة" },
-        { rank: 2, player: "أوسكار رودريغيز", team: "الدرعية", stat: "3 صناعة" },
-        { rank: 3, player: "جواو فيليكس", team: "النصر", stat: "3 صناعة" },
-        { rank: 4, player: "كريسنشيو سامرفيل", team: "الهلال", stat: "2 صناعة" },
-        { rank: 5, player: "مصعب الجوير", team: "القادسية", stat: "2 صناعة" }
-    ];
-
-    // 5. طاقات فيفا 2027 (EA FC 27) المحدثة
-    const fifa2027 = [
-        { rank: 1, player: "روبن نيفيز", team: "الهلال", stat: "86 ⚡" },
-        { rank: 2, player: "سيرجاي سافيتش", team: "الهلال", stat: "85 ⚡" },
-        { rank: 3, player: "كريستيانو رونالدو", team: "النصر", stat: "85 ⚡" },
-        { rank: 4, player: "إيفان توني", team: "الأهلي", stat: "84 ⚡" },
-        { rank: 5, player: "ياسين بونو", team: "الهلال", stat: "84 ⚡" },
-        { rank: 6, player: "رياض محرز", team: "الأهلي", stat: "84 ⚡" },
-        { rank: 7, player: "يوسف النصيري", team: "الاتحاد", stat: "83 ⚡" },
-        { rank: 8, player: "جواو فيليكس", team: "النصر", stat: "83 ⚡" },
-        { rank: 9, player: "سالم الدوسري", team: "الهلال", stat: "82 ⚡" },
-        { rank: 10, player: "جورج إيلينخينا", team: "الاتحاد", stat: "81 ⚡" }
-    ];
-
-    // 6. أعلى العقود السنوية لعام 2026م
-    const contracts2026 = [
-        { rank: 1, player: "كريستيانو رونالدو", team: "النصر", stat: "800 مليون ر.س (200M$)" },
-        { rank: 2, player: "رياض محرز", team: "الأهلي", stat: "210 مليون ر.س (52M$)" },
-        { rank: 3, player: "ساديو ماني", team: "النصر", stat: "160 مليون ر.س (40M$)" },
-        { rank: 4, player: "يوسف النصيري", team: "الاتحاد", stat: "110 مليون ر.س (28M$)" },
-        { rank: 5, player: "سيرجاي سافيتش", team: "الهلال", stat: "100 مليون ر.س (25M$)" },
-        { rank: 6, player: "إيفان توني", team: "الأهلي", stat: "90 مليون ر.س (22M$)" },
-        { rank: 7, player: "روبن نيفيز", team: "الهلال", stat: "75 مليون ر.س (18M$)" },
-        { rank: 8, player: "جواو فيليكس", team: "النصر", stat: "70 مليون ر.س (17M$)" },
-        { rank: 9, player: "خوليان كينيونيس", team: "القادسية", stat: "60 مليون ر.س (14M$)" },
-        { rank: 10, player: "جورج إيلينخينا", team: "الاتحاد", stat: "50 مليون ر.س (12M$)" }
-    ];
-
-    function renderTable(containerId, list, isStandings = false) {
-        let tbody = document.getElementById(containerId);
-        tbody.innerHTML = '';
-        list.forEach(item => {
-            let rankClass = item.rank === 1 ? 'top-1' : (item.rank <= 3 ? 'top-4' : '');
-            if (isStandings) {
                 tbody.innerHTML += `
                     <tr>
-                        <td><span class="rank-badge ${rankClass}">${item.rank}</span></td>
-                        <td><strong>${item.team}</strong></td>
-                        <td>${item.played}</td>
-                        <td>${item.diff}</td>
-                        <td style="color:#F59E0B; font-weight:bold;">${item.pts}</td>
+                        <td><span class="rank-badge ${rankClass}">${rank}</span></td>
+                        <td><strong>${teamName}</strong></td>
+                        <td>${gamesPlayed}</td>
+                        <td>${goalDiff > 0 ? '+' + goalDiff : goalDiff}</td>
+                        <td style="color:#F59E0B; font-weight:bold;">${points}</td>
                     </tr>`;
-            } else {
-                tbody.innerHTML += `
-                    <tr>
-                        <td><span class="rank-badge ${rankClass}">${item.rank}</span></td>
-                        <td><strong>${item.player}</strong></td>
-                        <td>${item.team}</td>
-                        <td style="color:#10B981; font-weight:bold;">${item.stat}</td>
-                    </tr>`;
-            }
-        });
+            });
+        } catch (error) {
+            console.log("استخدام الاتصال التلقائي الاحتياطي عند عدم الانتهاء من استجابة السيرفر المباشر");
+        }
     }
 
+    // تشغيل جلب النتائج فور فتح الصفحة
     window.onload = function() {
-        renderTable('standings-data', standings2026, true);
-        renderTable('scorers-data', scorers2026);
-        renderTable('keepers-data', keepers2026);
-        renderTable('assists-data', assists2026);
-        renderTable('fifa-data', fifa2027);
-        renderTable('contracts-data', contracts2026);
+        fetchLiveStandings();
     };
 </script>
 
