@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>منصة الألعاب الخاصة</title>
+  <title>منصة الألعاب والتحديات</title>
   <style>
     :root {
       --bg-color: #0f172a;
@@ -35,7 +35,7 @@
 
     .container {
       width: 100%;
-      max-width: 680px;
+      max-width: 650px;
     }
 
     header {
@@ -55,18 +55,9 @@
     }
 
     .games-grid {
-      display: grid;
-      grid-template-columns: 1fr;
+      display: flex;
+      flex-direction: column;
       gap: 15px;
-    }
-
-    @media (min-width: 600px) {
-      .games-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .full-width {
-        grid-column: span 2;
-      }
     }
 
     .game-card {
@@ -77,7 +68,6 @@
       border: 1px solid #334155;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
       gap: 12px;
       transition: transform 0.2s, border-color 0.2s;
     }
@@ -111,7 +101,7 @@
 
     .game-desc {
       color: var(--subtext-color);
-      font-size: 0.88rem;
+      font-size: 0.98rem;
       line-height: 1.45;
     }
 
@@ -121,7 +111,7 @@
       background-color: var(--accent-color);
       color: white;
       text-decoration: none;
-      padding: 10px;
+      padding: 12px;
       border-radius: 8px;
       font-weight: bold;
       transition: opacity 0.2s;
@@ -140,58 +130,46 @@
 
 <div class="container">
   <header>
-    <h1>🎮 منصة الألعاب الشاملة</h1>
-    <p>إدارة وقيد النشرات، الدوريات، والتحديات الخاصة</p>
+    <h1>🎮 منصة الألعاب الخاصة</h1>
+    <p>إدارة وقيد النشرات، دوري روشن، ومسابقة المليون</p>
   </header>
 
   <div class="games-grid">
 
-    <!-- 1. حاسبة نششرة اللاعبين (الحاسبة الوحيدة المعمدة) -->
-    <div class="game-card full-width">
+    <!-- 1. نششرة اللاعبين -->
+    <div class="game-card">
       <div class="card-header">
-        <span class="game-title">نششرة اللاعبين (2 إلى 8 لاعبين)</span>
+        <span class="game-title">نششرة اللاعبين (من 2 إلى 8 لاعبين)</span>
         <span class="game-code">GAME-08N</span>
       </div>
       <p class="game-desc">
-        حاسبة النقاط الخاصة: اختيار عدد اللاعبين من 2 إلى 8، يبدأ الجميع من 100 نقطة، اختيار شرط الفوز (مضاعفات 1000)، والتعديل بالزيادة والخصم بسهولة.
+        حاسبة النقاط الخاصة: بدء من 100 نقطة لكل لاعب، اختيار هدف الفوز من مضاعفات 1000، والتحكم السهل بالزيادة والخصم.
       </p>
       <a href="./GAME-08N/index.html" class="play-btn btn-green">فتح حاسبة النشرة 🚀</a>
     </div>
 
-    <!-- 2. دوري روشن السعودي 2026 -->
+    <!-- 2. دوري روشن السعودي -->
     <div class="game-card">
       <div class="card-header">
-        <span class="game-title">دوري روشن السعودي 2026</span>
-        <span class="game-code">ROSHN-2026</span>
+        <span class="game-title">دوري روشن السعودي</span>
+        <span class="game-code">ROSHN</span>
       </div>
       <p class="game-desc">
-        جدول الترتيب، الهدافين، ونتائج المباريات للجولات الرسمية.
+        متابعة ترتيب الفرق، الهدافين، ونتايج المباريات المحدثة.
       </p>
-      <a href="./ROSHN-2026/index.html" class="play-btn btn-purple">متابعة دوري روشن 🇸🇦</a>
+      <a href="./roshn/index.html" class="play-btn btn-purple">متابعة دوري روشن 🇸🇦</a>
     </div>
 
-    <!-- 3. دوري السعادة فيفا 26 -->
+    <!-- 3. مسابقة من سيربح المليون -->
     <div class="game-card">
       <div class="card-header">
-        <span class="game-title">دوري السعادة فيفا 26</span>
-        <span class="game-code">FIFA26-S</span>
+        <span class="game-title">تحدي من سيربح المليون</span>
+        <span class="game-code">MILLION</span>
       </div>
       <p class="game-desc">
-        إدارة البطولة والتنافس: جدول الترتيب وسجل مواجهات فيفا.
+        مسابقة الأسئلة العامة التفاعلية والوصول إلى الجائزة الكبرى.
       </p>
-      <a href="./FIFA26-S/index.html" class="play-btn">عرض دوري السعادة ⚽</a>
-    </div>
-
-    <!-- 4. مسابقة المليون -->
-    <div class="game-card full-width">
-      <div class="card-header">
-        <span class="game-title">تحدي لعبة المليون</span>
-        <span class="game-code">MILLION-01</span>
-      </div>
-      <p class="game-desc">
-        مسابقة الأسئلة والتحدي التفاعلية مع وسائل المساعدة.
-      </p>
-      <a href="./MILLION-01/index.html" class="play-btn btn-gold">بدء التحدي 🏆</a>
+      <a href="./million/index.html" class="play-btn btn-gold">بدء مسابقة المليون 🏆</a>
     </div>
 
   </div>
