@@ -3,73 +3,310 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة الألعاب الأونلاين 🎮</title>
+    <title>نظام تقييم الأداء - جمعية النبهانية للخدمات الإنسانية والاجتماعية</title>
     <style>
-        body { 
-            background-color: #0F172A; 
-            color: white; 
-            font-family: system-ui, -apple-system, sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            padding: 16px; 
-            box-sizing: border-box; 
+        :root {
+            --primary-color: #065F46;
+            --secondary-color: #D97706;
+            --bg-color: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-color: #1E293B;
+            --border-color: #E2E8F0;
         }
-        .card { 
-            background: #1E293B; 
-            border: 1px solid #F59E0B; 
-            border-radius: 16px; 
-            padding: 24px; 
-            width: 100%; 
-            max-width: 400px; 
-            text-align: center; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
-        }
-        h1 { color: #F59E0B; margin-bottom: 8px; font-size: 24px; }
-        p { color: #94A3B8; font-size: 14px; margin-bottom: 20px; }
-        .game-btn { 
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
             display: flex;
-            align-items: center;
             justify-content: center;
-            gap: 10px;
-            width: 100%; 
-            padding: 14px; 
-            margin: 10px 0; 
-            border-radius: 12px; 
-            border: none; 
-            font-weight: bold; 
-            font-size: 16px; 
-            text-decoration: none; 
-            box-sizing: border-box; 
-            transition: all 0.2s ease; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
-        .game-btn:active { transform: scale(0.97); }
-        .btn-million { background: linear-gradient(135deg, #F59E0B, #D97706); color: #000; }
-        .btn-baloot { background: linear-gradient(135deg, #10B981, #047857); color: #fff; }
-        .btn-quiz { background: linear-gradient(135deg, #3B82F6, #1D4ED8); color: #fff; }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            padding: 24px;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+        }
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 20px;
+            margin: 0 0 6px 0;
+        }
+        .header h2 {
+            color: var(--secondary-color);
+            font-size: 16px;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            background: #F1F5F9;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+        .form-group { display: flex; flex-direction: column; text-align: right; }
+        .form-group label { font-size: 12px; font-weight: bold; margin-bottom: 6px; color: #475569; }
+        .form-group input, .form-group select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .section-title {
+            font-size: 16px;
+            color: var(--primary-color);
+            border-right: 4px solid var(--secondary-color);
+            padding-right: 8px;
+            margin: 20px 0 12px 0;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+            font-size: 13px;
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: right;
+        }
+        th { background-color: #F1F5F9; color: #334155; }
+        td select { width: 100%; padding: 6px; border-radius: 4px; border: 1px solid #CBD5E1; }
+
+        .result-box {
+            background: #ECFDF5;
+            border: 1px solid #10B981;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .score-val { font-size: 24px; font-weight: bold; color: var(--primary-color); }
+        .grade-badge { font-size: 18px; font-weight: bold; color: var(--secondary-color); }
+
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--border-color);
+            font-size: 13px;
+            text-align: center;
+        }
+        .sig-box { flex: 1; }
+
+        .btn-print {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+        .btn-print:hover { background-color: #047857; }
+
+        @media print {
+            body { padding: 0; background: white; }
+            .container { border: none; box-shadow: none; width: 100%; max-width: 100%; }
+            .btn-print { display: none; }
+            select { border: none; background: transparent; appearance: none; }
+        }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h1>بوابة الألعاب الأونلاين 🎮</h1>
-    <p>اختر اللعبة وابدأ التحدي الآن</p>
-    
-    <a href="./million/index.html" class="game-btn btn-million">
-        🃏 لعبة المليون أونلاين
-    </a>
-    
-    <a href="./baloot/index.html" class="game-btn btn-baloot">
-        ♠️ لعبة البلوت أونلاين
-    </a>
+<div class="container">
+    <div class="header">
+        <h1>جمعية النبهانية للخدمات الإنسانية والاجتماعية</h1>
+        <h2>نظام تقييم وتطوير الأداء الوظيفي الدوري</h2>
+    </div>
 
-    <a href="./quiz/index.html" class="game-btn btn-quiz">
-        🏆 لعبة من سيربح المليون
-    </a>
+    <div class="info-grid">
+        <div class="form-group">
+            <label>اسم الموظف</label>
+            <input type="text" id="emp-name" placeholder="أدخل اسم الموظف">
+        </div>
+        <div class="form-group">
+            <label>المسمى الوظيفي</label>
+            <input type="text" id="emp-title" placeholder="المسمى الوظيفي">
+        </div>
+        <div class="form-group">
+            <label>القسم / الإدارة</label>
+            <select id="emp-dept">
+                <option>البرامج والخدمات الإنسانية</option>
+                <option>الشؤون المالية والإدارية</option>
+                <option>الإعلام والاتصال المؤسسي</option>
+                <option>التطوع والمبادرات</option>
+                <option>إدارة الجمعية</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>فترة التقييم</label>
+            <select id="eval-period">
+                <option>الربع الأول</option>
+                <option>الربع الثاني</option>
+                <option>الربع الثالث</option>
+                <option>الربع الرابع</option>
+                <option>التقييم السنوي</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="section-title">معايير ومؤشرات تقييم الأداء</div>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 5%;">#</th>
+                <th style="width: 45%;">معيار التقييم</th>
+                <th style="width: 25%;">الوزن الأقصى</th>
+                <th style="width: 25%;">الدرجة المستحقة</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>الالتزام بالدوام الرسمي والتعليمات الإدارية</td>
+                <td>20 نقطة</td>
+                <td>
+                    <select class="score-input" onchange="calculateScore()">
+                        <option value="20">20 - ممتاز جداً</option>
+                        <option value="16">16 - جيد جداً</option>
+                        <option value="12">12 - جيد</option>
+                        <option value="8">8 - مقبولة</option>
+                        <option value="4">4 - تحتاج تحسين</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>إنجاز المهام والخطط التشغيلية في المواعيد المحددة</td>
+                <td>30 نقطة</td>
+                <td>
+                    <select class="score-input" onchange="calculateScore()">
+                        <option value="30">30 - إنجاز تام وقياسي</option>
+                        <option value="24">24 - إنجاز جيد جداً</option>
+                        <option value="18">18 - إنجاز متوسط</option>
+                        <option value="12">12 - تأخير محدد</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>دقة المخرجات وجودة التقارير الإدارية/الميدانية</td>
+                <td>25 نقطة</td>
+                <td>
+                    <select class="score-input" onchange="calculateScore()">
+                        <option value="25">25 - جودة عالية ودقيقة</option>
+                        <option value="20">20 - جودة جيدة جداً</option>
+                        <option value="15">15 - جودة مقبولة</option>
+                        <option value="10">10 - تحتاج مراجعة وتدقيق</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>التعاون الميداني والعمل بروح الفريق وتطوير بيئة العمل</td>
+                <td>25 نقطة</td>
+                <td>
+                    <select class="score-input" onchange="calculateScore()">
+                        <option value="25">25 - تعاون ومبادرة ممتازة</option>
+                        <option value="20">20 - تعاون جيد جداً</option>
+                        <option value="15">15 - تعامل متوقع</option>
+                        <option value="10">10 - يحتاج لتفعيل التعاون</option>
+                    </select>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="result-box">
+        <div>
+            <div style="font-size: 12px; color: #475569;">المجموع الكلي:</div>
+            <div class="score-val" id="total-score">100 / 100</div>
+        </div>
+        <div>
+            <div style="font-size: 12px; color: #475569;">التقدير العام:</div>
+            <div class="grade-badge" id="grade-badge">ممتاز 🌟</div>
+        </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 20px;">
+        <label>توصيات وملاحظات المشرف المباشر:</label>
+        <input type="text" id="notes" placeholder="اكتب أية ملاحظات إيجابية أو مجالات للتطوير..." style="padding: 10px;">
+    </div>
+
+    <div class="signatures">
+        <div class="sig-box">
+            <strong>المشرف المباشر</strong><br><br>
+            التوقيع: .....................
+        </div>
+        <div class="sig-box">
+            <strong>اعتماد المدير التنفيذي</strong><br><br>
+            التوقيع: .....................
+        </div>
+    </div>
+
+    <br>
+    <button class="btn-print" onclick="window.print()">طباعة / حفظ التقرير PDF 🖨️</button>
 </div>
+
+<script>
+    function calculateScore() {
+        let inputs = document.querySelectorAll('.score-input');
+        let total = 0;
+        inputs.forEach(sel => {
+            total += parseInt(sel.value);
+        });
+
+        document.getElementById('total-score').innerText = total + " / 100";
+
+        let badge = document.getElementById('grade-badge');
+        if (total >= 90) {
+            badge.innerText = "ممتاز 🌟";
+            badge.style.color = "#065F46";
+        } else if (total >= 80) {
+            badge.innerText = "جيد جداً 👍";
+            badge.style.color = "#2563EB";
+        } else if (total >= 70) {
+            badge.innerText = "جيد 🟢";
+            badge.style.color = "#D97706";
+        } else if (total >= 60) {
+            badge.innerText = "مرضي 🟠";
+            badge.style.color = "#E11D48";
+        } else {
+            badge.innerText = "غير مرضي 🔴";
+            badge.style.color = "#991B1B";
+        }
+    }
+</script>
 
 </body>
 </html>
