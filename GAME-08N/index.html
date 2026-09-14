@@ -17,7 +17,6 @@
       --green: #22c55e;
       --red: #ef4444;
       --gold: #f59e0b;
-      --silver: #94a3b8;
       --text-color: #f8fafc;
     }
 
@@ -37,8 +36,9 @@
     .btn-red { background-color: var(--red); }
     .btn-reset { background-color: #475569; margin-top: 10px; }
     .btn-gold { background-color: var(--gold); color: #000; font-weight: bold; }
+    .btn-whatsapp { background-color: #25D366; color: #fff; font-weight: bold; margin-top: 10px; }
 
-    .online-badge { background-color: #065f46; color: #34d399; font-size: 0.85rem; padding: 6px 12px; border-radius: 6px; text-align: center; margin-bottom: 10px; font-weight: bold; }
+    .online-badge { background-color: #065f46; color: #34d399; font-size: 0.85rem; padding: 8px 12px; border-radius: 8px; text-align: center; margin-bottom: 10px; font-weight: bold; }
 
     .players-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
     .player-card { background-color: #334155; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
@@ -55,18 +55,17 @@
 
 <div class="container">
   <div class="back-nav"><a href="../index.html">➔ العودة لمنصة الألعاب</a></div>
-  <div class="header-tag">GAME-08N • أونلاين / محلي</div>
+  <div class="header-tag">GAME-08N • أونلاين مباشر</div>
   <h1>نششرة اللاعبين</h1>
 
   <!-- شاشة الإعداد -->
   <div id="setup-screen" class="card">
     <div style="background-color: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #334155;">
-      <h3 style="color: var(--gold); font-size: 1rem; margin-bottom: 8px;">🔗 الانضمام إلى نشرة موجودة</h3>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-        <input type="text" id="room-code-input" placeholder="رمز الغرفة (4 أرقام)">
-        <input type="password" id="room-pass-input" placeholder="الرقم السري">
+      <h3 style="color: var(--gold); font-size: 1rem; margin-bottom: 8px;">🔗 الانضمام لنشرة بواسطة رمز الغرفة</h3>
+      <div style="display: flex; gap: 8px;">
+        <input type="text" id="room-code-input" placeholder="أدخل رمز الغرفة (مثال: 5892)">
+        <button class="btn btn-gold" style="width: 120px;" onclick="joinRoomByCode()">دخول 🚀</button>
       </div>
-      <button class="btn btn-gold" onclick="joinOnlineRoom()">انضمام للنشرة 🔗</button>
     </div>
 
     <hr style="border-color: #334155; margin-bottom: 15px;">
@@ -99,19 +98,17 @@
       </select>
     </div>
 
-    <div style="margin-bottom: 15px;">
-      <label>رقم سري للغرفة (اختياري للمشاركة أونلاين):</label>
-      <input type="password" id="create-room-pass" placeholder="أدخل رقم سري للغرفة (مثلاً: 2998)">
-    </div>
-
-    <button class="btn btn-green" onclick="createRoom()">بدء النشرة الآن 🚀</button>
+    <button class="btn btn-green" onclick="createRoom()">بدء النشرة 🚀</button>
   </div>
 
   <!-- شاشة اللعب -->
   <div id="game-screen" style="display: none;">
     <div id="online-status" class="online-badge"></div>
 
-    <div class="players-grid" id="players-grid"></div>
+    <!-- زر مشاركة النشرة -->
+    <button class="btn btn-whatsapp" onclick="shareRoomWhatsApp()">📲 مشاركة النشرة عبر الواتساب</button>
+
+    <div class="players-grid" id="players-grid" style="margin-top: 15px;"></div>
 
     <div class="card">
       <h3 style="margin-bottom: 10px; color: #60a5fa;">التحكم بالنقط</h3>
@@ -133,15 +130,13 @@
 
 <script>
   let db = null;
-  // محاولة الاتصال بـ Firebase إذا توفرت الإعدادات
   try {
     const firebaseConfig = { databaseURL: "https://nashra-game-default-rtdb.firebaseio.com" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     db = firebase.database();
-  } catch(e) { console.log("Firebase غير مفعّل، سينتقل النمط للمحلي تلقائياً"); }
+  } catch(e) { console.log("Firebase Error"); }
 
   let currentRoomId = null;
-  let roomPass = null;
   let players = [];
   let targetScore = 1000;
   let selectedPlayerIndex = 0;
@@ -156,10 +151,17 @@
   }
   generateNameInputs();
 
+  // الفحص التلقائي للرابط إذا دخل المتسابق عبر رابط مشاركة
+  window.onload = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomFromUrl = urlParams.get('room');
+    if (roomFromUrl) {
+      joinRoomByCode(roomFromUrl);
+    }
+  };
+
   function createRoom() {
     const count = parseInt(document.getElementById('player-count-select').value);
-    const pass = document.getElementById('create-room-pass').value.trim();
-
     players = [];
     for (let i = 0; i < count; i++) {
       const name = document.getElementById(`pname-${i}`).value.trim() || `لاعب ${i + 1}`;
@@ -168,51 +170,40 @@
 
     targetScore = parseInt(document.getElementById('target-score-select').value);
     currentRoomId = Math.floor(1000 + Math.random() * 9000).toString();
-    roomPass = pass;
 
-    // فتح اللعبة مباشرة
     openGameView();
 
-    // حفظ في السحابة إن أمكن
-    if (db && pass) {
+    if (db) {
       db.ref('rooms/' + currentRoomId).set({
-        pass: roomPass,
         targetScore: targetScore,
         players: players
       });
-      document.getElementById('online-status').innerText = `🟢 متصل أونلاين | رمز الغرفة: ${currentRoomId} | الرمز: ${roomPass}`;
+      document.getElementById('online-status').innerText = `🟢 متصل أونلاين | رمز الغرفة: ${currentRoomId}`;
       listenToRoom();
-    } else {
-      document.getElementById('online-status').innerText = `📱 نشرة محلية (غير متصلة بـ Firebase)`;
     }
   }
 
-  function joinOnlineRoom() {
-    const roomId = document.getElementById('room-code-input').value.trim();
-    const pass = document.getElementById('room-pass-input').value.trim();
-
-    if (!roomId || !pass) {
-      alert("يرجى أدخال رمز الغرفة والرقم السري!");
+  function joinRoomByCode(code) {
+    const roomId = code || document.getElementById('room-code-input').value.trim();
+    if (!roomId) {
+      alert("يرجى إدخال رمز الغرفة!");
       return;
     }
 
     if (db) {
       db.ref('rooms/' + roomId).once('value', (snapshot) => {
         const data = snapshot.val();
-        if (data && data.pass === pass) {
+        if (data) {
           currentRoomId = roomId;
-          roomPass = pass;
           players = data.players || [];
           targetScore = data.targetScore || 1000;
           openGameView();
-          document.getElementById('online-status').innerText = `🟢 متصل بالشرة | رمز الغرفة: ${currentRoomId}`;
+          document.getElementById('online-status').innerText = `🟢 متصل بالنشرة | رمز الغرفة: ${currentRoomId}`;
           listenToRoom();
         } else {
-          alert("رمز الغرفة أو الرقم السري غير صحيح!");
+          alert("رمز الغرفة غير موجود!");
         }
       });
-    } else {
-      alert("خدمة الأونلاين غير مفعلة حالياً.");
     }
   }
 
@@ -234,6 +225,12 @@
     document.getElementById('game-screen').style.display = 'block';
     renderPlayers();
     updatePlayerDropdown();
+  }
+
+  function shareRoomWhatsApp() {
+    const shareUrl = window.location.href.split('?')[0] + '?room=' + currentRoomId;
+    const message = `انضم لنشرة اللعب المباشرة 🃏\nرمز الغرفة: ${currentRoomId}\nالرابط المباشر:\n${shareUrl}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
   }
 
   function renderPlayers() {
