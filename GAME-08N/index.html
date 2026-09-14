@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>نششرة اللاعبين أونلاين - GAME-08N</title>
+  <title>نششرة اللاعبين - GAME-08N</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -38,7 +38,7 @@
     .btn-reset { background-color: #475569; margin-top: 10px; }
     .btn-gold { background-color: var(--gold); color: #000; font-weight: bold; }
 
-    .online-badge { background-color: #065f46; color: #34d399; font-size: 0.8rem; padding: 4px 10px; border-radius: 6px; text-align: center; margin-bottom: 10px; display: none; }
+    .online-badge { background-color: #065f46; color: #34d399; font-size: 0.85rem; padding: 6px 12px; border-radius: 6px; text-align: center; margin-bottom: 10px; font-weight: bold; }
 
     .players-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
     .player-card { background-color: #334155; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
@@ -47,46 +47,31 @@
     .player-score { font-size: 1.8rem; font-weight: bold; color: #38bdf8; }
     .action-btns { display: flex; gap: 10px; margin-top: 10px; }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.9rem; text-align: center; }
-    th, td { padding: 8px; border-bottom: 1px solid #334155; }
-    th { color: var(--gold); background-color: #0f172a; }
-
     .back-nav { margin-bottom: 10px; text-align: right; }
     .back-nav a { color: #94a3b8; text-decoration: none; font-size: 0.9rem; }
-
-    .modal-overlay {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(15, 23, 42, 0.95); z-index: 100;
-      justify-content: center; align-items: center; padding: 15px;
-    }
-    .modal-content {
-      background: var(--card-bg); border-radius: 15px; padding: 20px;
-      width: 100%; max-width: 500px; text-align: center; border: 2px solid var(--gold);
-      max-height: 90vh; overflow-y: auto;
-    }
   </style>
 </head>
 <body>
 
 <div class="container">
   <div class="back-nav"><a href="../index.html">➔ العودة لمنصة الألعاب</a></div>
-  <div class="header-tag">GAME-08N • أونلاين</div>
-  <h1>نششرة اللاعبين التفاعلية</h1>
+  <div class="header-tag">GAME-08N • أونلاين / محلي</div>
+  <h1>نششرة اللاعبين</h1>
 
-  <!-- إعدادات الأونلاين والغرفة -->
+  <!-- شاشة الإعداد -->
   <div id="setup-screen" class="card">
     <div style="background-color: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #334155;">
-      <h3 style="color: var(--gold); font-size: 1rem; margin-bottom: 8px;">🌐 الانضمام إلى نشرة أونلاين مشتركة</h3>
+      <h3 style="color: var(--gold); font-size: 1rem; margin-bottom: 8px;">🔗 الانضمام إلى نشرة موجودة</h3>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-        <input type="text" id="room-code-input" placeholder="رمز الغرفة (مثال: 1001)">
+        <input type="text" id="room-code-input" placeholder="رمز الغرفة (4 أرقام)">
         <input type="password" id="room-pass-input" placeholder="الرقم السري">
       </div>
-      <button class="btn btn-gold" onclick="joinOnlineRoom()">انضمام للنشرة المباشرة 🔗</button>
+      <button class="btn btn-gold" onclick="joinOnlineRoom()">انضمام للنشرة 🔗</button>
     </div>
 
     <hr style="border-color: #334155; margin-bottom: 15px;">
 
-    <h3 style="font-size: 1.05rem; margin-bottom: 10px;">أو إنشاء نشرة جديدة:</h3>
+    <h3 style="font-size: 1.05rem; margin-bottom: 10px;">إنشاء نشرة جديدة:</h3>
     <div style="margin-bottom: 15px;">
       <label>عدد اللاعبين:</label>
       <select id="player-count-select" onchange="generateNameInputs()">
@@ -115,14 +100,14 @@
     </div>
 
     <div style="margin-bottom: 15px;">
-      <label>تحديد رقم سري للغرفة (للمشاركة أونلاين):</label>
-      <input type="password" id="create-room-pass" placeholder="أدخل رقم سري للغرفة (مثال: 2998)">
+      <label>رقم سري للغرفة (اختياري للمشاركة أونلاين):</label>
+      <input type="password" id="create-room-pass" placeholder="أدخل رقم سري للغرفة (مثلاً: 2998)">
     </div>
 
-    <button class="btn btn-green" onclick="createOnlineRoom()">بدء نشرة جديدة ومشاركتها 🚀</button>
+    <button class="btn btn-green" onclick="createRoom()">بدء النشرة الآن 🚀</button>
   </div>
 
-  <!-- شاشة اللعب والتحكم -->
+  <!-- شاشة اللعب -->
   <div id="game-screen" style="display: none;">
     <div id="online-status" class="online-badge"></div>
 
@@ -142,20 +127,18 @@
       </div>
     </div>
 
-    <button class="btn btn-reset" onclick="exitRoom()">خروج من الغرفة 🔄</button>
+    <button class="btn btn-reset" onclick="exitRoom()">خروج وإعادة ضبط 🔄</button>
   </div>
 </div>
 
 <script>
-  // تهيئة Firebase المباشرة
-  const firebaseConfig = {
-    databaseURL: "https://nashra-game-default-rtdb.firebaseio.com" // رابط قاعدة بيانات مجانية جاهزة
-  };
-  
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-  }
-  const db = firebase.database();
+  let db = null;
+  // محاولة الاتصال بـ Firebase إذا توفرت الإعدادات
+  try {
+    const firebaseConfig = { databaseURL: "https://nashra-game-default-rtdb.firebaseio.com" };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+  } catch(e) { console.log("Firebase غير مفعّل، سينتقل النمط للمحلي تلقائياً"); }
 
   let currentRoomId = null;
   let roomPass = null;
@@ -173,13 +156,9 @@
   }
   generateNameInputs();
 
-  function createOnlineRoom() {
+  function createRoom() {
     const count = parseInt(document.getElementById('player-count-select').value);
     const pass = document.getElementById('create-room-pass').value.trim();
-    if (!pass) {
-      alert("يرجى كتابة رقم سري للغرفة لمشاركتها مع الآخرين!");
-      return;
-    }
 
     players = [];
     for (let i = 0; i < count; i++) {
@@ -188,18 +167,24 @@
     }
 
     targetScore = parseInt(document.getElementById('target-score-select').value);
-    currentRoomId = Math.floor(1000 + Math.random() * 9000).toString(); // رمز من 4 أرقام
+    currentRoomId = Math.floor(1000 + Math.random() * 9000).toString();
     roomPass = pass;
 
-    // حفظ الغرفة في Firebase
-    db.ref('rooms/' + currentRoomId).set({
-      pass: roomPass,
-      targetScore: targetScore,
-      players: players
-    }).then(() => {
-      alert(`تم إنشاء الغرفة بنجاح!\nرمز الغرفة: ${currentRoomId}\nالرقم السري: ${roomPass}`);
-      listenToRoomUpdates();
-    });
+    // فتح اللعبة مباشرة
+    openGameView();
+
+    // حفظ في السحابة إن أمكن
+    if (db && pass) {
+      db.ref('rooms/' + currentRoomId).set({
+        pass: roomPass,
+        targetScore: targetScore,
+        players: players
+      });
+      document.getElementById('online-status').innerText = `🟢 متصل أونلاين | رمز الغرفة: ${currentRoomId} | الرمز: ${roomPass}`;
+      listenToRoom();
+    } else {
+      document.getElementById('online-status').innerText = `📱 نشرة محلية (غير متصلة بـ Firebase)`;
+    }
   }
 
   function joinOnlineRoom() {
@@ -207,40 +192,48 @@
     const pass = document.getElementById('room-pass-input').value.trim();
 
     if (!roomId || !pass) {
-      alert("يرجى إدخال رمز الغرفة والرقم السري!");
+      alert("يرجى أدخال رمز الغرفة والرقم السري!");
       return;
     }
 
-    db.ref('rooms/' + roomId).once('value', (snapshot) => {
-      const data = snapshot.val();
-      if (data && data.pass === pass) {
-        currentRoomId = roomId;
-        roomPass = pass;
-        listenToRoomUpdates();
-      } else {
-        alert("رمز الغرفة أو الرقم السري غير صحيح!");
-      }
-    });
+    if (db) {
+      db.ref('rooms/' + roomId).once('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data && data.pass === pass) {
+          currentRoomId = roomId;
+          roomPass = pass;
+          players = data.players || [];
+          targetScore = data.targetScore || 1000;
+          openGameView();
+          document.getElementById('online-status').innerText = `🟢 متصل بالشرة | رمز الغرفة: ${currentRoomId}`;
+          listenToRoom();
+        } else {
+          alert("رمز الغرفة أو الرقم السري غير صحيح!");
+        }
+      });
+    } else {
+      alert("خدمة الأونلاين غير مفعلة حالياً.");
+    }
   }
 
-  function listenToRoomUpdates() {
+  function listenToRoom() {
+    if (db && currentRoomId) {
+      db.ref('rooms/' + currentRoomId + '/players').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          players = data;
+          renderPlayers();
+          updatePlayerDropdown();
+        }
+      });
+    }
+  }
+
+  function openGameView() {
     document.getElementById('setup-screen').style.display = 'none';
     document.getElementById('game-screen').style.display = 'block';
-
-    const statusBadge = document.getElementById('online-status');
-    statusBadge.innerText = `🟢 متصل أونلاين | رمز الغرفة: ${currentRoomId}`;
-    statusBadge.style.display = 'block';
-
-    // الاستماع الفوري للتحديثات السحابية
-    db.ref('rooms/' + currentRoomId).on('value', (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        players = data.players || [];
-        targetScore = data.targetScore || 1000;
-        renderPlayers();
-        updatePlayerDropdown();
-      }
-    });
+    renderPlayers();
+    updatePlayerDropdown();
   }
 
   function renderPlayers() {
@@ -272,6 +265,11 @@
     renderPlayers();
   }
 
+  function highlightPlayerCard(index) {
+    selectedPlayerIndex = parseInt(index);
+    renderPlayers();
+  }
+
   function modifyScore(type) {
     const amountInput = document.getElementById('score-amount');
     const amount = parseInt(amountInput.value);
@@ -284,15 +282,16 @@
     }
 
     amountInput.value = '';
+    renderPlayers();
+    updatePlayerDropdown();
 
-    // تحديث قاعدة البيانات السحابية لتنتقل التغيرات لكافة الهواتف لحظياً
-    if (currentRoomId) {
+    if (db && currentRoomId) {
       db.ref('rooms/' + currentRoomId + '/players').set(players);
     }
   }
 
   function exitRoom() {
-    if (currentRoomId) {
+    if (db && currentRoomId) {
       db.ref('rooms/' + currentRoomId).off();
     }
     document.getElementById('game-screen').style.display = 'none';
