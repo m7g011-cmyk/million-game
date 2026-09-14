@@ -58,12 +58,12 @@
   <div class="header-tag">GAME-08N • أونلاين مباشر</div>
   <h1>نششرة اللاعبين</h1>
 
-  <!-- شاشة الإعداد -->
+  <!-- شاشة الإعداد والورود -->
   <div id="setup-screen" class="card">
     <div style="background-color: #0f172a; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #334155;">
       <h3 style="color: var(--gold); font-size: 1rem; margin-bottom: 8px;">🔗 الانضمام لنشرة بواسطة رمز الغرفة</h3>
       <div style="display: flex; gap: 8px;">
-        <input type="text" id="room-code-input" placeholder="أدخل رمز الغرفة (مثال: 5892)">
+        <input type="text" id="room-code-input" placeholder="أدخل رمز الغرفة">
         <button class="btn btn-gold" style="width: 120px;" onclick="joinRoomByCode()">دخول 🚀</button>
       </div>
     </div>
@@ -101,11 +101,10 @@
     <button class="btn btn-green" onclick="createRoom()">بدء النشرة 🚀</button>
   </div>
 
-  <!-- شاشة اللعب -->
+  <!-- شاشة اللعب والخصم والزيادة -->
   <div id="game-screen" style="display: none;">
     <div id="online-status" class="online-badge"></div>
 
-    <!-- زر مشاركة النشرة -->
     <button class="btn btn-whatsapp" onclick="shareRoomWhatsApp()">📲 مشاركة النشرة عبر الواتساب</button>
 
     <div class="players-grid" id="players-grid" style="margin-top: 15px;"></div>
@@ -134,7 +133,7 @@
     const firebaseConfig = { databaseURL: "https://nashra-game-default-rtdb.firebaseio.com" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     db = firebase.database();
-  } catch(e) { console.log("Firebase Error"); }
+  } catch(e) { console.log("تنبيه الاتصال المحلي"); }
 
   let currentRoomId = null;
   let players = [];
@@ -151,7 +150,6 @@
   }
   generateNameInputs();
 
-  // الفحص التلقائي للرابط إذا دخل المتسابق عبر رابط مشاركة
   window.onload = function() {
     const urlParams = new URLSearchParams(window.location.search);
     const roomFromUrl = urlParams.get('room');
@@ -190,20 +188,26 @@
       return;
     }
 
+    currentRoomId = roomId;
+
     if (db) {
       db.ref('rooms/' + roomId).once('value', (snapshot) => {
         const data = snapshot.val();
         if (data) {
-          currentRoomId = roomId;
           players = data.players || [];
           targetScore = data.targetScore || 1000;
           openGameView();
           document.getElementById('online-status').innerText = `🟢 متصل بالنشرة | رمز الغرفة: ${currentRoomId}`;
           listenToRoom();
         } else {
-          alert("رمز الغرفة غير موجود!");
+          // في حال عدم العثور فوراً فتح الشاشة لجلب التحديثات
+          openGameView();
+          document.getElementById('online-status').innerText = `🟢 جاري الاتصال بالغرفة: ${currentRoomId}`;
+          listenToRoom();
         }
       });
+    } else {
+      openGameView();
     }
   }
 
